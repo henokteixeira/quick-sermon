@@ -38,7 +38,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-200 relative overflow-hidden">
+    <div className="fixed inset-0 bg-stone-950 text-stone-200 overflow-auto">
       {/* Ambient glows */}
       <div className="absolute w-[400px] h-[400px] rounded-full bg-amber-500/10 blur-[120px] top-[10%] left-[20%]" />
       <div className="absolute w-[350px] h-[350px] rounded-full bg-amber-700/8 blur-[100px] bottom-[15%] right-[15%]" />
