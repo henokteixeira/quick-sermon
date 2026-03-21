@@ -22,7 +22,7 @@ export default function Home() {
       );
       const data = await res.json();
       setHealth(data);
-    } catch (err) {
+    } catch {
       setError("Could not connect to backend");
     } finally {
       setLoading(false);
