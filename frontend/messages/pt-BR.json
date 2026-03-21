@@ -63,7 +63,9 @@
       "healthy": "saudável",
       "ok": "ok",
       "connectionError": "Não foi possível conectar ao servidor",
-      "refresh": "Atualizar"
+      "refresh": "Atualizar",
+      "operational": "Operacional",
+      "down": "Fora do ar"
     }
   },
   "dashboard": {
