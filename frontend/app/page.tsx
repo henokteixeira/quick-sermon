@@ -44,9 +44,9 @@ export default function Home() {
       <div className="absolute w-[350px] h-[350px] rounded-full bg-amber-700/8 blur-[100px] bottom-[15%] right-[15%]" />
 
       {/* Content */}
-      <div className="relative z-10 max-w-2xl mx-auto px-6 py-16 min-h-screen flex flex-col justify-between">
+      <div className="relative z-10 max-w-4xl w-full mx-auto px-6 py-16 min-h-screen flex flex-col justify-between">
         {/* Header */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="5 3 19 12 5 21 5 3" />
@@ -58,20 +58,20 @@ export default function Home() {
         </div>
 
         {/* Hero */}
-        <div className="space-y-10 py-12">
-          <div className="space-y-4">
-            <h1 className="text-5xl md:text-6xl font-serif text-white leading-tight">
+        <div className="space-y-12 py-12 text-center">
+          <div className="space-y-5">
+            <h1 className="text-5xl md:text-7xl font-serif text-white leading-tight">
               {t("hero.title")}
               <br />
               <span className="text-amber-400">{t("hero.titleAccent")}</span>
             </h1>
-            <p className="text-stone-400 text-lg leading-relaxed max-w-md">
+            <p className="text-stone-400 text-lg leading-relaxed max-w-lg mx-auto">
               {t("hero.subtitle")}
             </p>
           </div>
 
           {/* CTA */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 justify-center">
             <a
               href="/login"
               className="inline-flex items-center justify-center h-12 px-8 rounded-lg bg-amber-500 text-stone-950 font-medium text-sm tracking-wide hover:bg-amber-400 transition-colors"
@@ -87,7 +87,7 @@ export default function Home() {
           </div>
 
           {/* Status card */}
-          <div className="border border-stone-800 rounded-xl p-5 bg-stone-900/50 backdrop-blur-sm max-w-sm space-y-3">
+          <div className="border border-stone-800 rounded-xl p-5 bg-stone-900/50 backdrop-blur-sm max-w-sm mx-auto space-y-3 text-left">
             <h3 className="text-sm font-medium text-stone-300">
               {t("status.title")}
             </h3>
@@ -143,7 +143,7 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-8 border-t border-stone-800/50">
+        <div className="flex items-center justify-center gap-6 pt-8 border-t border-stone-800/50">
           <div className="flex items-center gap-3">
             <div className="flex -space-x-2">
               {["bg-amber-500", "bg-stone-600", "bg-amber-700"].map((bg, i) => (
@@ -159,7 +159,7 @@ export default function Home() {
               {t("hero.socialProof")}
             </p>
           </div>
-          <span className="text-stone-700 text-xs">v1.0</span>
+          <span className="text-stone-700 text-xs">&middot; v1.0</span>
         </div>
       </div>
     </div>
