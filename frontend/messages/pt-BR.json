@@ -1,0 +1,75 @@
+{
+  "common": {
+    "appName": "Quick Sermon",
+    "appDescription": "Sistema de Clips de Pregações",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "retry": "Tentar novamente",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "next": "Próximo"
+  },
+  "auth": {
+    "login": {
+      "title": "Bem-vindo de volta",
+      "subtitle": "Entre na sua conta para continuar",
+      "email": "Email",
+      "emailPlaceholder": "seu@email.com",
+      "password": "Senha",
+      "passwordPlaceholder": "Sua senha",
+      "submit": "Entrar",
+      "submitting": "Entrando...",
+      "noAccount": "Não tem conta?",
+      "createAccount": "Criar conta",
+      "error": "Erro ao fazer login. Tente novamente.",
+      "registered": "Conta criada com sucesso! Faça login para continuar."
+    },
+    "register": {
+      "title": "Criar sua conta",
+      "subtitle": "Preencha os dados para começar a usar o Quick Sermon",
+      "name": "Nome",
+      "namePlaceholder": "Seu nome completo",
+      "email": "Email",
+      "emailPlaceholder": "seu@email.com",
+      "password": "Senha",
+      "passwordPlaceholder": "Mín. 8 caracteres",
+      "confirmPassword": "Confirmar senha",
+      "confirmPasswordPlaceholder": "Repita a senha",
+      "submit": "Criar conta",
+      "submitting": "Criando conta...",
+      "hasAccount": "Já tem conta?",
+      "signIn": "Entrar",
+      "error": "Erro ao criar conta. Tente novamente.",
+      "passwordMismatch": "As senhas não coincidem."
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Da live ao YouTube",
+      "titleAccent": "em minutos.",
+      "subtitle": "Automatize o processamento dos seus vídeos de pregação. Menos trabalho manual, mais tempo para o que importa.",
+      "socialProof": "Equipes de mídia já economizam horas toda semana"
+    },
+    "status": {
+      "title": "Status do Sistema",
+      "checking": "Verificando...",
+      "api": "API",
+      "database": "Banco de dados",
+      "healthy": "saudável",
+      "ok": "ok",
+      "connectionError": "Não foi possível conectar ao servidor",
+      "refresh": "Atualizar"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "nav": {
+      "dashboard": "Dashboard",
+      "videos": "Vídeos",
+      "users": "Usuários",
+      "settings": "Configurações"
+    }
+  }
+}
