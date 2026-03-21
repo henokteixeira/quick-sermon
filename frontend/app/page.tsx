@@ -50,7 +50,7 @@ export default function Home() {
       <div className="absolute w-[350px] h-[350px] rounded-full bg-amber-700/8 blur-[100px] bottom-[15%] right-[15%]" />
 
       {/* Content */}
-      <div className="relative z-10 max-w-4xl w-full mx-auto px-6 py-16 min-h-screen flex flex-col justify-between">
+      <div className="relative z-10 max-w-4xl w-full mx-auto px-6 py-16 min-h-full flex flex-col justify-between gap-8">
         {/* Header */}
         <div className="flex items-center justify-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center">
