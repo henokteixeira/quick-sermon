@@ -29,3 +29,8 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = None
     role: UserRole | None = None
     is_active: bool | None = None
+
+
+class UserUpdateSelf(BaseModel):
+    name: str | None = None
+    password: str | None = None

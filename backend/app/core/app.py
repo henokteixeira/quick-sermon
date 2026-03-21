@@ -36,8 +36,12 @@ def create_app() -> FastAPI:
     app.add_exception_handler(AppException, app_exception_handler)
 
     # Routers
+    from app.modules.auth.routes import router as auth_router
     from app.modules.health.routes import router as health_router
+    from app.modules.users.routes import router as users_router
 
     app.include_router(health_router)
+    app.include_router(auth_router)
+    app.include_router(users_router)
 
     return app
