@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Serif_Display, Inter } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 
@@ -15,17 +17,22 @@ export const metadata: Metadata = {
   description: "Sistema de Clips de Pregações",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="pt-BR">
+    <html lang={locale}>
       <body
         className={`${inter.variable} ${dmSerif.variable} ${inter.className} antialiased`}
       >
-        <QueryProvider>{children}</QueryProvider>
+        <NextIntlClientProvider messages={messages}>
+          <QueryProvider>{children}</QueryProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
