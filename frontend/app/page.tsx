@@ -33,7 +33,13 @@ export default function Home() {
   };
 
   useEffect(() => {
+    document.documentElement.style.backgroundColor = "#0c0a09";
+    document.body.style.backgroundColor = "#0c0a09";
     checkHealth();
+    return () => {
+      document.documentElement.style.backgroundColor = "";
+      document.body.style.backgroundColor = "";
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
