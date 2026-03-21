@@ -36,9 +36,11 @@ export default function Home() {
     else setLoading(true);
     setError(null);
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/health`
-      );
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const healthUrl = baseUrl.endsWith("/api")
+        ? baseUrl.replace(/\/api$/, "/health")
+        : `${baseUrl}/health`;
+      const res = await fetch(healthUrl);
       const data = await res.json();
       setHealth(data);
     } catch {
