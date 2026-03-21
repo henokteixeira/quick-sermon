@@ -50,8 +50,11 @@
       "title": "Da live ao YouTube",
       "titleAccent": "em minutos.",
       "subtitle": "Automatize o processamento dos seus vídeos de pregação. Menos trabalho manual, mais tempo para o que importa.",
-      "socialProof": "Equipes de mídia já economizam horas toda semana"
+      "socialProof": "Equipes de mídia já economizam horas toda semana",
+      "cta": "Começar agora",
+      "register": "Criar conta"
     },
+    "register": "Criar conta",
     "status": {
       "title": "Status do Sistema",
       "checking": "Verificando...",

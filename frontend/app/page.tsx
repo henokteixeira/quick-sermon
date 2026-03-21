@@ -38,92 +38,129 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center space-y-8 max-w-md px-6">
-        <div className="space-y-3">
-          <div className="mx-auto w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="hsl(var(--primary-foreground))"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+    <div className="min-h-screen bg-stone-950 text-stone-200 relative overflow-hidden">
+      {/* Ambient glows */}
+      <div className="absolute w-[400px] h-[400px] rounded-full bg-amber-500/10 blur-[120px] top-[10%] left-[20%]" />
+      <div className="absolute w-[350px] h-[350px] rounded-full bg-amber-700/8 blur-[100px] bottom-[15%] right-[15%]" />
+
+      {/* Content */}
+      <div className="relative z-10 max-w-2xl mx-auto px-6 py-16 min-h-screen flex flex-col justify-between">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
           </div>
-          <h1 className="text-3xl font-serif font-normal text-foreground">
+          <span className="text-stone-400 text-sm font-medium tracking-widest uppercase">
             {tc("appName")}
-          </h1>
-          <p className="text-muted-foreground">{tc("appDescription")}</p>
+          </span>
         </div>
 
-        <div className="border border-border rounded-xl p-6 bg-card shadow-sm space-y-4">
-          <h2 className="font-semibold text-lg text-card-foreground">
-            {t("status.title")}
-          </h2>
-
-          {loading && (
-            <p className="text-muted-foreground text-sm">
-              {t("status.checking")}
+        {/* Hero */}
+        <div className="space-y-10 py-12">
+          <div className="space-y-4">
+            <h1 className="text-5xl md:text-6xl font-serif text-white leading-tight">
+              {t("hero.title")}
+              <br />
+              <span className="text-amber-400">{t("hero.titleAccent")}</span>
+            </h1>
+            <p className="text-stone-400 text-lg leading-relaxed max-w-md">
+              {t("hero.subtitle")}
             </p>
-          )}
+          </div>
 
-          {error && (
-            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
-              {error}
-            </div>
-          )}
+          {/* CTA */}
+          <div className="flex gap-3">
+            <a
+              href="/login"
+              className="inline-flex items-center justify-center h-12 px-8 rounded-lg bg-amber-500 text-stone-950 font-medium text-sm tracking-wide hover:bg-amber-400 transition-colors"
+            >
+              {t("hero.cta")}
+            </a>
+            <a
+              href="/register"
+              className="inline-flex items-center justify-center h-12 px-8 rounded-lg border border-stone-700 text-stone-300 font-medium text-sm tracking-wide hover:border-stone-500 hover:text-white transition-colors"
+            >
+              {t("register")}
+            </a>
+          </div>
 
-          {health && (
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between items-center py-1.5 border-b border-border">
-                <span className="text-muted-foreground">{t("status.api")}</span>
-                <span
-                  className={`font-medium px-2 py-0.5 rounded-md text-xs ${
+          {/* Status card */}
+          <div className="border border-stone-800 rounded-xl p-5 bg-stone-900/50 backdrop-blur-sm max-w-sm space-y-3">
+            <h3 className="text-sm font-medium text-stone-300">
+              {t("status.title")}
+            </h3>
+
+            {loading && (
+              <div className="flex items-center gap-2 text-stone-500 text-sm">
+                <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                {t("status.checking")}
+              </div>
+            )}
+
+            {error && (
+              <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 p-2.5 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            {health && (
+              <div className="space-y-0">
+                <div className="flex justify-between items-center py-2.5 border-b border-stone-800">
+                  <span className="text-sm text-stone-500">{t("status.api")}</span>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                     health.status === "ok"
-                      ? "bg-emerald-50 text-emerald-700"
-                      : "bg-red-50 text-red-700"
-                  }`}
-                >
-                  {health.status}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-1.5">
-                <span className="text-muted-foreground">
-                  {t("status.database")}
-                </span>
-                <span
-                  className={`font-medium px-2 py-0.5 rounded-md text-xs ${
+                      ? "bg-emerald-500/15 text-emerald-400"
+                      : "bg-red-500/15 text-red-400"
+                  }`}>
+                    {health.status}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2.5">
+                  <span className="text-sm text-stone-500">{t("status.database")}</span>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                     health.database === "healthy"
-                      ? "bg-emerald-50 text-emerald-700"
-                      : "bg-red-50 text-red-700"
-                  }`}
-                >
-                  {health.database === "healthy"
-                    ? t("status.healthy")
-                    : health.database}
-                </span>
+                      ? "bg-emerald-500/15 text-emerald-400"
+                      : "bg-red-500/15 text-red-400"
+                  }`}>
+                    {health.database === "healthy" ? t("status.healthy") : health.database}
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <Button
-            onClick={checkHealth}
-            variant="outline"
-            size="sm"
-            className="mt-2"
-          >
-            {t("status.refresh")}
-          </Button>
+            <button
+              onClick={checkHealth}
+              className="text-xs text-stone-500 hover:text-stone-300 transition-colors"
+            >
+              {t("status.refresh")}
+            </button>
+          </div>
         </div>
 
-        <p className="text-xs text-muted-foreground">
-          {tc("appName")} &middot; v1.0
-        </p>
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-8 border-t border-stone-800/50">
+          <div className="flex items-center gap-3">
+            <div className="flex -space-x-2">
+              {["bg-amber-500", "bg-stone-600", "bg-amber-700"].map((bg, i) => (
+                <div
+                  key={i}
+                  className={`w-7 h-7 rounded-full ${bg} border-2 border-stone-950 flex items-center justify-center text-[10px] text-white font-medium`}
+                >
+                  {["M", "C", "A"][i]}
+                </div>
+              ))}
+            </div>
+            <p className="text-stone-600 text-xs">
+              {t("hero.socialProof")}
+            </p>
+          </div>
+          <span className="text-stone-700 text-xs">v1.0</span>
+        </div>
       </div>
     </div>
   );
