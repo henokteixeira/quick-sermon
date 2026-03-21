@@ -30,6 +30,11 @@ async def main() -> None:
     workflows: list = []
     activities: list = []
 
+    if not workflows and not activities:
+        logger.warning("no_workflows_or_activities", msg="No workflows or activities registered. Worker idle.")
+        await shutdown_event.wait()
+        return
+
     worker = Worker(
         client,
         task_queue=settings.TEMPORAL_TASK_QUEUE,
