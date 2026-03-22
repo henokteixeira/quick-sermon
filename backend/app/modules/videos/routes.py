@@ -11,6 +11,7 @@ from app.modules.videos.dependencies import get_video_repository
 from app.modules.videos.enums import VideoStatus
 from app.modules.videos.repositories.video_repository import VideoRepository
 from app.modules.videos.schemas import VideoCreate, VideoResponse
+from app.modules.videos.services.delete_video_service import DeleteVideoService
 from app.modules.videos.services.get_video_service import GetVideoService
 from app.modules.videos.services.list_videos_service import ListVideosService
 from app.modules.videos.services.submit_video_service import SubmitVideoService
@@ -52,3 +53,15 @@ async def get_video(
     service = GetVideoService(video_repo)
     video = await service.execute(video_id)
     return VideoResponse.model_validate(video)
+
+
+@router.delete("/{video_id}", status_code=204)
+async def delete_video(
+    video_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    video_repo: VideoRepository = Depends(get_video_repository),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    service = DeleteVideoService(video_repo)
+    await service.execute(video_id)
+    await db.commit()

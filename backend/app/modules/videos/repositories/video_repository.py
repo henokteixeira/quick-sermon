@@ -24,6 +24,10 @@ class VideoRepository:
         await self.session.flush()
         return video
 
+    async def delete(self, video: Video) -> None:
+        await self.session.delete(video)
+        await self.session.flush()
+
     async def list_all(
         self,
         status: VideoStatus | None = None,

@@ -128,7 +128,13 @@
       "views": "Visualizações",
       "uploadDate": "Publicado em",
       "submittedAt": "Submetido em",
-      "status": "Status"
+      "status": "Status",
+      "delete": "Excluir",
+      "deleteTitle": "Excluir vídeo",
+      "deleteDescription": "Tem certeza que deseja excluir este vídeo? Esta ação não pode ser desfeita.",
+      "cancel": "Cancelar",
+      "confirmDelete": "Excluir",
+      "deleting": "Excluindo..."
     },
     "status": {
       "pending": "Aguardando",

@@ -1,12 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useQuery } from "@tanstack/react-query";
-import { getVideo } from "@/lib/api/videos";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getVideo, deleteVideo } from "@/lib/api/videos";
 import { VideoStatusBadge } from "@/components/features/videos/video-status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function formatDuration(seconds: number | null): string {
   if (!seconds) return "--";
@@ -51,11 +60,22 @@ export default function VideoDetailPage({
   params: { id: string };
 }) {
   const { id } = params;
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const t = useTranslations("videos.detail");
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const { data: video, isLoading } = useQuery({
     queryKey: ["video", id],
     queryFn: () => getVideo(id),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteVideo(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+      router.push("/videos");
+    },
   });
 
   if (isLoading) {
@@ -89,11 +109,25 @@ export default function VideoDetailPage({
         {t("back")}
       </Link>
 
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-5">
-        <h1 className="text-xl sm:text-2xl font-serif text-foreground leading-tight">
-          {video.title || t("title")}
-        </h1>
-        <VideoStatusBadge status={video.status} />
+      <div className="flex items-start justify-between gap-4 mb-5">
+        <div className="min-w-0">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-serif text-foreground leading-tight">
+              {video.title || t("title")}
+            </h1>
+            <VideoStatusBadge status={video.status} />
+          </div>
+        </div>
+        <button
+          onClick={() => setDeleteOpen(true)}
+          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-red-200 text-red-600 text-sm hover:bg-red-50 transition-colors shrink-0"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
+          {t("delete")}
+        </button>
       </div>
 
       {/* YouTube Embed */}
@@ -182,6 +216,31 @@ export default function VideoDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t("deleteTitle")}</DialogTitle>
+            <DialogDescription>{t("deleteDescription")}</DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 justify-end mt-2">
+            <button
+              onClick={() => setDeleteOpen(false)}
+              className="h-9 px-4 rounded-lg border border-input text-sm font-medium hover:bg-muted transition-colors"
+            >
+              {t("cancel")}
+            </button>
+            <button
+              onClick={() => deleteMutation.mutate()}
+              disabled={deleteMutation.isPending}
+              className="h-9 px-4 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+            >
+              {deleteMutation.isPending ? t("deleting") : t("confirmDelete")}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

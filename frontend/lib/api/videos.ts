@@ -39,3 +39,7 @@ export async function publishVideo(id: string): Promise<Video> {
   const response = await apiClient.post<Video>(`/videos/${id}/publish`);
   return response.data;
 }
+
+export async function deleteVideo(id: string): Promise<void> {
+  await apiClient.delete(`/videos/${id}`);
+}
