@@ -158,42 +158,45 @@ export default function VideoDetailPage({
         {t("back")}
       </Link>
 
-      <div className="flex items-start justify-between gap-4 mb-5">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-3 flex-wrap">
-            {isEditingTitle ? (
-              <input
-                ref={titleInputRef}
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                onBlur={saveTitle}
-                onKeyDown={handleTitleKeyDown}
-                disabled={updateMutation.isPending}
-                className="text-xl sm:text-2xl font-serif text-foreground leading-tight bg-transparent border-b-2 border-accent outline-none w-full"
-              />
-            ) : (
-              <button
-                onClick={startEditingTitle}
-                className="group flex items-center gap-2 text-left"
-                title={t("editTitle")}
-              >
-                <h1 className="text-xl sm:text-2xl font-serif text-foreground leading-tight">
-                  {video.title || t("title")}
-                </h1>
-                <svg className="w-4 h-4 text-muted-foreground/0 group-hover:text-muted-foreground transition-colors shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-              </button>
-            )}
-            <VideoStatusBadge status={video.status} />
-          </div>
-        </div>
+      {/* Title */}
+      <div className="mb-3">
+        {isEditingTitle ? (
+          <input
+            ref={titleInputRef}
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            onBlur={saveTitle}
+            onKeyDown={handleTitleKeyDown}
+            disabled={updateMutation.isPending}
+            className="text-xl sm:text-2xl font-serif text-foreground leading-tight bg-transparent border-b-2 border-accent outline-none w-full"
+          />
+        ) : (
+          <h1 className="text-xl sm:text-2xl font-serif text-foreground leading-tight">
+            {video.title || t("title")}
+          </h1>
+        )}
+      </div>
+
+      {/* Actions bar */}
+      <div className="flex items-center gap-2 mb-5">
+        <VideoStatusBadge status={video.status} />
+        <div className="flex-1" />
+        <button
+          onClick={startEditingTitle}
+          title={t("editTitle")}
+          className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-muted-foreground text-xs hover:bg-muted transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+          {t("editTitle")}
+        </button>
         <button
           onClick={() => setDeleteOpen(true)}
-          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-red-200 text-red-600 text-sm hover:bg-red-50 transition-colors shrink-0"
+          className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-red-500 text-xs hover:bg-red-50 transition-colors"
         >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="3 6 5 6 21 6" />
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
           </svg>
