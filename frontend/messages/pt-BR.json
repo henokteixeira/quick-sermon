@@ -84,7 +84,8 @@
       "dashboard": "Dashboard",
       "videos": "Vídeos",
       "users": "Usuários",
-      "settings": "Configurações"
+      "settings": "Configurações",
+      "logout": "Sair"
     }
   },
   "videos": {
