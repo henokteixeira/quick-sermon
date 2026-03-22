@@ -122,6 +122,7 @@
       "title": "Detalhes do Vídeo",
       "back": "Voltar",
       "sourceUrl": "URL Original",
+      "openYoutube": "Abrir no YouTube",
       "duration": "Duração",
       "submittedAt": "Submetido em",
       "status": "Status"

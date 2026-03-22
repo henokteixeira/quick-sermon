@@ -42,14 +42,16 @@ export default function VideoDetailPage({
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl space-y-4">
+      <div className="space-y-4">
         <Skeleton className="h-5 w-24" />
-        <Skeleton className="h-8 w-96" />
-        <Skeleton className="h-64 w-full rounded-xl" />
-        <div className="grid grid-cols-3 gap-4">
-          <Skeleton className="h-20 rounded-xl" />
-          <Skeleton className="h-20 rounded-xl" />
-          <Skeleton className="h-20 rounded-xl" />
+        <div className="flex flex-col lg:flex-row gap-6">
+          <Skeleton className="w-full lg:w-[420px] aspect-video rounded-xl shrink-0" />
+          <div className="flex-1 space-y-3">
+            <Skeleton className="h-7 w-3/4" />
+            <Skeleton className="h-5 w-1/3" />
+            <Skeleton className="h-16 w-full rounded-xl" />
+            <Skeleton className="h-16 w-full rounded-xl" />
+          </div>
         </div>
       </div>
     );
@@ -58,53 +60,37 @@ export default function VideoDetailPage({
   if (!video) return null;
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <a
         href="/videos"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-5"
       >
-        <svg
-          className="w-4 h-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
         {t("back")}
       </a>
 
-      <div className="mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
-          <h1 className="text-xl sm:text-2xl font-serif text-foreground leading-tight">
-            {video.title || t("title")}
-          </h1>
-          <VideoStatusBadge status={video.status} />
-        </div>
-      </div>
-
-      {video.thumbnail_url && (
-        <Card className="overflow-hidden mb-6 p-0">
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Thumbnail */}
+        <Card className="overflow-hidden p-0 shrink-0 lg:w-[420px] self-start">
           <div className="relative aspect-video bg-muted">
-            <img
-              src={video.thumbnail_url}
-              alt={video.title || ""}
-              className="w-full h-full object-cover"
-            />
+            {video.thumbnail_url ? (
+              <img
+                src={video.thumbnail_url}
+                alt={video.title || ""}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <svg className="w-10 h-10 text-muted-foreground/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+              </div>
+            )}
             {video.duration && (
-              <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/70 backdrop-blur-sm">
-                <svg
-                  className="w-3.5 h-3.5 text-white/80"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
+              <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/75 backdrop-blur-sm">
+                <svg className="w-3 h-3 text-white/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
@@ -114,72 +100,102 @@ export default function VideoDetailPage({
               </div>
             )}
           </div>
-        </Card>
-      )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-              {t("duration")}
-            </p>
-            <p className="text-lg font-medium text-foreground tabular-nums">
-              {formatDuration(video.duration)}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-              {t("status")}
-            </p>
-            <div className="mt-0.5">
-              <VideoStatusBadge status={video.status} />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-              {t("submittedAt")}
-            </p>
-            <p className="text-sm font-medium text-foreground">
-              {formatDate(video.created_at)}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="mt-3">
-        <CardContent className="p-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
-            {t("sourceUrl")}
-          </p>
-          <a
-            href={video.source_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-accent hover:text-amber-400 transition-colors break-all"
-          >
-            {video.source_url}
-            <svg
-              className="w-3.5 h-3.5 shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          {/* URL below thumbnail */}
+          <div className="px-4 py-3 border-t border-border">
+            <a
+              href={video.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-accent hover:text-amber-400 transition-colors truncate max-w-full"
             >
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
-          </a>
-        </CardContent>
-      </Card>
+              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+              <span className="truncate">{t("openYoutube")}</span>
+            </a>
+          </div>
+        </Card>
+
+        {/* Details */}
+        <div className="flex-1 min-w-0">
+          <div className="mb-5">
+            <h1 className="text-xl sm:text-2xl font-serif text-foreground leading-tight mb-2">
+              {video.title || t("title")}
+            </h1>
+            <VideoStatusBadge status={video.status} />
+          </div>
+
+          <div className="space-y-3">
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                    {t("duration")}
+                  </p>
+                  <p className="text-base font-medium text-foreground tabular-nums mt-0.5">
+                    {formatDuration(video.duration)}
+                  </p>
+                </div>
+                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                  <svg className="w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                    {t("submittedAt")}
+                  </p>
+                  <p className="text-sm font-medium text-foreground mt-0.5">
+                    {formatDate(video.created_at)}
+                  </p>
+                </div>
+                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                  <svg className="w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                    {t("sourceUrl")}
+                  </p>
+                  <p className="text-sm text-foreground mt-0.5 truncate max-w-[280px]">
+                    {video.source_url}
+                  </p>
+                </div>
+                <a
+                  href={video.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-lg bg-muted hover:bg-accent/10 flex items-center justify-center transition-colors"
+                >
+                  <svg className="w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                </a>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
