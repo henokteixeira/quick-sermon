@@ -2,22 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTranslations } from "next-intl";
+import { PasswordInput } from "./password-input";
 import { register } from "@/lib/api/auth";
 
 export function RegisterForm() {
   const router = useRouter();
+  const t = useTranslations("auth.register");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,7 +21,7 @@ export function RegisterForm() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("As senhas nao coincidem.");
+      setError(t("passwordMismatch"));
       return;
     }
 
@@ -41,88 +32,113 @@ export function RegisterForm() {
       router.push("/login?registered=true");
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      setError(
-        axiosErr.response?.data?.message || "Erro ao criar conta. Tente novamente."
-      );
+      setError(axiosErr.response?.data?.message || t("error"));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-2xl text-center">Criar Conta</CardTitle>
-        <CardDescription className="text-center">
-          Preencha os dados para se registrar
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="name">Nome</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Seu nome"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
-            <Input
+    <div>
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-serif text-white">{t("title")}</h2>
+        <p className="mt-1.5 text-stone-400 text-sm">{t("subtitle")}</p>
+      </div>
+
+      {error && (
+        <div className="mb-5 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
+          <p className="text-sm text-red-400">{error}</p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <label htmlFor="name" className="text-sm font-medium text-stone-300 block">
+            {t("name")}
+          </label>
+          <input
+            id="name"
+            type="text"
+            placeholder={t("namePlaceholder")}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="flex w-full h-11 rounded-lg border border-stone-700 bg-stone-900/50 px-4 text-sm text-stone-200 outline-none placeholder:text-stone-600 transition-all focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="text-sm font-medium text-stone-300 block">
+            {t("email")}
+          </label>
+          <input
+            id="email"
+            type="email"
+            placeholder={t("emailPlaceholder")}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="flex w-full h-11 rounded-lg border border-stone-700 bg-stone-900/50 px-4 text-sm text-stone-200 outline-none placeholder:text-stone-600 transition-all focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <label htmlFor="password" className="text-sm font-medium text-stone-300 block">
+              {t("password")}
+            </label>
+            <PasswordInput
               id="password"
-              type="password"
-              placeholder="Minimo 8 caracteres"
+              placeholder={t("passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirmar Senha</Label>
-            <Input
+
+          <div className="space-y-1.5">
+            <label htmlFor="confirmPassword" className="text-sm font-medium text-stone-300 block">
+              {t("confirmPassword")}
+            </label>
+            <PasswordInput
               id="confirmPassword"
-              type="password"
-              placeholder="Repita a senha"
+              placeholder={t("confirmPasswordPlaceholder")}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={8}
             />
           </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Criando conta..." : "Criar conta"}
-          </Button>
-          <p className="text-sm text-center text-muted-foreground">
-            Ja tem conta?{" "}
-            <a href="/login" className="text-primary hover:underline">
-              Entrar
-            </a>
-          </p>
-        </CardFooter>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full h-11 rounded-lg bg-amber-500 text-stone-950 font-medium text-sm tracking-wide hover:bg-amber-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+        >
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              {t("submitting")}
+            </span>
+          ) : (
+            t("submit")
+          )}
+        </button>
       </form>
-    </Card>
+
+      <div className="mt-8 pt-6 border-t border-stone-800">
+        <p className="text-sm text-center text-stone-500">
+          {t("hasAccount")}{" "}
+          <a href="/login" className="font-medium text-amber-400 hover:text-amber-300 transition-colors">
+            {t("signIn")}
+          </a>
+        </p>
+      </div>
+    </div>
   );
 }

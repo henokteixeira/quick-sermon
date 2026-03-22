@@ -68,4 +68,14 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Fix Chrome autofill dark theme */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 40px #1c1917 inset !important;
+    -webkit-text-fill-color: #d6d3d1 !important;
+    caret-color: #d6d3d1 !important;
+    border-color: #44403c !important;
+  }
 }
