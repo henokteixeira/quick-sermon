@@ -13,6 +13,7 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("auth.login");
+  const tErr = useTranslations("auth.errors");
   const setAuth = useAuthStore((s) => s.setAuth);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,8 +38,9 @@ export function LoginForm() {
 
       router.push("/");
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { message?: string } } };
-      setError(axiosErr.response?.data?.message || t("error"));
+      const axiosErr = err as { response?: { data?: { error?: { code?: string } } } };
+      const code = axiosErr.response?.data?.error?.code || "unknown";
+      setError(tErr.has(code) ? tErr(code) : tErr("unknown"));
     } finally {
       setLoading(false);
     }
