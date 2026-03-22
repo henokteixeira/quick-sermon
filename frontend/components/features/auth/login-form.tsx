@@ -32,7 +32,7 @@ export function LoginForm() {
       localStorage.setItem("access_token", tokens.access_token);
       localStorage.setItem("refresh_token", tokens.refresh_token);
 
-      const { data: user } = await apiClient.get<User>("/api/users/me");
+      const { data: user } = await apiClient.get<User>("/users/me");
       setAuth(user, tokens.access_token, tokens.refresh_token);
 
       router.push("/");
