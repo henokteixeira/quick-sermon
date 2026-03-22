@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AuthGuard } from "@/components/features/auth/auth-guard";
@@ -26,14 +27,14 @@ export default function DashboardLayout({
         {/* Desktop sidebar */}
         <aside className="hidden md:flex w-64 bg-sidebar text-sidebar-foreground flex-col shrink-0">
           <div className="p-5 pb-8">
-            <a href="/" className="flex items-center gap-2.5">
+            <Link href="/" className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center">
                 <svg viewBox="0 0 24 24" className="w-4 h-4 text-stone-950" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="5 3 19 12 5 21 5 3" />
                 </svg>
               </div>
               <span className="font-serif text-lg text-white">Quick Sermon</span>
-            </a>
+            </Link>
           </div>
 
           <nav className="flex-1 px-3 space-y-0.5">
@@ -43,7 +44,7 @@ export default function DashboardLayout({
                   ? pathname === "/"
                   : pathname.startsWith(item.href);
               return (
-                <a
+                <Link
                   key={item.key}
                   href={item.href}
                   className={cn(
@@ -55,7 +56,7 @@ export default function DashboardLayout({
                 >
                   <item.icon className="w-4 h-4" />
                   {t(item.key)}
-                </a>
+                </Link>
               );
             })}
           </nav>
@@ -67,14 +68,14 @@ export default function DashboardLayout({
 
         {/* Mobile header */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 bg-sidebar text-white border-b border-white/5">
-          <a href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-md bg-amber-500 flex items-center justify-center">
               <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-stone-950" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="5 3 19 12 5 21 5 3" />
               </svg>
             </div>
             <span className="font-serif text-base">Quick Sermon</span>
-          </a>
+          </Link>
         </header>
 
         <main className="flex-1 bg-background min-h-0">

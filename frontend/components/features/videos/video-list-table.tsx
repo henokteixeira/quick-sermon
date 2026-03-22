@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { listVideos } from "@/lib/api/videos";
@@ -79,7 +80,7 @@ export function VideoListTable() {
   return (
     <div className="space-y-3">
       {data.items.map((video) => (
-        <a key={video.id} href={`/videos/${video.id}`} className="block group">
+        <Link key={video.id} href={`/videos/${video.id}`} className="block group">
           <Card className="p-0 overflow-hidden transition-all hover:shadow-md hover:border-accent/30">
             <div className="flex items-center">
               <div className="relative w-24 sm:w-36 h-16 sm:h-[5.25rem] shrink-0 bg-muted overflow-hidden">
@@ -122,7 +123,7 @@ export function VideoListTable() {
               </div>
             </div>
           </Card>
-        </a>
+        </Link>
       ))}
 
       {data.total_pages > 1 && (
