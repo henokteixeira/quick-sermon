@@ -1,24 +1,73 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
 import { VideoStatus } from "@/lib/types/video";
+import { cn } from "@/lib/utils";
 
-const STATUS_VARIANT: Record<VideoStatus, string> = {
-  pending: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
-  detecting: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  processing: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  awaiting_review: "bg-purple-500/15 text-purple-400 border-purple-500/30",
-  published: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  error: "bg-red-500/15 text-red-400 border-red-500/30",
+const STATUS_CONFIG: Record<
+  VideoStatus,
+  { dot: string; bg: string; text: string; pulse?: boolean }
+> = {
+  pending: {
+    dot: "bg-amber-500",
+    bg: "bg-amber-500/8 border-amber-500/20",
+    text: "text-amber-700",
+  },
+  detecting: {
+    dot: "bg-blue-500",
+    bg: "bg-blue-500/8 border-blue-500/20",
+    text: "text-blue-700",
+    pulse: true,
+  },
+  processing: {
+    dot: "bg-blue-500",
+    bg: "bg-blue-500/8 border-blue-500/20",
+    text: "text-blue-700",
+    pulse: true,
+  },
+  awaiting_review: {
+    dot: "bg-violet-500",
+    bg: "bg-violet-500/8 border-violet-500/20",
+    text: "text-violet-700",
+  },
+  published: {
+    dot: "bg-emerald-500",
+    bg: "bg-emerald-500/8 border-emerald-500/20",
+    text: "text-emerald-700",
+  },
+  error: {
+    dot: "bg-red-500",
+    bg: "bg-red-500/8 border-red-500/20",
+    text: "text-red-700",
+  },
 };
 
 export function VideoStatusBadge({ status }: { status: VideoStatus }) {
   const t = useTranslations("videos.status");
+  const config = STATUS_CONFIG[status];
 
   return (
-    <Badge variant="outline" className={STATUS_VARIANT[status]}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border",
+        config.bg,
+        config.text
+      )}
+    >
+      <span className="relative flex h-1.5 w-1.5">
+        {config.pulse && (
+          <span
+            className={cn(
+              "absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping",
+              config.dot
+            )}
+          />
+        )}
+        <span
+          className={cn("relative inline-flex rounded-full h-1.5 w-1.5", config.dot)}
+        />
+      </span>
       {t(status)}
-    </Badge>
+    </span>
   );
 }

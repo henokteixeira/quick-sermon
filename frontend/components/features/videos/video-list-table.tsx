@@ -1,19 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { listVideos } from "@/lib/api/videos";
 import { VideoStatusBadge } from "./video-status-badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function formatDuration(seconds: number | null): string {
@@ -28,15 +20,12 @@ function formatDuration(seconds: number | null): string {
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("pt-BR", {
     day: "2-digit",
-    month: "2-digit",
+    month: "short",
     year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
 }
 
 export function VideoListTable() {
-  const router = useRouter();
   const t = useTranslations("videos.list");
   const [page, setPage] = useState(1);
   const pageSize = 20;
@@ -48,9 +37,17 @@ export function VideoListTable() {
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full" />
+      <div className="grid gap-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i} className="p-4">
+            <div className="flex items-center gap-4">
+              <Skeleton className="w-32 h-20 rounded-lg shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/4" />
+              </div>
+            </div>
+          </Card>
         ))}
       </div>
     );
@@ -58,77 +55,100 @@ export function VideoListTable() {
 
   if (!data || data.items.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">{t("noVideos")}</p>
-      </div>
+      <Card className="flex flex-col items-center justify-center py-16 px-8">
+        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+          <svg className="w-7 h-7 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">{t("noVideos")}</p>
+        <a
+          href="/videos/new"
+          className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:bg-amber-400 transition-colors"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          {t("addFirst")}
+        </a>
+      </Card>
     );
   }
 
   return (
-    <div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-16">{t("thumbnail")}</TableHead>
-            <TableHead>{t("videoTitle")}</TableHead>
-            <TableHead className="w-28">{t("duration")}</TableHead>
-            <TableHead className="w-32">{t("status")}</TableHead>
-            <TableHead className="w-40">{t("date")}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.items.map((video) => (
-            <TableRow
-              key={video.id}
-              className="cursor-pointer hover:bg-gray-50"
-              onClick={() => router.push(`/videos/${video.id}`)}
-            >
-              <TableCell>
+    <div className="space-y-3">
+      {data.items.map((video) => (
+        <a key={video.id} href={`/videos/${video.id}`} className="block group">
+          <Card className="p-0 overflow-hidden transition-all hover:shadow-md hover:border-accent/30">
+            <div className="flex items-center">
+              <div className="relative w-36 h-[5.25rem] shrink-0 bg-muted overflow-hidden">
                 {video.thumbnail_url ? (
                   <img
                     src={video.thumbnail_url}
                     alt=""
-                    className="w-16 h-9 object-cover rounded"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="w-16 h-9 bg-gray-200 rounded" />
+                  <div className="w-full h-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-muted-foreground/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                  </div>
                 )}
-              </TableCell>
-              <TableCell className="font-medium">
-                {video.title || video.source_url}
-              </TableCell>
-              <TableCell className="text-gray-500 text-sm">
-                {formatDuration(video.duration)}
-              </TableCell>
-              <TableCell>
-                <VideoStatusBadge status={video.status} />
-              </TableCell>
-              <TableCell className="text-gray-500 text-sm">
-                {formatDate(video.created_at)}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                {video.duration && (
+                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-black/70 text-white tabular-nums">
+                    {formatDuration(video.duration)}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex-1 px-4 py-3 min-w-0">
+                <h3 className="text-sm font-medium text-foreground truncate group-hover:text-accent transition-colors">
+                  {video.title || video.source_url}
+                </h3>
+                <div className="flex items-center gap-3 mt-2">
+                  <VideoStatusBadge status={video.status} />
+                  <span className="text-xs text-muted-foreground">
+                    {formatDate(video.created_at)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="pr-4 shrink-0">
+                <svg className="w-4 h-4 text-muted-foreground/40 group-hover:text-accent transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </div>
+            </div>
+          </Card>
+        </a>
+      ))}
 
       {data.total_pages > 1 && (
-        <div className="flex items-center justify-between mt-4 px-2">
+        <div className="flex items-center justify-between pt-2 px-1">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
             {t("previous")}
           </button>
-          <span className="text-sm text-gray-500">
+          <span className="text-xs text-muted-foreground tabular-nums">
             {page} / {data.total_pages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(data.total_pages, p + 1))}
             disabled={page >= data.total_pages}
-            className="text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {t("next")}
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </button>
         </div>
       )}
