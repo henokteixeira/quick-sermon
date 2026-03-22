@@ -36,7 +36,7 @@ export function LoginForm() {
       const { data: user } = await apiClient.get<User>("/users/me");
       setAuth(user, tokens.access_token, tokens.refresh_token);
 
-      router.push("/");
+      router.push("/dashboard");
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: { code?: string } } } };
       const code = axiosErr.response?.data?.error?.code || "unknown";

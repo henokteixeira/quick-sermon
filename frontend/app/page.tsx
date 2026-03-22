@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
 interface HealthStatus {
   status: string;
@@ -26,6 +27,7 @@ function StatusDot({ ok }: { ok: boolean }) {
 export default function Home() {
   const t = useTranslations("home");
   const tc = useTranslations("common");
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,7 +100,7 @@ export default function Home() {
           {/* CTA */}
           <div className="flex gap-3 justify-center">
             <a
-              href="/login"
+              href={isAuthenticated ? "/dashboard" : "/login"}
               className="inline-flex items-center justify-center h-11 px-7 rounded-lg bg-amber-500 text-stone-950 font-medium text-sm tracking-wide hover:bg-amber-400 transition-colors"
             >
               {t("hero.cta")}

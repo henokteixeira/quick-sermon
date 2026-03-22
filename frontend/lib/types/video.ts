@@ -14,10 +14,10 @@ export interface Video {
   thumbnail_url: string | null;
   status: VideoStatus;
   youtube_video_id: string | null;
-  sermon_start: number | null;
-  sermon_end: number | null;
-  confidence: number | null;
-  selected_title: string | null;
+  channel_name: string | null;
+  view_count: number | null;
+  upload_date: string | null;
+  submitted_by: string | null;
   created_at: string;
 }
 

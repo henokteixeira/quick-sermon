@@ -84,7 +84,67 @@
       "dashboard": "Dashboard",
       "videos": "Vídeos",
       "users": "Usuários",
-      "settings": "Configurações"
+      "settings": "Configurações",
+      "logout": "Sair"
+    }
+  },
+  "videos": {
+    "title": "Vídeos",
+    "subtitle": "Gerencie e acompanhe seus vídeos de pregação",
+    "newVideo": "Novo Vídeo",
+    "submit": {
+      "title": "Submeter Vídeo",
+      "subtitle": "Cole a URL de uma live do YouTube para iniciar o processamento",
+      "back": "Voltar",
+      "urlLabel": "URL do YouTube",
+      "urlPlaceholder": "https://youtube.com/watch?v=...",
+      "submit": "Processar",
+      "submitting": "Validando...",
+      "invalidUrl": "URL inválida. Cole um link do YouTube."
+    },
+    "errors": {
+      "CONFLICT": "Este vídeo já foi submetido.",
+      "VALIDATION_ERROR": "URL inválida ou vídeo inacessível.",
+      "INTERNAL_ERROR": "Erro interno do servidor. Tente novamente.",
+      "unknown": "Ocorreu um erro inesperado. Tente novamente."
+    },
+    "list": {
+      "thumbnail": "Thumb",
+      "videoTitle": "Título",
+      "duration": "Duração",
+      "status": "Status",
+      "date": "Data",
+      "noVideos": "Nenhum vídeo submetido ainda.",
+      "addFirst": "Adicionar primeiro vídeo",
+      "previous": "Anterior",
+      "next": "Próximo"
+    },
+    "detail": {
+      "title": "Detalhes do Vídeo",
+      "back": "Voltar",
+      "sourceUrl": "URL Original",
+      "openYoutube": "Abrir no YouTube",
+      "duration": "Duração",
+      "channel": "Canal",
+      "views": "Visualizações",
+      "uploadDate": "Publicado em",
+      "submittedAt": "Submetido em",
+      "status": "Status",
+      "editTitle": "Editar título",
+      "delete": "Excluir",
+      "deleteTitle": "Excluir vídeo",
+      "deleteDescription": "Tem certeza que deseja excluir este vídeo? Esta ação não pode ser desfeita.",
+      "cancel": "Cancelar",
+      "confirmDelete": "Excluir",
+      "deleting": "Excluindo..."
+    },
+    "status": {
+      "pending": "Aguardando",
+      "detecting": "Detectando",
+      "processing": "Processando",
+      "awaiting_review": "Revisão",
+      "published": "Publicado",
+      "error": "Erro"
     }
   }
 }
