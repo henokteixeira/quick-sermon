@@ -1,6 +1,5 @@
 "use client";
 
-import { use } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { getVideo } from "@/lib/api/videos";
@@ -31,9 +30,9 @@ function formatDate(dateStr: string): string {
 export default function VideoDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = use(params);
+  const { id } = params;
   const t = useTranslations("videos.detail");
 
   const { data: video, isLoading } = useQuery({
