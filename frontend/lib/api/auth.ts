@@ -2,7 +2,7 @@ import apiClient from "./client";
 import { LoginRequest, TokenResponse } from "../types/auth";
 
 export async function login(data: LoginRequest): Promise<TokenResponse> {
-  const response = await apiClient.post<TokenResponse>("/api/auth/login", data);
+  const response = await apiClient.post<TokenResponse>("/auth/login", data);
   return response.data;
 }
 
@@ -12,14 +12,14 @@ export async function register(data: {
   name: string;
 }): Promise<TokenResponse> {
   const response = await apiClient.post<TokenResponse>(
-    "/api/auth/register",
+    "/auth/register",
     data
   );
   return response.data;
 }
 
 export async function refreshToken(token: string): Promise<TokenResponse> {
-  const response = await apiClient.post<TokenResponse>("/api/auth/refresh", {
+  const response = await apiClient.post<TokenResponse>("/auth/refresh", {
     refresh_token: token,
   });
   return response.data;
