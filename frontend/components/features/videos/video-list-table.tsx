@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { listVideos } from "@/lib/api/videos";
 import { VideoStatusBadge } from "./video-status-badge";
+import { VideoSubmitDialog } from "./video-submit-form";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -62,16 +63,15 @@ export function VideoListTable() {
           </svg>
         </div>
         <p className="text-sm text-muted-foreground mb-4">{t("noVideos")}</p>
-        <a
-          href="/videos/new"
-          className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:bg-amber-400 transition-colors"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          {t("addFirst")}
-        </a>
+        <VideoSubmitDialog>
+          <button className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:bg-amber-400 transition-colors">
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            {t("addFirst")}
+          </button>
+        </VideoSubmitDialog>
       </Card>
     );
   }

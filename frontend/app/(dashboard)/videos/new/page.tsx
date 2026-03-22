@@ -1,5 +1,5 @@
-import { VideoSubmitForm } from "@/components/features/videos/video-submit-form";
+import { redirect } from "next/navigation";
 
 export default function NewVideoPage() {
-  return <VideoSubmitForm />;
+  redirect("/videos");
 }
