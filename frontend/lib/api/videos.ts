@@ -2,7 +2,7 @@ import apiClient from "./client";
 import { Video, VideoListResponse } from "../types/video";
 
 export async function createVideo(sourceUrl: string): Promise<Video> {
-  const response = await apiClient.post<Video>("/api/videos", {
+  const response = await apiClient.post<Video>("/videos", {
     source_url: sourceUrl,
   });
   return response.data;
@@ -13,14 +13,14 @@ export async function listVideos(params?: {
   page?: number;
   page_size?: number;
 }): Promise<VideoListResponse> {
-  const response = await apiClient.get<VideoListResponse>("/api/videos", {
+  const response = await apiClient.get<VideoListResponse>("/videos", {
     params,
   });
   return response.data;
 }
 
 export async function getVideo(id: string): Promise<Video> {
-  const response = await apiClient.get<Video>(`/api/videos/${id}`);
+  const response = await apiClient.get<Video>(`/videos/${id}`);
   return response.data;
 }
 
@@ -29,13 +29,13 @@ export async function updateTimestamps(
   data: { sermon_start: number; sermon_end: number }
 ): Promise<Video> {
   const response = await apiClient.patch<Video>(
-    `/api/videos/${id}/timestamps`,
+    `/videos/${id}/timestamps`,
     data
   );
   return response.data;
 }
 
 export async function publishVideo(id: string): Promise<Video> {
-  const response = await apiClient.post<Video>(`/api/videos/${id}/publish`);
+  const response = await apiClient.post<Video>(`/videos/${id}/publish`);
   return response.data;
 }

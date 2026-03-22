@@ -82,7 +82,7 @@ export function VideoListTable() {
         <a key={video.id} href={`/videos/${video.id}`} className="block group">
           <Card className="p-0 overflow-hidden transition-all hover:shadow-md hover:border-accent/30">
             <div className="flex items-center">
-              <div className="relative w-36 h-[5.25rem] shrink-0 bg-muted overflow-hidden">
+              <div className="relative w-24 sm:w-36 h-16 sm:h-[5.25rem] shrink-0 bg-muted overflow-hidden">
                 {video.thumbnail_url ? (
                   <img
                     src={video.thumbnail_url}
@@ -103,7 +103,7 @@ export function VideoListTable() {
                 )}
               </div>
 
-              <div className="flex-1 px-4 py-3 min-w-0">
+              <div className="flex-1 px-3 sm:px-4 py-2 sm:py-3 min-w-0">
                 <h3 className="text-sm font-medium text-foreground truncate group-hover:text-accent transition-colors">
                   {video.title || video.source_url}
                 </h3>
@@ -115,7 +115,7 @@ export function VideoListTable() {
                 </div>
               </div>
 
-              <div className="pr-4 shrink-0">
+              <div className="pr-3 sm:pr-4 shrink-0 hidden sm:block">
                 <svg className="w-4 h-4 text-muted-foreground/40 group-hover:text-accent transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>

@@ -22,8 +22,9 @@ export default function DashboardLayout({
 
   return (
     <AuthGuard>
-      <div className="min-h-screen flex">
-        <aside className="w-64 bg-sidebar text-sidebar-foreground flex flex-col">
+      <div className="min-h-screen flex flex-col md:flex-row">
+        {/* Desktop sidebar */}
+        <aside className="hidden md:flex w-64 bg-sidebar text-sidebar-foreground flex-col shrink-0">
           <div className="p-5 pb-8">
             <a href="/" className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center">
@@ -64,9 +65,46 @@ export default function DashboardLayout({
           </div>
         </aside>
 
-        <main className="flex-1 bg-background min-h-screen">
-          <div className="p-8">{children}</div>
+        {/* Mobile header */}
+        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-sidebar text-white border-b border-white/5">
+          <a href="/" className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-md bg-amber-500 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-stone-950" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+            </div>
+            <span className="font-serif text-base">Quick Sermon</span>
+          </a>
+        </header>
+
+        <main className="flex-1 bg-background min-h-0">
+          <div className="p-4 md:p-8 pb-20 md:pb-8">{children}</div>
         </main>
+
+        {/* Mobile bottom nav */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-sidebar border-t border-white/5 flex items-center justify-around px-2 py-2 z-50">
+          {NAV_ITEMS.map((item) => {
+            const isActive =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
+            return (
+              <a
+                key={item.key}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] transition-colors min-w-[3.5rem]",
+                  isActive
+                    ? "text-amber-400"
+                    : "text-stone-500"
+                )}
+              >
+                <item.icon className="w-5 h-5" />
+                {t(item.key)}
+              </a>
+            );
+          })}
+        </nav>
       </div>
     </AuthGuard>
   );

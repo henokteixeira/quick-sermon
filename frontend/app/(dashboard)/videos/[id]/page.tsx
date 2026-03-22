@@ -79,8 +79,8 @@ export default function VideoDetailPage({
       </a>
 
       <div className="mb-6">
-        <div className="flex items-start justify-between gap-4">
-          <h1 className="text-2xl font-serif text-foreground leading-tight">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
+          <h1 className="text-xl sm:text-2xl font-serif text-foreground leading-tight">
             {video.title || t("title")}
           </h1>
           <VideoStatusBadge status={video.status} />
@@ -118,7 +118,7 @@ export default function VideoDetailPage({
         </Card>
       )}
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
