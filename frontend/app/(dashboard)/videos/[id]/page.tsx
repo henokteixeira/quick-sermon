@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getVideo, deleteVideo } from "@/lib/api/videos";
+import { getVideo, deleteVideo, updateVideo, refreshVideo } from "@/lib/api/videos";
 import { VideoStatusBadge } from "@/components/features/videos/video-status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -70,6 +70,35 @@ export default function VideoDetailPage({
     queryFn: () => getVideo(id),
   });
 
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  const updateMutation = useMutation({
+    mutationFn: (title: string) => updateVideo(id, { title }),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(["video", id], updated);
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+      setIsEditingTitle(false);
+    },
+  });
+
+  const refreshMutation = useMutation({
+    mutationFn: () => refreshVideo(id),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(["video", id], updated);
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+    },
+  });
+
+  // Auto-refresh metadata on page load
+  useEffect(() => {
+    if (video && !refreshMutation.isPending) {
+      refreshMutation.mutate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [video?.id]);
+
   const deleteMutation = useMutation({
     mutationFn: () => deleteVideo(id),
     onSuccess: () => {
@@ -77,6 +106,26 @@ export default function VideoDetailPage({
       router.push("/videos");
     },
   });
+
+  function startEditingTitle() {
+    setEditTitle(video?.title || "");
+    setIsEditingTitle(true);
+    setTimeout(() => titleInputRef.current?.focus(), 0);
+  }
+
+  function saveTitle() {
+    const trimmed = editTitle.trim();
+    if (trimmed && trimmed !== video?.title) {
+      updateMutation.mutate(trimmed);
+    } else {
+      setIsEditingTitle(false);
+    }
+  }
+
+  function handleTitleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") saveTitle();
+    if (e.key === "Escape") setIsEditingTitle(false);
+  }
 
   if (isLoading) {
     return (
@@ -110,11 +159,33 @@ export default function VideoDetailPage({
       </Link>
 
       <div className="flex items-start justify-between gap-4 mb-5">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-xl sm:text-2xl font-serif text-foreground leading-tight">
-              {video.title || t("title")}
-            </h1>
+            {isEditingTitle ? (
+              <input
+                ref={titleInputRef}
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                onBlur={saveTitle}
+                onKeyDown={handleTitleKeyDown}
+                disabled={updateMutation.isPending}
+                className="text-xl sm:text-2xl font-serif text-foreground leading-tight bg-transparent border-b-2 border-accent outline-none w-full"
+              />
+            ) : (
+              <button
+                onClick={startEditingTitle}
+                className="group flex items-center gap-2 text-left"
+                title={t("editTitle")}
+              >
+                <h1 className="text-xl sm:text-2xl font-serif text-foreground leading-tight">
+                  {video.title || t("title")}
+                </h1>
+                <svg className="w-4 h-4 text-muted-foreground/0 group-hover:text-muted-foreground transition-colors shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </button>
+            )}
             <VideoStatusBadge status={video.status} />
           </div>
         </div>

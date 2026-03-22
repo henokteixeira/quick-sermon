@@ -40,6 +40,19 @@ export async function publishVideo(id: string): Promise<Video> {
   return response.data;
 }
 
+export async function updateVideo(
+  id: string,
+  data: { title?: string }
+): Promise<Video> {
+  const response = await apiClient.patch<Video>(`/videos/${id}`, data);
+  return response.data;
+}
+
+export async function refreshVideo(id: string): Promise<Video> {
+  const response = await apiClient.post<Video>(`/videos/${id}/refresh`);
+  return response.data;
+}
+
 export async function deleteVideo(id: string): Promise<void> {
   await apiClient.delete(`/videos/${id}`);
 }

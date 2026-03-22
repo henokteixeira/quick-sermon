@@ -20,6 +20,10 @@ class VideoMetadata(BaseModel):
     upload_date: str | None = None
 
 
+class VideoUpdate(BaseModel):
+    title: str | None = None
+
+
 class VideoResponse(BaseModel):
     id: uuid.UUID
     source_url: str

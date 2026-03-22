@@ -10,9 +10,11 @@ from app.modules.users.models import User
 from app.modules.videos.dependencies import get_video_repository
 from app.modules.videos.enums import VideoStatus
 from app.modules.videos.repositories.video_repository import VideoRepository
-from app.modules.videos.schemas import VideoCreate, VideoResponse
+from app.modules.videos.schemas import VideoCreate, VideoResponse, VideoUpdate
 from app.modules.videos.services.delete_video_service import DeleteVideoService
 from app.modules.videos.services.get_video_service import GetVideoService
+from app.modules.videos.services.refresh_metadata_service import RefreshMetadataService
+from app.modules.videos.services.update_video_service import UpdateVideoService
 from app.modules.videos.services.list_videos_service import ListVideosService
 from app.modules.videos.services.submit_video_service import SubmitVideoService
 
@@ -52,6 +54,33 @@ async def get_video(
 ) -> VideoResponse:
     service = GetVideoService(video_repo)
     video = await service.execute(video_id)
+    return VideoResponse.model_validate(video)
+
+
+@router.patch("/{video_id}", response_model=VideoResponse)
+async def update_video(
+    video_id: uuid.UUID,
+    data: VideoUpdate,
+    user: User = Depends(get_current_user),
+    video_repo: VideoRepository = Depends(get_video_repository),
+    db: AsyncSession = Depends(get_db),
+) -> VideoResponse:
+    service = UpdateVideoService(video_repo)
+    video = await service.execute(video_id, data)
+    await db.commit()
+    return VideoResponse.model_validate(video)
+
+
+@router.post("/{video_id}/refresh", response_model=VideoResponse)
+async def refresh_video(
+    video_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    video_repo: VideoRepository = Depends(get_video_repository),
+    db: AsyncSession = Depends(get_db),
+) -> VideoResponse:
+    service = RefreshMetadataService(video_repo)
+    video = await service.execute(video_id)
+    await db.commit()
     return VideoResponse.model_validate(video)
 
 
