@@ -15,6 +15,9 @@ class VideoMetadata(BaseModel):
     title: str
     duration: int
     thumbnail_url: str
+    channel_name: str | None = None
+    view_count: int | None = None
+    upload_date: str | None = None
 
 
 class VideoResponse(BaseModel):
@@ -25,6 +28,9 @@ class VideoResponse(BaseModel):
     thumbnail_url: str | None
     status: VideoStatus
     youtube_video_id: str | None
+    channel_name: str | None
+    view_count: int | None
+    upload_date: str | None
     submitted_by: uuid.UUID | None
     created_at: datetime
 

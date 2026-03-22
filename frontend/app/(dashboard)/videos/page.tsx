@@ -8,7 +8,7 @@ export default function VideosPage() {
   const t = useTranslations("videos");
 
   return (
-    <div>
+    <div className="max-w-[900px] mx-auto">
       <div className="flex items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-serif text-foreground">{t("title")}</h1>

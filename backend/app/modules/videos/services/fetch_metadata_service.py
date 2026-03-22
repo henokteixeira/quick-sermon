@@ -56,4 +56,7 @@ class FetchMetadataService:
             title=data.get("title", "Sem titulo"),
             duration=int(data.get("duration", 0)),
             thumbnail_url=thumbnail,
+            channel_name=data.get("channel") or data.get("uploader"),
+            view_count=data.get("view_count"),
+            upload_date=data.get("upload_date"),
         )

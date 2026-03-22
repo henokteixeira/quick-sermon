@@ -33,6 +33,9 @@ class SubmitVideoService:
             duration=metadata.duration,
             thumbnail_url=metadata.thumbnail_url,
             youtube_video_id=metadata.video_id,
+            channel_name=metadata.channel_name,
+            view_count=metadata.view_count,
+            upload_date=metadata.upload_date,
             status=VideoStatus.PENDING,
             submitted_by=user_id,
         )

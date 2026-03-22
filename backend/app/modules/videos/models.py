@@ -17,6 +17,9 @@ class Video(Base, UUIDMixin, TimestampMixin):
     thumbnail_url: Mapped[str | None] = mapped_column(String(500))
     status: Mapped[str] = mapped_column(String(20), default=VideoStatus.PENDING, nullable=False)
     youtube_video_id: Mapped[str | None] = mapped_column(String(50))
+    channel_name: Mapped[str | None] = mapped_column(String(255))
+    view_count: Mapped[int | None] = mapped_column(Integer)
+    upload_date: Mapped[str | None] = mapped_column(String(10))
 
     submitted_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id")

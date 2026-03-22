@@ -21,10 +21,27 @@ function formatDuration(seconds: number | null): string {
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("pt-BR", {
     day: "2-digit",
-    month: "long",
+    month: "2-digit",
+    year: "2-digit",
+  });
+}
+
+function formatViews(count: number | null): string {
+  if (!count) return "--";
+  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
+  if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K`;
+  return count.toLocaleString("pt-BR");
+}
+
+function formatUploadDate(dateStr: string | null): string {
+  if (!dateStr || dateStr.length !== 8) return "--";
+  const y = dateStr.slice(0, 4);
+  const m = dateStr.slice(4, 6);
+  const d = dateStr.slice(6, 8);
+  return new Date(`${y}-${m}-${d}`).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
     year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
 }
 
@@ -43,15 +60,15 @@ export default function VideoDetailPage({
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="max-w-[900px] mx-auto space-y-4">
         <Skeleton className="h-5 w-24" />
-        <div className="flex flex-col lg:flex-row gap-6">
-          <Skeleton className="w-full lg:w-[420px] aspect-video rounded-xl shrink-0" />
-          <div className="flex-1 space-y-3">
-            <Skeleton className="h-7 w-3/4" />
-            <Skeleton className="h-5 w-1/3" />
-            <Skeleton className="h-16 w-full rounded-xl" />
-            <Skeleton className="h-16 w-full rounded-xl" />
+        <Skeleton className="h-8 w-2/3" />
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4">
+          <Skeleton className="aspect-video rounded-xl" />
+          <div className="space-y-3">
+            <Skeleton className="h-20 rounded-xl" />
+            <Skeleton className="h-20 rounded-xl" />
+            <Skeleton className="h-20 rounded-xl" />
           </div>
         </div>
       </div>
@@ -61,7 +78,7 @@ export default function VideoDetailPage({
   if (!video) return null;
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-[900px] mx-auto">
       <Link
         href="/videos"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-5"
@@ -72,49 +89,50 @@ export default function VideoDetailPage({
         {t("back")}
       </Link>
 
-      <div className="mb-5">
-        <h1 className="text-xl sm:text-2xl font-serif text-foreground leading-tight mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-5">
+        <h1 className="text-xl sm:text-2xl font-serif text-foreground leading-tight">
           {video.title || t("title")}
         </h1>
         <VideoStatusBadge status={video.status} />
       </div>
 
-      <Card className="overflow-hidden p-0 mb-3">
-        <div className="relative aspect-video bg-muted">
-          {video.thumbnail_url ? (
+      {/* YouTube Embed */}
+      <Card className="overflow-hidden p-0 mb-4">
+        {video.youtube_video_id ? (
+          <div className="relative aspect-video bg-black">
+            <iframe
+              src={`https://www.youtube.com/embed/${video.youtube_video_id}`}
+              title={video.title || ""}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 w-full h-full"
+            />
+          </div>
+        ) : video.thumbnail_url ? (
+          <div className="relative aspect-video bg-muted">
             <img
               src={video.thumbnail_url}
               alt={video.title || ""}
               className="w-full h-full object-cover"
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <svg className="w-10 h-10 text-muted-foreground/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-            </div>
-          )}
-          {video.duration && (
-            <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/75 backdrop-blur-sm">
-              <svg className="w-3 h-3 text-white/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              <span className="text-xs font-medium text-white tabular-nums">
-                {formatDuration(video.duration)}
-              </span>
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="aspect-video bg-muted flex items-center justify-center">
+            <svg className="w-10 h-10 text-muted-foreground/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          </div>
+        )}
       </Card>
 
-      <div className="grid grid-cols-2 gap-3 mb-3">
+      {/* Info cards grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider">
               {t("duration")}
             </p>
-            <p className="text-base font-medium text-foreground tabular-nums mt-1">
+            <p className="text-sm font-medium text-foreground tabular-nums mt-1">
               {formatDuration(video.duration)}
             </p>
           </CardContent>
@@ -122,7 +140,40 @@ export default function VideoDetailPage({
 
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider">
+              {t("channel")}
+            </p>
+            <p className="text-sm font-medium text-foreground mt-1 truncate">
+              {video.channel_name || "--"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider">
+              {t("views")}
+            </p>
+            <p className="text-sm font-medium text-foreground tabular-nums mt-1">
+              {formatViews(video.view_count)}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider">
+              {t("uploadDate")}
+            </p>
+            <p className="text-sm font-medium text-foreground mt-1">
+              {formatUploadDate(video.upload_date)}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider">
               {t("submittedAt")}
             </p>
             <p className="text-sm font-medium text-foreground mt-1">
@@ -131,31 +182,6 @@ export default function VideoDetailPage({
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardContent className="p-4 flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">
-              {t("sourceUrl")}
-            </p>
-            <p className="text-sm text-foreground mt-1 truncate">
-              {video.source_url}
-            </p>
-          </div>
-          <a
-            href={video.source_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-9 h-9 rounded-lg bg-muted hover:bg-accent/10 flex items-center justify-center transition-colors shrink-0"
-          >
-            <svg className="w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
-          </a>
-        </CardContent>
-      </Card>
     </div>
   );
 }

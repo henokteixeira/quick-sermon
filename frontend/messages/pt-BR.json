@@ -124,6 +124,9 @@
       "sourceUrl": "URL Original",
       "openYoutube": "Abrir no YouTube",
       "duration": "Duração",
+      "channel": "Canal",
+      "views": "Visualizações",
+      "uploadDate": "Publicado em",
       "submittedAt": "Submetido em",
       "status": "Status"
     },
