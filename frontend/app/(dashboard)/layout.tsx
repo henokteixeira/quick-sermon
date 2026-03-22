@@ -10,9 +10,9 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/dashboard", key: "dashboard", icon: DashboardIcon },
   { href: "/videos", key: "videos", icon: VideosIcon },
-  { href: "/users", key: "users", icon: UsersIcon },
+  { href: "/users", key: "users", icon: UsersIcon, adminOnly: true },
   { href: "/settings", key: "settings", icon: SettingsIcon },
-];
+] as const;
 
 export default function DashboardLayout({
   children,
@@ -51,7 +51,7 @@ export default function DashboardLayout({
           </div>
 
           <nav className="flex-1 px-3 space-y-0.5">
-            {NAV_ITEMS.map((item) => {
+            {NAV_ITEMS.filter((item) => !("adminOnly" in item && item.adminOnly) || user?.role === "admin").map((item) => {
               const isActive = pathname.startsWith(item.href);
               return (
                 <Link
