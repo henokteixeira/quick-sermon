@@ -86,5 +86,49 @@
       "users": "Usuários",
       "settings": "Configurações"
     }
+  },
+  "videos": {
+    "title": "Vídeos",
+    "newVideo": "Novo Vídeo",
+    "submit": {
+      "title": "Submeter Vídeo",
+      "subtitle": "Cole a URL de uma live do YouTube para iniciar o processamento",
+      "urlLabel": "URL do YouTube",
+      "urlPlaceholder": "https://youtube.com/watch?v=...",
+      "submit": "Processar",
+      "submitting": "Validando...",
+      "invalidUrl": "URL inválida. Cole um link do YouTube."
+    },
+    "errors": {
+      "CONFLICT": "Este vídeo já foi submetido.",
+      "VALIDATION_ERROR": "URL inválida ou vídeo inacessível.",
+      "INTERNAL_ERROR": "Erro interno do servidor. Tente novamente.",
+      "unknown": "Ocorreu um erro inesperado. Tente novamente."
+    },
+    "list": {
+      "thumbnail": "Thumb",
+      "videoTitle": "Título",
+      "duration": "Duração",
+      "status": "Status",
+      "date": "Data",
+      "noVideos": "Nenhum vídeo submetido ainda.",
+      "previous": "Anterior",
+      "next": "Próximo"
+    },
+    "detail": {
+      "title": "Detalhes do Vídeo",
+      "sourceUrl": "URL Original",
+      "duration": "Duração",
+      "submittedAt": "Submetido em",
+      "status": "Status"
+    },
+    "status": {
+      "pending": "Aguardando",
+      "detecting": "Detectando",
+      "processing": "Processando",
+      "awaiting_review": "Revisão",
+      "published": "Publicado",
+      "error": "Erro"
+    }
   }
 }

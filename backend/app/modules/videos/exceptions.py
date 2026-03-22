@@ -11,6 +11,11 @@ class DuplicateVideoException(ConflictException):
         super().__init__(f"Video with URL '{url}' has already been submitted")
 
 
-class InvalidTimestampsException(ValidationException):
-    def __init__(self, message: str = "Invalid timestamps"):
+class InvalidYouTubeUrlException(ValidationException):
+    def __init__(self):
+        super().__init__("URL invalida. Cole um link do YouTube.")
+
+
+class VideoInaccessibleException(ValidationException):
+    def __init__(self, message: str = "Video inacessivel. Verifique se o link esta correto."):
         super().__init__(message)
