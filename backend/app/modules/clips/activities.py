@@ -57,6 +57,7 @@ class DownloadInput:
     start_time: int
     end_time: int
     quality: str
+    format_id: str | None = None
 
 
 @dataclass
@@ -111,13 +112,12 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
     margin_end = input.end_time + DOWNLOAD_MARGIN_SECONDS
 
     section = f"*{_format_time(margin_start)}-{_format_time(margin_end)}"
-    format_str = _build_format_string(input.quality)
+    format_str = input.format_id or _build_format_string(input.quality)
 
     cmd = [
         "yt-dlp",
         "--downloader", "ffmpeg",
         "--download-sections", section,
-        "--force-keyframes-at-cuts",
         "-f", format_str,
         "--merge-output-format", "mp4",
         "-o", str(raw_path),
@@ -125,6 +125,10 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
         "--newline",
         input.source_url,
     ]
+
+    if not input.format_id:
+        cmd.insert(1, "node")
+        cmd.insert(1, "--js-runtimes")
 
     logger.info("starting_download", cmd=" ".join(cmd))
     _report_progress(input.clip_id, "downloading", 0.0, None)
@@ -208,18 +212,21 @@ def trim_video(input: TrimInput) -> TrimResult:
 
     trim_start = input.target_start - input.actual_start
     trim_end = input.target_end - input.actual_start
+    duration = trim_end - trim_start
 
     if trim_start < 0:
         trim_start = 0
+        duration = trim_end
 
     cmd = [
         "ffmpeg",
         "-y",
-        "-i", input.raw_file_path,
         "-ss", str(trim_start),
-        "-to", str(trim_end),
+        "-i", input.raw_file_path,
+        "-t", str(duration),
         "-c", "copy",
         "-movflags", "+faststart",
+        "-avoid_negative_ts", "make_zero",
         str(final_path),
     ]
 

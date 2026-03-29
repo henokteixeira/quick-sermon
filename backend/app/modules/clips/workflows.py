@@ -46,6 +46,7 @@ class DownloadAndTrimWorkflow:
         start_time = params["start_time"]
         end_time = params["end_time"]
         quality = params["quality"]
+        format_id = params.get("format_id")
 
         # --- Download ---
         await self._update_status(clip_id, status=ClipStatus.DOWNLOADING)
@@ -60,9 +61,10 @@ class DownloadAndTrimWorkflow:
                     start_time=start_time,
                     end_time=end_time,
                     quality=quality,
+                    format_id=format_id,
                 ),
                 start_to_close_timeout=timedelta(hours=2),
-                heartbeat_timeout=timedelta(minutes=2),
+                heartbeat_timeout=timedelta(minutes=5),
                 retry_policy=RetryPolicy(
                     initial_interval=timedelta(seconds=10),
                     backoff_coefficient=2.0,

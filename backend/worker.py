@@ -14,6 +14,12 @@ from app.modules.clips.activities import (
     trim_video,
     update_clip_status_activity,
 )
+from app.modules.youtube.workflows import UploadToYouTubeWorkflow
+from app.modules.youtube.activities import (
+    increment_quota,
+    update_upload_status,
+    upload_to_youtube,
+)
 
 logger = structlog.get_logger()
 
@@ -33,8 +39,15 @@ async def main() -> None:
         namespace=settings.TEMPORAL_NAMESPACE,
     )
 
-    workflows = [DownloadAndTrimWorkflow]
-    activities = [download_video_segment, trim_video, update_clip_status_activity]
+    workflows = [DownloadAndTrimWorkflow, UploadToYouTubeWorkflow]
+    activities = [
+        download_video_segment,
+        trim_video,
+        update_clip_status_activity,
+        upload_to_youtube,
+        update_upload_status,
+        increment_quota,
+    ]
 
     worker = Worker(
         client,

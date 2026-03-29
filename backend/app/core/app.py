@@ -41,11 +41,13 @@ def create_app() -> FastAPI:
     from app.modules.health.routes import router as health_router
     from app.modules.users.routes import router as users_router
     from app.modules.videos.routes import router as videos_router
+    from app.modules.youtube.routes import router as youtube_router
 
     app.include_router(health_router)
     app.include_router(auth_router)
     app.include_router(users_router)
     app.include_router(videos_router)
     app.include_router(clips_router)
+    app.include_router(youtube_router)
 
     return app

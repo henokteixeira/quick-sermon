@@ -52,6 +52,7 @@ class CreateClipService:
                 "start_time": data.start_time,
                 "end_time": data.end_time,
                 "quality": data.quality,
+                "format_id": data.format_id,
             },
             id=f"clip-{clip.id}",
             task_queue=settings.TEMPORAL_TASK_QUEUE,

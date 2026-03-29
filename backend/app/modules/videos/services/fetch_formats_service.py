@@ -37,6 +37,7 @@ class FetchFormatsService:
         try:
             process = await asyncio.create_subprocess_exec(
                 "yt-dlp",
+                "--js-runtimes", "node",
                 "--dump-json",
                 "--no-download",
                 "--no-playlist",
@@ -66,31 +67,46 @@ class FetchFormatsService:
         video_duration = data.get("duration", 0)
         duration_for_estimate = clip_duration or video_duration
 
-        by_height: dict[int, float] = defaultdict(float)
+        by_height: dict[int, dict] = {}
+
+        best_audio_id: str | None = None
+        best_audio_tbr: float = 0
 
         for fmt in raw_formats:
-            height = fmt.get("height")
-            if not height or height < 360:
-                continue
+            format_id = fmt.get("format_id", "")
             vcodec = fmt.get("vcodec", "none")
-            if vcodec == "none":
+            acodec = fmt.get("acodec", "none")
+            height = fmt.get("height")
+            tbr = fmt.get("tbr") or 0
+
+            if vcodec == "none" and acodec != "none" and tbr > best_audio_tbr:
+                best_audio_id = format_id
+                best_audio_tbr = tbr
+
+            if not height or height < 360 or vcodec == "none":
                 continue
 
-            tbr = fmt.get("tbr") or 0
-            if tbr > by_height[height]:
-                by_height[height] = tbr
+            if height not in by_height or tbr > by_height[height]["tbr"]:
+                by_height[height] = {"format_id": format_id, "tbr": tbr}
 
         result = []
         for height in sorted(by_height.keys(), reverse=True):
-            tbr = by_height[height]
+            info = by_height[height]
+            tbr = info["tbr"]
             estimated_mb = (tbr * duration_for_estimate / 8 / 1024) if tbr else 0
             label = f"{height}p"
             if height >= 2160:
                 label = f"{height}p (4K)"
+
+            format_spec = info["format_id"]
+            if best_audio_id:
+                format_spec = f"{info['format_id']}+{best_audio_id}"
+
             result.append({
                 "resolution": label,
                 "height": height,
                 "estimated_size_mb": round(estimated_mb, 1),
+                "format_id": format_spec,
             })
 
         return result

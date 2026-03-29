@@ -130,6 +130,8 @@
       "uploadDate": "Publicado em",
       "submittedAt": "Submetido em",
       "status": "Status",
+      "tabDetails": "Detalhes",
+      "tabClips": "Clipes",
       "editTitle": "Editar título",
       "delete": "Excluir",
       "deleteTitle": "Excluir vídeo",
@@ -184,6 +186,7 @@
       "selectRange": "Selecione o trecho da pregação no player acima"
     },
     "list": {
+      "clipCount": "{count, plural, one {# clip} other {# clips}} criado(s)",
       "empty": "Nenhum clip criado para este vídeo.",
       "createFirst": "Criar primeiro clip",
       "startEnd": "Trecho",
@@ -220,6 +223,46 @@
     "deleteDescription": "Tem certeza que deseja excluir este clip?",
     "cancel": "Cancelar",
     "confirmDelete": "Excluir",
-    "deleting": "Excluindo..."
+    "deleting": "Excluindo...",
+    "upload": "Enviar ao YouTube",
+    "retryUpload": "Reenviar ao YouTube",
+    "editOnYouTube": "Editar no YouTube",
+    "uploading": "Enviando...",
+    "uploadErrors": {
+      "NOT_FOUND": "Nenhum canal do YouTube conectado. Peça a um administrador para conectar em Configurações.",
+      "VALIDATION_ERROR": "Não foi possível enviar o clip. Verifique se ele está pronto para upload.",
+      "FORBIDDEN": "Você não tem permissão para enviar ao YouTube.",
+      "YOUTUBE_AUTH_FAILED": "Falha na autenticação com o YouTube. Reconecte o canal em Configurações.",
+      "unknown": "Erro ao enviar para o YouTube. Tente novamente."
+    }
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Gerencie as integrações e preferências do sistema",
+    "integrations": "Integrações",
+    "integrationsDescription": "Conecte serviços externos para automatizar o fluxo de trabalho.",
+    "adminOnly": "Apenas administradores podem gerenciar integrações.",
+    "youtube": {
+      "connected": "YouTube conectado",
+      "connectedSince": "Conectado em {date}",
+      "connectedSuccess": "Canal do YouTube conectado com sucesso!",
+      "notConnected": "YouTube não conectado",
+      "notConnectedDescription": "Conecte o canal do YouTube da igreja para enviar clips automaticamente.",
+      "connect": "Conectar",
+      "connecting": "Conectando...",
+      "disconnect": "Desconectar",
+      "disconnectTitle": "Desconectar YouTube",
+      "disconnectDescription": "Tem certeza que deseja desconectar o canal do YouTube? Os uploads futuros serão desabilitados até uma nova conexão.",
+      "cancel": "Cancelar",
+      "confirmDisconnect": "Desconectar",
+      "disconnecting": "Desconectando...",
+      "quota": {
+        "title": "Quota diária",
+        "description": "Limite de uploads por dia (YouTube Data API v3).",
+        "used": "{used} / {limit} unidades usadas",
+        "warning": "Atenção: quota acima de 80%. Considere adiar uploads não urgentes.",
+        "blocked": "Quota excedida. Novos uploads bloqueados até amanhã."
+      }
+    }
   }
 }

@@ -9,6 +9,7 @@ from app.core.models import Base
 import app.modules.users.models  # noqa: F401
 import app.modules.videos.models  # noqa: F401
 import app.modules.clips.models  # noqa: F401
+import app.modules.youtube.models  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:
