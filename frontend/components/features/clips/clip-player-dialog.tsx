@@ -6,6 +6,7 @@ import { getClipStreamUrl } from "@/lib/api/clips";
 import { formatTime, formatFileSizeFromBytes } from "@/lib/formatters";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -15,21 +16,25 @@ interface ClipPlayerDialogProps {
   clip: Clip | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  youtubeVideoId?: string | null;
 }
 
 export function ClipPlayerDialog({
   clip,
   open,
   onOpenChange,
+  youtubeVideoId,
 }: ClipPlayerDialogProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [streamUrl, setStreamUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const useYouTubeEmbed = !!youtubeVideoId;
+
   useEffect(() => {
     let cancelled = false;
 
-    if (open && clip) {
+    if (open && clip && !useYouTubeEmbed) {
       setLoading(true);
       setStreamUrl(null);
       getClipStreamUrl(clip.id)
@@ -46,7 +51,7 @@ export function ClipPlayerDialog({
         .finally(() => {
           if (!cancelled) setLoading(false);
         });
-    } else {
+    } else if (!useYouTubeEmbed) {
       videoRef.current?.pause();
       setStreamUrl(null);
     }
@@ -54,15 +59,30 @@ export function ClipPlayerDialog({
     return () => {
       cancelled = true;
     };
-  }, [open, clip]);
+  }, [open, clip, useYouTubeEmbed]);
 
   if (!clip) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden gap-0">
-        <div className="bg-black rounded-t-lg">
-          {loading || !streamUrl ? (
+      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden gap-0 [&>button:last-child]:hidden">
+        <div className="bg-black rounded-t-lg relative">
+          {!useYouTubeEmbed && (
+            <DialogClose className="absolute right-2 top-2 z-10 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 transition-colors">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </DialogClose>
+          )}
+          {useYouTubeEmbed ? (
+            <iframe
+              className="w-full aspect-video"
+              src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`}
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+            />
+          ) : loading || !streamUrl ? (
             <div className="w-full aspect-video flex items-center justify-center">
               <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
             </div>
