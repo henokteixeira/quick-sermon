@@ -19,4 +19,5 @@ class UpdateProfileService:
             user.name = data.name
         if data.password is not None:
             user.password_hash = hash_password(data.password)
+        await self.user_repo.update(user)
         return UserResponse.model_validate(user)

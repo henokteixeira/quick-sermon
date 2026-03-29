@@ -1,5 +1,6 @@
 import asyncio
 import signal
+from concurrent.futures import ThreadPoolExecutor
 
 import structlog
 from temporalio.client import Client
@@ -7,6 +8,12 @@ from temporalio.worker import Worker
 
 from app.core.config import settings
 from app.core.logging import setup_logging
+from app.modules.clips.workflows import DownloadAndTrimWorkflow
+from app.modules.clips.activities import (
+    download_video_segment,
+    trim_video,
+    update_clip_status_activity,
+)
 
 logger = structlog.get_logger()
 
@@ -26,20 +33,15 @@ async def main() -> None:
         namespace=settings.TEMPORAL_NAMESPACE,
     )
 
-    # Import workflows and activities here as they are implemented
-    workflows: list = []
-    activities: list = []
-
-    if not workflows and not activities:
-        logger.warning("no_workflows_or_activities", msg="No workflows or activities registered. Worker idle.")
-        await shutdown_event.wait()
-        return
+    workflows = [DownloadAndTrimWorkflow]
+    activities = [download_video_segment, trim_video, update_clip_status_activity]
 
     worker = Worker(
         client,
         task_queue=settings.TEMPORAL_TASK_QUEUE,
         workflows=workflows,
         activities=activities,
+        activity_executor=ThreadPoolExecutor(max_workers=4),
     )
 
     logger.info(

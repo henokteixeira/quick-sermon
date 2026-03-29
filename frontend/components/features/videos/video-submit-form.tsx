@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createVideo } from "@/lib/api/videos";
+import { getApiErrorCode } from "@/lib/api/client";
 import {
   Dialog,
   DialogContent,
@@ -55,9 +56,7 @@ export function VideoSubmitDialog({
     }
   }
 
-  const errorCode =
-    (mutation.error as { response?: { data?: { error?: { code?: string } } } })
-      ?.response?.data?.error?.code || "";
+  const errorCode = mutation.error ? getApiErrorCode(mutation.error) : "";
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

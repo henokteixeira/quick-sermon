@@ -5,7 +5,7 @@ interface RetryableRequest extends AxiosRequestConfig {
 }
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -60,3 +60,11 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
+
+/** Extract error code from an Axios error response */
+export function getApiErrorCode(error: unknown): string {
+  return (
+    (error as { response?: { data?: { error?: { code?: string } } } })
+      ?.response?.data?.error?.code || "unknown"
+  );
+}

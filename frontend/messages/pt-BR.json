@@ -146,5 +146,80 @@
       "published": "Publicado",
       "error": "Erro"
     }
+  },
+  "clips": {
+    "title": "Clips",
+    "createClip": "Criar Clip",
+    "create": {
+      "title": "Criar Clip",
+      "startTime": "Início",
+      "endTime": "Fim",
+      "startPlaceholder": "0:00:00",
+      "endPlaceholder": "1:30:00",
+      "quality": "Qualidade",
+      "qualityPlaceholder": "Selecionar qualidade",
+      "loadingFormats": "Carregando formatos...",
+      "noFormats": "Nenhum formato disponível",
+      "estimatedSize": "Tamanho estimado",
+      "sizeWarning": "Atenção: o arquivo pode ultrapassar 2 GB. O download pode ser mais lento.",
+      "submit": "Criar clip",
+      "submitting": "Criando...",
+      "invalidTime": "Formato inválido. Use H:MM:SS"
+    },
+    "editor": {
+      "title": "Editor de Clip",
+      "back": "Voltar",
+      "timeline": "Timeline",
+      "markStart": "Marcar Início",
+      "markEnd": "Marcar Fim",
+      "sermonDuration": "Duração da pregação",
+      "quality": "Qualidade",
+      "loadingFormats": "Carregando formatos...",
+      "noFormats": "Nenhum formato disponível",
+      "estimatedSize": "~{size}",
+      "sizeWarning": "Atenção: o arquivo pode ultrapassar 2 GB. O download pode ser mais lento.",
+      "submit": "Criar clip",
+      "submitting": "Criando clip...",
+      "loading": "Carregando player...",
+      "selectRange": "Selecione o trecho da pregação no player acima"
+    },
+    "list": {
+      "empty": "Nenhum clip criado para este vídeo.",
+      "createFirst": "Criar primeiro clip",
+      "startEnd": "Trecho",
+      "quality": "Qualidade",
+      "status": "Status",
+      "size": "Tamanho",
+      "actions": "Ações"
+    },
+    "status": {
+      "pending": "Aguardando",
+      "downloading": "Baixando",
+      "trimming": "Cortando",
+      "ready": "Pronto",
+      "uploading": "Enviando",
+      "published": "Publicado",
+      "error": "Erro"
+    },
+    "progress": {
+      "downloading": "Baixando",
+      "trimming": "Cortando",
+      "speed": "Velocidade"
+    },
+    "errors": {
+      "download_failed": "Falha no download. Tente novamente.",
+      "download_timeout": "Download expirou. Tente novamente.",
+      "trim_failed": "Falha no corte do vídeo.",
+      "trim_corrupted": "Arquivo corrompido. Tente novamente.",
+      "invalid_timestamps": "Timestamps inválidos. Edite e tente novamente.",
+      "video_unavailable": "Vídeo indisponível no YouTube."
+    },
+    "retry": "Tentar novamente",
+    "delete": "Excluir",
+    "deleteTitle": "Excluir clip",
+    "deleteDescription": "Tem certeza que deseja excluir este clip?",
+    "cancel": "Cancelar",
+    "confirmDelete": "Excluir",
+    "deleting": "Excluindo..."
   }
 }

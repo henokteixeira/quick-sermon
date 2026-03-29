@@ -12,6 +12,7 @@ from app.modules.videos.enums import VideoStatus
 from app.modules.videos.repositories.video_repository import VideoRepository
 from app.modules.videos.schemas import VideoCreate, VideoResponse, VideoUpdate
 from app.modules.videos.services.delete_video_service import DeleteVideoService
+from app.modules.videos.services.fetch_formats_service import FetchFormatsService
 from app.modules.videos.services.get_video_service import GetVideoService
 from app.modules.videos.services.refresh_metadata_service import RefreshMetadataService
 from app.modules.videos.services.update_video_service import UpdateVideoService
@@ -94,3 +95,14 @@ async def delete_video(
     service = DeleteVideoService(video_repo)
     await service.execute(video_id)
     await db.commit()
+
+
+@router.get("/{video_id}/formats")
+async def get_video_formats(
+    video_id: uuid.UUID,
+    clip_duration: int | None = Query(default=None, ge=1),
+    user: User = Depends(get_current_user),
+    video_repo: VideoRepository = Depends(get_video_repository),
+) -> dict:
+    service = FetchFormatsService(video_repo)
+    return await service.execute(video_id, clip_duration)

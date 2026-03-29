@@ -27,6 +27,18 @@ def decode_token(token: str) -> dict:
     return jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
 
 
+def create_stream_token(clip_id: str, expires_minutes: int = 60) -> str:
+    return create_access_token(
+        {"sub": clip_id, "purpose": "stream"},
+        expires_delta=timedelta(minutes=expires_minutes),
+    )
+
+
+def decode_stream_token(token: str, clip_id: str) -> bool:
+    payload = decode_token(token)
+    return payload.get("purpose") == "stream" and payload.get("sub") == clip_id
+
+
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12)).decode()
 

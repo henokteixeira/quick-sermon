@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # Storage
+    CLIPS_BASE_DIR: str = "/data/clips"
+
     # Ollama
     OLLAMA_BASE_URL: str = "http://ollama:11434"
 

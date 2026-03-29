@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { PasswordInput } from "./password-input";
 import { login } from "@/lib/api/auth";
 import { useAuthStore } from "@/lib/stores/auth-store";
-import apiClient from "@/lib/api/client";
+import apiClient, { getApiErrorCode } from "@/lib/api/client";
 import { User } from "@/lib/types/auth";
 
 export function LoginForm() {
@@ -38,8 +38,7 @@ export function LoginForm() {
 
       router.push("/dashboard");
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { error?: { code?: string } } } };
-      const code = axiosErr.response?.data?.error?.code || "unknown";
+      const code = getApiErrorCode(err);
       setError(tErr.has(code) ? tErr(code) : tErr("unknown"));
     } finally {
       setLoading(false);

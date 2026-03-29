@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { PasswordInput } from "./password-input";
 import { register } from "@/lib/api/auth";
+import { getApiErrorCode } from "@/lib/api/client";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -32,8 +33,7 @@ export function RegisterForm() {
       await register({ email, password, name });
       router.push("/login?registered=true");
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { error?: { code?: string } } } };
-      const code = axiosErr.response?.data?.error?.code || "unknown";
+      const code = getApiErrorCode(err);
       setError(tErr.has(code) ? tErr(code) : tErr("unknown"));
     } finally {
       setLoading(false);

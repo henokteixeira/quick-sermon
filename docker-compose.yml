@@ -77,6 +77,8 @@ services:
       DEBUG: "true"
     ports:
       - "8000:8000"
+    volumes:
+      - clips_data:/data/clips
     depends_on:
       db:
         condition: service_healthy
@@ -94,6 +96,8 @@ services:
       TEMPORAL_TASK_QUEUE: video-processing
       OLLAMA_BASE_URL: http://ollama:11434
       SECRET_KEY: change-me-in-production
+    volumes:
+      - clips_data:/data/clips
     depends_on:
       db:
         condition: service_healthy
@@ -123,3 +127,4 @@ volumes:
   db_data:
   temporal_db_data:
   ollama_data:
+  clips_data:
