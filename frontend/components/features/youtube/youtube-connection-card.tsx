@@ -18,6 +18,7 @@ export function YouTubeConnectionCard() {
   const t = useTranslations("settings.youtube");
   const queryClient = useQueryClient();
   const [disconnectOpen, setDisconnectOpen] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   const { data: connection, isLoading } = useQuery({
     queryKey: ["youtube-connection"],
@@ -27,9 +28,12 @@ export function YouTubeConnectionCard() {
   const connectMutation = useMutation({
     mutationFn: getOAuthAuthorizeUrl,
     onSuccess: (url) => {
+      setRedirecting(true);
       window.location.href = url;
     },
   });
+
+  const isConnecting = connectMutation.isPending || redirecting;
 
   const disconnectMutation = useMutation({
     mutationFn: disconnectYouTube,
@@ -125,10 +129,10 @@ export function YouTubeConnectionCard() {
           </div>
           <button
             onClick={() => connectMutation.mutate()}
-            disabled={connectMutation.isPending}
+            disabled={isConnecting}
             className="h-8 px-3 rounded-lg bg-red-600 text-white text-xs font-medium hover:bg-red-700 transition-colors disabled:opacity-50 shrink-0"
           >
-            {connectMutation.isPending ? t("connecting") : t("connect")}
+            {isConnecting ? t("connecting") : t("connect")}
           </button>
         </div>
       </CardContent>

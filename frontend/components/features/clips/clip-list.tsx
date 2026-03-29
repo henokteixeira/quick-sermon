@@ -269,6 +269,7 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
         </div>
 
         {/* Delete confirmation */}
+        <div onClick={(e) => e.stopPropagation()}>
         <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
           <DialogContent className="sm:max-w-sm">
             <DialogHeader>
@@ -292,6 +293,7 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
     </div>
   );
