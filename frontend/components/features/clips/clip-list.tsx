@@ -9,7 +9,7 @@ import { getApiErrorCode } from "@/lib/api/client";
 import { Clip, ClipProgress } from "@/lib/types/clip";
 import { ClipStatusBadge } from "./clip-status-badge";
 import { ClipPlayerDialog } from "./clip-player-dialog";
-import { formatTime, formatFileSizeFromBytes } from "@/lib/formatters";
+import { formatTime, formatFileSizeFromBytes, formatDuration } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -29,6 +29,15 @@ const STATUS_ACCENT: Record<string, string> = {
   error: "border-l-red-400",
 };
 
+function useEta(percent: number, startedAt: number | null) {
+  const now = Date.now() / 1000;
+  if (!startedAt || percent <= 0) return { elapsed: 0, eta: null };
+  const elapsed = Math.max(0, now - startedAt);
+  const rate = percent / elapsed;
+  const remaining = rate > 0 ? (100 - percent) / rate : null;
+  return { elapsed: Math.round(elapsed), eta: remaining ? Math.round(remaining) : null };
+}
+
 function ClipProgressBar({ clipId }: { clipId: string }) {
   const t = useTranslations("clips.progress");
 
@@ -37,6 +46,11 @@ function ClipProgressBar({ clipId }: { clipId: string }) {
     queryFn: () => getClipProgress(clipId),
     refetchInterval: 3000,
   });
+
+  const { elapsed, eta } = useEta(
+    progress?.percent ?? 0,
+    progress?.started_at ?? null
+  );
 
   if (!progress || progress.percent === 0) {
     return (
@@ -49,23 +63,28 @@ function ClipProgressBar({ clipId }: { clipId: string }) {
   }
 
   return (
-    <div className="mt-2.5 space-y-1">
-      <div className="flex items-center gap-2">
-        <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-500"
-            style={{ width: `${Math.min(progress.percent, 100)}%` }}
-          />
-        </div>
-        <span className="text-[10px] text-muted-foreground tabular-nums w-10 text-right font-medium">
+    <div className="mt-2.5 space-y-1.5">
+      <div className="flex items-center justify-between text-[10px] tabular-nums">
+        <span className="text-muted-foreground font-medium">
           {progress.percent.toFixed(0)}%
+          {elapsed > 0 && (
+            <span className="text-muted-foreground/60 ml-1">
+              · {formatDuration(elapsed)}
+            </span>
+          )}
         </span>
+        {eta !== null && eta > 0 && (
+          <span className="text-blue-600 dark:text-blue-400 font-medium">
+            ~{formatDuration(eta)} {t("remaining")}
+          </span>
+        )}
       </div>
-      {progress.speed && (
-        <p className="text-[10px] text-muted-foreground">
-          {t("speed")}: {progress.speed}
-        </p>
-      )}
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-500"
+          style={{ width: `${Math.min(progress.percent, 100)}%` }}
+        />
+      </div>
     </div>
   );
 }
@@ -97,13 +116,17 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
   const isReady = clip.status === "ready";
   const isPublished = clip.status === "published";
 
+  const isUploading = clip.status === "uploading";
+
   const { data: lastUpload } = useQuery({
     queryKey: ["youtube-upload", clip.id],
     queryFn: () => getUploadByClip(clip.id),
-    enabled: isReady || isPublished,
+    enabled: isReady || isPublished || isUploading,
     refetchInterval: (query) => {
-      if (!isPublished) return false;
-      return !query.state.data?.youtube_video_id ? 3_000 : false;
+      const hasVideoId = !!query.state.data?.youtube_video_id;
+      if (hasVideoId) return false;
+      if (isUploading || isPublished) return 2_000;
+      return false;
     },
   });
 

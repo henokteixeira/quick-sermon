@@ -49,6 +49,7 @@ export interface ClipProgress {
   percent: number;
   speed: string | null;
   stage: string;
+  started_at: number | null;
 }
 
 export interface VideoFormat {

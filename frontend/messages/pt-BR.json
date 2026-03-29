@@ -207,7 +207,8 @@
     "progress": {
       "downloading": "Baixando",
       "trimming": "Cortando",
-      "speed": "Velocidade"
+      "speed": "Velocidade",
+      "remaining": "restante"
     },
     "errors": {
       "download_failed": "Falha no download. Tente novamente.",
