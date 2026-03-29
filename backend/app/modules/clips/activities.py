@@ -57,6 +57,7 @@ class DownloadInput:
     start_time: int
     end_time: int
     quality: str
+    format_id: str | None = None
 
 
 @dataclass
@@ -111,11 +112,10 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
     margin_end = input.end_time + DOWNLOAD_MARGIN_SECONDS
 
     section = f"*{_format_time(margin_start)}-{_format_time(margin_end)}"
-    format_str = _build_format_string(input.quality)
+    format_str = input.format_id or _build_format_string(input.quality)
 
     cmd = [
         "yt-dlp",
-        "--js-runtimes", "node",
         "--downloader", "ffmpeg",
         "--download-sections", section,
         "-f", format_str,
@@ -125,6 +125,10 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
         "--newline",
         input.source_url,
     ]
+
+    if not input.format_id:
+        cmd.insert(1, "node")
+        cmd.insert(1, "--js-runtimes")
 
     logger.info("starting_download", cmd=" ".join(cmd))
     _report_progress(input.clip_id, "downloading", 0.0, None)

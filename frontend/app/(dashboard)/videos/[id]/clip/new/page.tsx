@@ -155,6 +155,7 @@ export default function ClipEditorPage({
         start_time: startTime,
         end_time: endTime,
         quality: `${selectedFormat.height}p`,
+        format_id: selectedFormat.format_id,
       });
     },
     onSuccess: () => {

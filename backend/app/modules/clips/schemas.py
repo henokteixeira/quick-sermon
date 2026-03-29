@@ -12,6 +12,7 @@ class ClipCreate(BaseModel):
     end_time: int
     quality: str
     clip_type: ClipType = ClipType.SERMON
+    format_id: str | None = None
 
     @field_validator("end_time")
     @classmethod
@@ -52,6 +53,7 @@ class VideoFormat(BaseModel):
     resolution: str
     height: int
     estimated_size_mb: float
+    format_id: str | None = None
 
 
 class VideoFormatsResponse(BaseModel):

@@ -12,6 +12,7 @@ export async function createClip(data: {
   end_time: number;
   quality: string;
   clip_type?: string;
+  format_id?: string;
 }): Promise<Clip> {
   const response = await apiClient.post<Clip>("/clips", data);
   return response.data;

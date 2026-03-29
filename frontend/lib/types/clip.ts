@@ -55,6 +55,7 @@ export interface VideoFormat {
   resolution: string;
   height: number;
   estimated_size_mb: number;
+  format_id?: string;
 }
 
 export interface VideoFormatsResponse {
