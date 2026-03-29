@@ -1,4 +1,5 @@
 import json
+import time
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -30,8 +31,11 @@ _sync_db_url = settings.DATABASE_URL.replace("+asyncpg", "+psycopg2")
 _sync_engine = create_engine(_sync_db_url, pool_size=5, max_overflow=2)
 
 
-def _report_progress(clip_id: str, stage: str, percent: float, speed: str | None) -> None:
-    data = {"stage": stage, "percent": percent, "speed": speed}
+def _report_progress(
+    clip_id: str, stage: str, percent: float, speed: str | None,
+    started_at: float | None = None,
+) -> None:
+    data = {"stage": stage, "percent": percent, "speed": speed, "started_at": started_at}
     activity.heartbeat(data)
     progress_file = Path(settings.CLIPS_BASE_DIR) / clip_id / "progress.json"
     progress_file.parent.mkdir(parents=True, exist_ok=True)
@@ -101,7 +105,7 @@ def upload_to_youtube(input: UploadInput) -> UploadResult:
             "categoryId": "22",  # People & Blogs
         },
         "status": {
-            "privacyStatus": "private",
+            "privacyStatus": "unlisted",
         },
     }
 
@@ -118,19 +122,20 @@ def upload_to_youtube(input: UploadInput) -> UploadResult:
         media_body=media,
     )
 
-    _report_progress(input.clip_id, "uploading", 0.0, None)
+    upload_started_at = time.time()
+    _report_progress(input.clip_id, "uploading", 0.0, None, upload_started_at)
 
     response = None
     while response is None:
         status, response = request.next_chunk()
         if status:
             percent = round(status.progress() * 100, 1)
-            _report_progress(input.clip_id, "uploading", percent, None)
+            _report_progress(input.clip_id, "uploading", percent, None, upload_started_at)
 
     video_id = response["id"]
     youtube_url = f"https://www.youtube.com/watch?v={video_id}"
 
-    _report_progress(input.clip_id, "uploading", 100.0, None)
+    _report_progress(input.clip_id, "uploading", 100.0, None, upload_started_at)
 
     logger.info(
         "youtube_upload_complete",
