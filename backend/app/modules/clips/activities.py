@@ -115,6 +115,7 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
 
     cmd = [
         "yt-dlp",
+        "--js-runtimes", "nodejs",
         "--downloader", "ffmpeg",
         "--download-sections", section,
         "--force-keyframes-at-cuts",

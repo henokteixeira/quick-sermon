@@ -37,6 +37,7 @@ class FetchFormatsService:
         try:
             process = await asyncio.create_subprocess_exec(
                 "yt-dlp",
+                "--js-runtimes", "nodejs",
                 "--dump-json",
                 "--no-download",
                 "--no-playlist",
