@@ -115,10 +115,9 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
 
     cmd = [
         "yt-dlp",
-        "--js-runtimes", "nodejs",
+        "--js-runtimes", "node",
         "--downloader", "ffmpeg",
         "--download-sections", section,
-        "--force-keyframes-at-cuts",
         "-f", format_str,
         "--merge-output-format", "mp4",
         "-o", str(raw_path),
@@ -209,18 +208,21 @@ def trim_video(input: TrimInput) -> TrimResult:
 
     trim_start = input.target_start - input.actual_start
     trim_end = input.target_end - input.actual_start
+    duration = trim_end - trim_start
 
     if trim_start < 0:
         trim_start = 0
+        duration = trim_end
 
     cmd = [
         "ffmpeg",
         "-y",
-        "-i", input.raw_file_path,
         "-ss", str(trim_start),
-        "-to", str(trim_end),
+        "-i", input.raw_file_path,
+        "-t", str(duration),
         "-c", "copy",
         "-movflags", "+faststart",
+        "-avoid_negative_ts", "make_zero",
         str(final_path),
     ]
 
