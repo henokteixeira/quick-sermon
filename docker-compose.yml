@@ -75,6 +75,10 @@ services:
       OLLAMA_BASE_URL: http://ollama:11434
       SECRET_KEY: change-me-in-production
       DEBUG: "true"
+      YOUTUBE_CLIENT_ID: ${YOUTUBE_CLIENT_ID:-}
+      YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET:-}
+      YOUTUBE_OAUTH_ENCRYPTION_KEY: ${YOUTUBE_OAUTH_ENCRYPTION_KEY:-}
+      FRONTEND_URL: http://localhost:3000
     ports:
       - "8000:8000"
     volumes:
@@ -96,6 +100,9 @@ services:
       TEMPORAL_TASK_QUEUE: video-processing
       OLLAMA_BASE_URL: http://ollama:11434
       SECRET_KEY: change-me-in-production
+      YOUTUBE_CLIENT_ID: ${YOUTUBE_CLIENT_ID:-}
+      YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET:-}
+      YOUTUBE_OAUTH_ENCRYPTION_KEY: ${YOUTUBE_OAUTH_ENCRYPTION_KEY:-}
     volumes:
       - clips_data:/data/clips
     depends_on:
