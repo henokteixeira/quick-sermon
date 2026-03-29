@@ -38,7 +38,7 @@ export default function DashboardLayout({
     <AuthGuard>
       <div className="min-h-screen flex flex-col md:flex-row">
         {/* Desktop sidebar */}
-        <aside className="hidden md:flex w-64 bg-sidebar text-sidebar-foreground flex-col shrink-0">
+        <aside className="hidden md:flex w-64 bg-sidebar text-sidebar-foreground flex-col shrink-0 fixed inset-y-0 left-0 z-40">
           <div className="p-5 pb-8">
             <Link href="/dashboard" className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center">
@@ -115,7 +115,7 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        <main className="flex-1 bg-background min-h-0">
+        <main className="flex-1 bg-background min-h-0 md:ml-64 overflow-y-auto">
           <div className="p-4 md:p-8 pb-20 md:pb-8">{children}</div>
         </main>
 

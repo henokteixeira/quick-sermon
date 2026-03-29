@@ -7,8 +7,15 @@ import { useTranslations } from "next-intl";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getVideo, deleteVideo, updateVideo, refreshVideo } from "@/lib/api/videos";
 import { VideoStatusBadge } from "@/components/features/videos/video-status-badge";
+import { ClipList } from "@/components/features/clips/clip-list";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  formatDuration,
+  formatDate,
+  formatViews,
+  formatUploadDate,
+} from "@/lib/formatters";
 import {
   Dialog,
   DialogContent,
@@ -16,43 +23,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-function formatDuration(seconds: number | null): string {
-  if (!seconds) return "--";
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  if (h > 0)
-    return `${h}h${String(m).padStart(2, "0")}m${String(s).padStart(2, "0")}s`;
-  return `${m}m${String(s).padStart(2, "0")}s`;
-}
-
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function formatViews(count: number | null): string {
-  if (!count) return "--";
-  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
-  if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K`;
-  return count.toLocaleString("pt-BR");
-}
-
-function formatUploadDate(dateStr: string | null): string {
-  if (!dateStr || dateStr.length !== 8) return "--";
-  const y = dateStr.slice(0, 4);
-  const m = dateStr.slice(4, 6);
-  const d = dateStr.slice(6, 8);
-  return new Date(`${y}-${m}-${d}`).toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 export default function VideoDetailPage({
   params,
@@ -64,6 +34,7 @@ export default function VideoDetailPage({
   const queryClient = useQueryClient();
   const t = useTranslations("videos.detail");
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const tClips = useTranslations("clips");
 
   const { data: video, isLoading } = useQuery({
     queryKey: ["video", id],
@@ -289,6 +260,35 @@ export default function VideoDetailPage({
             </p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Clips section */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-serif text-foreground">
+            {tClips("title")}
+          </h2>
+          <Link
+            href={`/videos/${id}/clip/new`}
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-foreground text-background text-xs font-medium hover:bg-foreground/90 transition-colors"
+          >
+            <svg
+              className="w-3.5 h-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            {tClips("createClip")}
+          </Link>
+        </div>
+
+        <ClipList videoId={id} />
       </div>
 
       {/* Delete confirmation dialog */}
