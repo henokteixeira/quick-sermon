@@ -3,6 +3,7 @@ import queue
 import re
 import subprocess
 import threading
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -17,8 +18,16 @@ logger = structlog.get_logger()
 DOWNLOAD_MARGIN_SECONDS = 150
 
 
-def _report_progress(clip_id: str, stage: str, percent: float, speed: str | None) -> None:
-    data = {"stage": stage, "percent": percent, "speed": speed}
+def _report_progress(
+    clip_id: str, stage: str, percent: float, speed: str | None,
+    started_at: float | None = None,
+) -> None:
+    data = {
+        "stage": stage,
+        "percent": percent,
+        "speed": speed,
+        "started_at": started_at,
+    }
     activity.heartbeat(data)
     progress_file = Path(settings.CLIPS_BASE_DIR) / clip_id / "progress.json"
     progress_file.write_text(json.dumps(data))
@@ -116,7 +125,12 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
 
     cmd = [
         "yt-dlp",
-        "--downloader", "ffmpeg",
+        "--downloader", "native",
+        "-N", "4",
+        "--throttled-rate", "100K",
+        "--retries", "10",
+        "--fragment-retries", "10",
+        "-4",
         "--download-sections", section,
         "-f", format_str,
         "--merge-output-format", "mp4",
@@ -131,7 +145,8 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
         cmd.insert(1, "--js-runtimes")
 
     logger.info("starting_download", cmd=" ".join(cmd))
-    _report_progress(input.clip_id, "downloading", 0.0, None)
+    download_started_at = time.time()
+    _report_progress(input.clip_id, "downloading", 0.0, None, download_started_at)
 
     process = subprocess.Popen(
         cmd,
@@ -150,7 +165,6 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
     reader_thread = threading.Thread(target=reader, daemon=True)
     reader_thread.start()
 
-    expected_duration = (margin_end - margin_start) or 1
     last_percent = 0.0
     last_speed: str | None = None
 
@@ -158,7 +172,7 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
         try:
             line = line_queue.get(timeout=10)
         except queue.Empty:
-            _report_progress(input.clip_id, "downloading", last_percent, last_speed)
+            _report_progress(input.clip_id, "downloading", last_percent, last_speed, download_started_at)
             continue
 
         if line is None:
@@ -168,19 +182,34 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
         if not line:
             continue
 
-        time_match = re.search(r"time=(\d+):(\d+):(\d+\.\d+)", line)
-        speed_match = re.search(r"speed=\s*(\S+)x", line)
+        updated = False
 
-        if time_match:
-            h, m, s = time_match.groups()
-            elapsed = int(h) * 3600 + int(m) * 60 + float(s)
-            last_percent = min(99.0, round(elapsed / expected_duration * 100, 1))
+        # Native downloader: [download]  45.2% of ~500MiB at 12.5MiB/s
+        dl_match = re.search(r"\[download\]\s+([\d.]+)%", line)
+        dl_speed_match = re.search(r"at\s+([\d.]+\S+/s)", line)
+        if dl_match:
+            last_percent = min(99.0, float(dl_match.group(1)))
+            updated = True
+        if dl_speed_match:
+            last_speed = dl_speed_match.group(1)
+            updated = True
 
-        if speed_match:
-            last_speed = f"{speed_match.group(1)}x"
+        # ffmpeg output during merge/section-cut: time=00:12:34.56 speed=1.5x
+        if not updated:
+            expected_duration = (margin_end - margin_start) or 1
+            time_match = re.search(r"time=(\d+):(\d+):(\d+\.\d+)", line)
+            speed_match = re.search(r"speed=\s*(\S+)x", line)
+            if time_match:
+                h, m, s = time_match.groups()
+                elapsed = int(h) * 3600 + int(m) * 60 + float(s)
+                last_percent = min(99.0, round(elapsed / expected_duration * 100, 1))
+                updated = True
+            if speed_match:
+                last_speed = f"{speed_match.group(1)}x"
+                updated = True
 
-        if time_match or speed_match:
-            _report_progress(input.clip_id, "downloading", last_percent, last_speed)
+        if updated:
+            _report_progress(input.clip_id, "downloading", last_percent, last_speed, download_started_at)
 
     process.wait()
 
