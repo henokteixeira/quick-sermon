@@ -23,6 +23,10 @@ class UserRepository:
         await self.session.flush()
         return user
 
+    async def update(self, user: User) -> User:
+        await self.session.flush()
+        return user
+
     async def list_all(self, offset: int = 0, limit: int = 50) -> list[User]:
         result = await self.session.execute(
             select(User).offset(offset).limit(limit).order_by(User.created_at.desc())

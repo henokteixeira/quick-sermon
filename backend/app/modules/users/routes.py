@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.database import get_db
 from app.modules.auth.dependencies import get_current_user, require_role
 from app.modules.users.dependencies import get_user_repository
 from app.modules.users.enums import UserRole
@@ -24,9 +26,12 @@ async def update_me(
     data: UserUpdateSelf,
     user: User = Depends(get_current_user),
     user_repo: UserRepository = Depends(get_user_repository),
+    db: AsyncSession = Depends(get_db),
 ):
     service = UpdateProfileService(user_repo)
-    return await service.execute(user, UpdateProfileRequest(name=data.name, password=data.password))
+    result = await service.execute(user, UpdateProfileRequest(name=data.name, password=data.password))
+    await db.commit()
+    return result
 
 
 @router.get("/", response_model=list[UserResponse])
