@@ -101,7 +101,7 @@ def upload_to_youtube(input: UploadInput) -> UploadResult:
             "categoryId": "22",  # People & Blogs
         },
         "status": {
-            "privacyStatus": "unlisted",
+            "privacyStatus": "private",
         },
     }
 
