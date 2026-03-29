@@ -62,7 +62,7 @@ class DownloadAndTrimWorkflow:
                     quality=quality,
                 ),
                 start_to_close_timeout=timedelta(hours=2),
-                heartbeat_timeout=timedelta(minutes=2),
+                heartbeat_timeout=timedelta(minutes=5),
                 retry_policy=RetryPolicy(
                     initial_interval=timedelta(seconds=10),
                     backoff_coefficient=2.0,
