@@ -10,35 +10,35 @@ const STATUS_CONFIG: Record<
 > = {
   pending: {
     dot: "bg-amber-500",
-    bg: "bg-amber-500/8 border-amber-500/20",
-    text: "text-amber-700",
+    bg: "bg-amber-500/10 border-amber-500/20",
+    text: "text-amber-700 dark:text-amber-400",
   },
   detecting: {
     dot: "bg-blue-500",
-    bg: "bg-blue-500/8 border-blue-500/20",
-    text: "text-blue-700",
+    bg: "bg-blue-500/10 border-blue-500/20",
+    text: "text-blue-700 dark:text-blue-400",
     pulse: true,
   },
   processing: {
     dot: "bg-blue-500",
-    bg: "bg-blue-500/8 border-blue-500/20",
-    text: "text-blue-700",
+    bg: "bg-blue-500/10 border-blue-500/20",
+    text: "text-blue-700 dark:text-blue-400",
     pulse: true,
   },
   awaiting_review: {
     dot: "bg-violet-500",
-    bg: "bg-violet-500/8 border-violet-500/20",
-    text: "text-violet-700",
+    bg: "bg-violet-500/10 border-violet-500/20",
+    text: "text-violet-700 dark:text-violet-400",
   },
   published: {
     dot: "bg-emerald-500",
-    bg: "bg-emerald-500/8 border-emerald-500/20",
-    text: "text-emerald-700",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+    text: "text-emerald-700 dark:text-emerald-400",
   },
   error: {
     dot: "bg-red-500",
-    bg: "bg-red-500/8 border-red-500/20",
-    text: "text-red-700",
+    bg: "bg-red-500/10 border-red-500/20",
+    text: "text-red-700 dark:text-red-400",
   },
 };
 
@@ -49,7 +49,7 @@ export function VideoStatusBadge({ status }: { status: VideoStatus }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border",
+        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border",
         config.bg,
         config.text
       )}
