@@ -23,21 +23,28 @@ class GetClipProgressService:
             "stage": clip.status,
             "percent": 100.0 if clip.status == ClipStatus.READY else 0.0,
             "speed": None,
+            "started_at": None,
         }
 
-        if clip.status not in (ClipStatus.DOWNLOADING, ClipStatus.TRIMMING):
+        if clip.status not in (
+            ClipStatus.DOWNLOADING, ClipStatus.TRIMMING, ClipStatus.UPLOADING,
+        ):
             return base
 
         # Read progress from file written by the activity
         progress_file = Path(settings.CLIPS_BASE_DIR) / str(clip.id) / "progress.json"
         try:
             data = json.loads(progress_file.read_text())
+            # Ignore stale progress from a previous stage
+            if data.get("stage") != clip.status:
+                return base
             return {
                 "clip_id": str(clip_id),
                 "status": clip.status,
                 "stage": data.get("stage", clip.status),
                 "percent": data.get("percent", 0.0),
                 "speed": data.get("speed"),
+                "started_at": data.get("started_at"),
             }
         except (FileNotFoundError, json.JSONDecodeError):
             return base

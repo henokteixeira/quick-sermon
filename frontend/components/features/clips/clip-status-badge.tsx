@@ -10,41 +10,41 @@ const STATUS_CONFIG: Record<
 > = {
   pending: {
     dot: "bg-amber-500",
-    bg: "bg-amber-500/8 border-amber-500/20",
-    text: "text-amber-700",
+    bg: "bg-amber-500/10 border-amber-500/20",
+    text: "text-amber-700 dark:text-amber-400",
   },
   downloading: {
     dot: "bg-blue-500",
-    bg: "bg-blue-500/8 border-blue-500/20",
-    text: "text-blue-700",
+    bg: "bg-blue-500/10 border-blue-500/20",
+    text: "text-blue-700 dark:text-blue-400",
     pulse: true,
   },
   trimming: {
     dot: "bg-indigo-500",
-    bg: "bg-indigo-500/8 border-indigo-500/20",
-    text: "text-indigo-700",
+    bg: "bg-indigo-500/10 border-indigo-500/20",
+    text: "text-indigo-700 dark:text-indigo-400",
     pulse: true,
   },
   ready: {
     dot: "bg-emerald-500",
-    bg: "bg-emerald-500/8 border-emerald-500/20",
-    text: "text-emerald-700",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+    text: "text-emerald-700 dark:text-emerald-400",
   },
   uploading: {
     dot: "bg-cyan-500",
-    bg: "bg-cyan-500/8 border-cyan-500/20",
-    text: "text-cyan-700",
+    bg: "bg-cyan-500/10 border-cyan-500/20",
+    text: "text-cyan-700 dark:text-cyan-400",
     pulse: true,
   },
   published: {
     dot: "bg-emerald-500",
-    bg: "bg-emerald-500/8 border-emerald-500/20",
-    text: "text-emerald-700",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+    text: "text-emerald-700 dark:text-emerald-400",
   },
   error: {
     dot: "bg-red-500",
-    bg: "bg-red-500/8 border-red-500/20",
-    text: "text-red-700",
+    bg: "bg-red-500/10 border-red-500/20",
+    text: "text-red-700 dark:text-red-400",
   },
 };
 
@@ -55,7 +55,7 @@ export function ClipStatusBadge({ status }: { status: ClipStatus }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border",
+        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border",
         config.bg,
         config.text
       )}

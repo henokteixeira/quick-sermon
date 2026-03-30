@@ -126,7 +126,7 @@ export function VideoSubmitDialog({
           <button
             type="submit"
             disabled={!isValid || mutation.isPending}
-            className="w-full h-11 rounded-lg bg-accent text-accent-foreground font-medium text-sm tracking-wide hover:bg-amber-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-11 rounded-xl bg-amber-500 text-stone-950 font-semibold text-sm tracking-wide hover:bg-amber-400 transition-all shadow-sm shadow-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
           >
             {mutation.isPending ? (
               <span className="flex items-center justify-center gap-2">
