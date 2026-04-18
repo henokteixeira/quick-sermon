@@ -1,8 +1,12 @@
 import apiClient from "./client";
 import {
   Clip,
+  ClipDraftUpdate,
   ClipListResponse,
   ClipProgress,
+  ClipPublishResponse,
+  ClipReviewData,
+  RegenerateField,
   VideoFormatsResponse,
 } from "../types/clip";
 
@@ -65,4 +69,36 @@ export async function getVideoFormats(
     { params: clipDuration ? { clip_duration: clipDuration } : undefined }
   );
   return response.data;
+}
+
+export async function getClipReview(id: string): Promise<ClipReviewData> {
+  const response = await apiClient.get<ClipReviewData>(`/clips/${id}/review`);
+  return response.data;
+}
+
+export async function saveClipDraft(
+  id: string,
+  data: ClipDraftUpdate
+): Promise<Clip> {
+  const response = await apiClient.patch<Clip>(`/clips/${id}/draft`, data);
+  return response.data;
+}
+
+export async function publishClip(id: string): Promise<ClipPublishResponse> {
+  const response = await apiClient.post<ClipPublishResponse>(
+    `/clips/${id}/publish`
+  );
+  return response.data;
+}
+
+export async function discardClip(id: string): Promise<Clip> {
+  const response = await apiClient.post<Clip>(`/clips/${id}/discard`);
+  return response.data;
+}
+
+export async function regenerateField(
+  id: string,
+  field: RegenerateField
+): Promise<void> {
+  await apiClient.post(`/clips/${id}/regenerate/${field}`);
 }
