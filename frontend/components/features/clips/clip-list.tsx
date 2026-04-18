@@ -1,9 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { listClips, retryClip, deleteClip, getClipProgress } from "@/lib/api/clips";
+import {
+  listClips,
+  retryClip,
+  deleteClip,
+  getClipProgress,
+  getClipStreamUrl,
+} from "@/lib/api/clips";
 import { triggerUpload, getUploadByClip } from "@/lib/api/youtube";
 import { getApiErrorCode } from "@/lib/api/client";
 import { Clip, ClipProgress } from "@/lib/types/clip";
@@ -25,7 +32,9 @@ const STATUS_ACCENT: Record<string, string> = {
   trimming: "border-l-indigo-400",
   ready: "border-l-emerald-400",
   uploading: "border-l-cyan-400",
+  awaiting_review: "border-l-purple-400",
   published: "border-l-emerald-400",
+  discarded: "border-l-stone-400",
   error: "border-l-red-400",
 };
 
@@ -115,20 +124,32 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
   const isActive = clip.status === "downloading" || clip.status === "trimming" || clip.status === "uploading";
   const isReady = clip.status === "ready";
   const isPublished = clip.status === "published";
+  const isAwaitingReview = clip.status === "awaiting_review";
+  const isDiscarded = clip.status === "discarded";
 
   const isUploading = clip.status === "uploading";
+  const canDownloadFile = isReady || isAwaitingReview;
 
   const { data: lastUpload } = useQuery({
     queryKey: ["youtube-upload", clip.id],
     queryFn: () => getUploadByClip(clip.id),
-    enabled: isReady || isPublished || isUploading,
+    enabled: isReady || isPublished || isUploading || isAwaitingReview,
     refetchInterval: (query) => {
       const hasVideoId = !!query.state.data?.youtube_video_id;
       if (hasVideoId) return false;
-      if (isUploading || isPublished) return 2_000;
+      if (isUploading) return 2_000;
       return false;
     },
   });
+
+  async function handleDownload() {
+    try {
+      const url = await getClipStreamUrl(clip.id);
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch {
+      setUploadError(tUploadErrors("unknown"));
+    }
+  }
 
   const lastUploadFailed = lastUpload?.youtube_status === "failed";
 
@@ -145,7 +166,7 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
     },
   });
 
-  const isClickable = isReady || isPublished;
+  const isClickable = isReady || isPublished || isAwaitingReview;
   const accentClass = STATUS_ACCENT[clip.status] || "border-l-transparent";
 
   return (
@@ -172,7 +193,7 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
 
             {isActive && <ClipProgressBar clipId={clip.id} />}
 
-            {(isReady || isPublished) && (
+            {(isReady || isPublished || isAwaitingReview) && (
               <div className="flex items-center gap-3 mt-2.5 text-xs text-muted-foreground">
                 {clip.resolution && (
                   <span className="flex items-center gap-1">
@@ -223,6 +244,20 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
           </div>
 
           <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+            {canDownloadFile && (
+              <button
+                onClick={handleDownload}
+                title={t("download")}
+                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span className="hidden sm:inline">{t("download")}</span>
+              </button>
+            )}
             {isPublished && lastUpload?.youtube_video_id && (
               <a
                 href={`https://studio.youtube.com/video/${lastUpload.youtube_video_id}/edit`}
@@ -236,6 +271,18 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
                 <span className="hidden sm:inline">{t("editOnYouTube")}</span>
               </a>
             )}
+            {isAwaitingReview && (
+              <Link
+                href={`/videos/${videoId}/clip/${clip.id}/review`}
+                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 dark:text-purple-300 transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                </svg>
+                <span className="hidden sm:inline">{t("review")}</span>
+              </Link>
+            )}
             {isReady && (
               <button
                 onClick={() => uploadMutation.mutate()}
@@ -246,7 +293,7 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
                   <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                 </svg>
                 <span className="hidden sm:inline">
-                  {uploadMutation.isPending ? t("uploading") : lastUploadFailed ? t("retryUpload") : t("upload")}
+                  {uploadMutation.isPending ? t("uploading") : lastUploadFailed ? t("retryUpload") : t("sendForReview")}
                 </span>
               </button>
             )}
@@ -271,23 +318,25 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
                 {t("retry")}
               </button>
             )}
-            <button
-              onClick={() => setDeleteOpen(true)}
-              className="inline-flex items-center h-8 px-2 rounded-lg text-xs text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-            >
-              <svg
-                className="w-3.5 h-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            {!isDiscarded && !isAwaitingReview && !isPublished && (
+              <button
+                onClick={() => setDeleteOpen(true)}
+                className="inline-flex items-center h-8 px-2 rounded-lg text-xs text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
               >
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              </svg>
-            </button>
+                <svg
+                  className="w-3.5 h-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
 
@@ -337,7 +386,11 @@ export function ClipList({ videoId }: ClipListProps) {
     refetchInterval: (query) => {
       const clips = query.state.data?.items ?? [];
       const hasActive = clips.some(
-        (c) => c.status === "pending" || c.status === "downloading" || c.status === "trimming" || c.status === "uploading"
+        (c) =>
+          c.status === "pending" ||
+          c.status === "downloading" ||
+          c.status === "trimming" ||
+          c.status === "uploading"
       );
       return hasActive ? 3_000 : 15_000;
     },

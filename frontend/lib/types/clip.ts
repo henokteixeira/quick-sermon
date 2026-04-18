@@ -6,7 +6,9 @@ export type ClipStatus =
   | "trimming"
   | "ready"
   | "uploading"
+  | "awaiting_review"
   | "published"
+  | "discarded"
   | "error";
 
 export type ClipErrorCode =
@@ -33,7 +35,47 @@ export interface Clip {
   error_message: string | null;
   submitted_by: string | null;
   created_at: string;
+  selected_title?: string | null;
+  description?: string | null;
+  whatsapp_message?: string | null;
 }
+
+export interface ClipReviewData {
+  id: string;
+  video_id: string;
+  status: ClipStatus;
+  start_time: number;
+  end_time: number;
+  duration: number | null;
+  file_path: string | null;
+  generated_titles: string[] | null;
+  generated_description: string | null;
+  generated_whatsapp_message: string | null;
+  selected_title: string | null;
+  description: string | null;
+  whatsapp_message: string | null;
+  published_at: string | null;
+  discarded_at: string | null;
+  youtube_video_id: string | null;
+  youtube_url: string | null;
+  can_publish: boolean;
+  can_discard: boolean;
+}
+
+export interface ClipDraftUpdate {
+  selected_title?: string | null;
+  description?: string | null;
+  whatsapp_message?: string | null;
+}
+
+export interface ClipPublishResponse {
+  id: string;
+  status: ClipStatus;
+  published_at: string | null;
+  youtube_url: string | null;
+}
+
+export type RegenerateField = "titles" | "description" | "whatsapp_message";
 
 export interface ClipListResponse {
   items: Clip[];

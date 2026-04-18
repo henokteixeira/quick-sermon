@@ -155,7 +155,7 @@ class UploadStatusInput:
     status: str = YouTubeUploadStatus.COMPLETED
     error_code: str | None = None
     error_message: str | None = None
-    clip_status: str = ClipStatus.PUBLISHED
+    clip_status: str = ClipStatus.AWAITING_REVIEW
 
 
 @activity.defn
@@ -213,3 +213,33 @@ def increment_quota() -> None:
             .values(daily_quota_used=new_used, quota_reset_date=today)
         )
         conn.commit()
+
+
+def update_youtube_privacy(video_id: str, privacy_status: str) -> None:
+    """Synchronous helper — update the privacy status of a YouTube video.
+
+    Called from services via ``asyncio.to_thread``. Raises whatever the
+    googleapiclient raises (HttpError subclasses) so services can map to
+    domain exceptions.
+    """
+    connection_data = _fetch_connection_sync()
+    if not connection_data:
+        raise RuntimeError("No YouTube connection configured")
+
+    credentials = _get_credentials(connection_data)
+    youtube = build("youtube", "v3", credentials=credentials)
+    youtube.videos().update(
+        part="status",
+        body={"id": video_id, "status": {"privacyStatus": privacy_status}},
+    ).execute()
+
+
+def delete_youtube_video(video_id: str) -> None:
+    """Synchronous helper — delete a video from YouTube."""
+    connection_data = _fetch_connection_sync()
+    if not connection_data:
+        raise RuntimeError("No YouTube connection configured")
+
+    credentials = _get_credentials(connection_data)
+    youtube = build("youtube", "v3", credentials=credentials)
+    youtube.videos().delete(id=video_id).execute()

@@ -80,7 +80,8 @@ class UploadToYouTubeWorkflow:
             self._progress = {"stage": "error", "percent": 0.0, "speed": None}
             raise
 
-        # Mark upload as completed
+        # Mark upload as completed — clip moves to awaiting_review; admin decides
+        # when to flip privacy to public via the review screen.
         await workflow.execute_activity(
             update_upload_status,
             UploadStatusInput(
@@ -89,7 +90,7 @@ class UploadToYouTubeWorkflow:
                 youtube_video_id=result.youtube_video_id,
                 youtube_url=result.youtube_url,
                 status=YouTubeUploadStatus.COMPLETED,
-                clip_status=ClipStatus.PUBLISHED,
+                clip_status=ClipStatus.AWAITING_REVIEW,
             ),
             start_to_close_timeout=STATUS_TIMEOUT,
             retry_policy=STATUS_RETRY,
@@ -102,7 +103,7 @@ class UploadToYouTubeWorkflow:
             retry_policy=STATUS_RETRY,
         )
 
-        self._progress = {"stage": "published", "percent": 100.0, "speed": None}
+        self._progress = {"stage": "awaiting_review", "percent": 100.0, "speed": None}
 
         return {
             "upload_id": upload_id,

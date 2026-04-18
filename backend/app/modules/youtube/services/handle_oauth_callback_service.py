@@ -16,8 +16,7 @@ from app.modules.youtube.services.token_encryption_service import encrypt_token
 logger = structlog.get_logger()
 
 SCOPES = [
-    "https://www.googleapis.com/auth/youtube.upload",
-    "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
 ]
 
 

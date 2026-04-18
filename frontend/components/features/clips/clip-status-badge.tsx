@@ -36,10 +36,20 @@ const STATUS_CONFIG: Record<
     text: "text-cyan-700 dark:text-cyan-400",
     pulse: true,
   },
+  awaiting_review: {
+    dot: "bg-purple-500",
+    bg: "bg-purple-500/10 border-purple-500/20",
+    text: "text-purple-700 dark:text-purple-400",
+  },
   published: {
     dot: "bg-emerald-500",
     bg: "bg-emerald-500/10 border-emerald-500/20",
     text: "text-emerald-700 dark:text-emerald-400",
+  },
+  discarded: {
+    dot: "bg-stone-400",
+    bg: "bg-stone-500/10 border-stone-500/20",
+    text: "text-stone-600 dark:text-stone-400",
   },
   error: {
     dot: "bg-red-500",

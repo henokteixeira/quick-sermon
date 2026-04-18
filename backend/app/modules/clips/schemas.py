@@ -1,9 +1,13 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from app.modules.clips.enums import ClipErrorCode, ClipStatus, ClipType
+
+TITLE_MAX_LEN = 100
+DESCRIPTION_MAX_LEN = 5000
+WHATSAPP_MAX_LEN = 4000
 
 
 class ClipCreate(BaseModel):
@@ -45,6 +49,45 @@ class ClipResponse(BaseModel):
     error_message: str | None
     submitted_by: uuid.UUID | None
     created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class ClipReviewResponse(BaseModel):
+    id: uuid.UUID
+    video_id: uuid.UUID
+    status: ClipStatus
+    start_time: int
+    end_time: int
+    duration: int | None
+    file_path: str | None
+    generated_titles: list[str] | None
+    generated_description: str | None
+    generated_whatsapp_message: str | None
+    selected_title: str | None
+    description: str | None
+    whatsapp_message: str | None
+    published_at: datetime | None
+    discarded_at: datetime | None
+    youtube_video_id: str | None
+    youtube_url: str | None
+    can_publish: bool
+    can_discard: bool
+
+    model_config = {"from_attributes": True}
+
+
+class ClipDraftUpdate(BaseModel):
+    selected_title: str | None = Field(default=None, max_length=TITLE_MAX_LEN)
+    description: str | None = Field(default=None, max_length=DESCRIPTION_MAX_LEN)
+    whatsapp_message: str | None = Field(default=None, max_length=WHATSAPP_MAX_LEN)
+
+
+class ClipPublishResponse(BaseModel):
+    id: uuid.UUID
+    status: ClipStatus
+    published_at: datetime | None
+    youtube_url: str | None
 
     model_config = {"from_attributes": True}
 
