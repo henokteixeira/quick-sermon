@@ -13,3 +13,13 @@ services:
       dockerfile: Dockerfile.worker
     volumes:
       - ./backend:/app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
