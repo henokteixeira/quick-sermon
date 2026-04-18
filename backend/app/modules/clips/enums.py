@@ -12,7 +12,9 @@ class ClipStatus(StrEnum):
     TRIMMING = "trimming"
     READY = "ready"
     UPLOADING = "uploading"
+    AWAITING_REVIEW = "awaiting_review"
     PUBLISHED = "published"
+    DISCARDED = "discarded"
     ERROR = "error"
 
 
