@@ -45,3 +45,29 @@ class NotAdminException(ForbiddenException):
 class ClipNotReadyException(ValidationException):
     def __init__(self):
         super().__init__("O clip precisa estar com status 'ready' para upload.")
+
+
+class YouTubeInsufficientScopeException(AppException):
+    def __init__(self):
+        super().__init__(
+            message=(
+                "A conexão com o YouTube não tem permissão suficiente. "
+                "Desconecte e reconecte o canal em Configurações para liberar publicação."
+            ),
+            code="YOUTUBE_INSUFFICIENT_SCOPE",
+            status_code=403,
+        )
+
+
+class YouTubeVideoNotFoundException(NotFoundException):
+    def __init__(self):
+        super().__init__("YouTube video")
+
+
+class YouTubeApiException(AppException):
+    def __init__(self, message: str = "Falha ao chamar a API do YouTube."):
+        super().__init__(
+            message=message,
+            code="YOUTUBE_API_ERROR",
+            status_code=502,
+        )
