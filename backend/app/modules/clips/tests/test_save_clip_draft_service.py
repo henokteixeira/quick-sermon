@@ -5,8 +5,9 @@ import pytest
 
 from app.modules.clips.enums import ClipStatus
 from app.modules.clips.exceptions import (
+    ClipAlreadyDiscardedException,
+    ClipAlreadyPublishedException,
     ClipNotFoundException,
-    ClipNotInReviewException,
 )
 from app.modules.clips.models import Clip
 from app.modules.clips.schemas import ClipDraftUpdate
@@ -69,10 +70,45 @@ async def test_save_draft_raises_when_clip_missing(clip_repo):
         await service.execute(uuid.uuid4(), ClipDraftUpdate(selected_title="X"))
 
 
-async def test_save_draft_blocked_outside_awaiting_review(clip_repo):
+async def test_save_draft_blocked_when_published(clip_repo):
     clip = _make_clip(status=ClipStatus.PUBLISHED)
     clip_repo.get_by_id.return_value = clip
     service = SaveClipDraftService(clip_repo)
 
-    with pytest.raises(ClipNotInReviewException):
+    with pytest.raises(ClipAlreadyPublishedException):
         await service.execute(clip.id, ClipDraftUpdate(selected_title="X"))
+
+
+async def test_save_draft_blocked_when_discarded(clip_repo):
+    clip = _make_clip(status=ClipStatus.DISCARDED)
+    clip_repo.get_by_id.return_value = clip
+    service = SaveClipDraftService(clip_repo)
+
+    with pytest.raises(ClipAlreadyDiscardedException):
+        await service.execute(clip.id, ClipDraftUpdate(selected_title="X"))
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        ClipStatus.PENDING,
+        ClipStatus.DOWNLOADING,
+        ClipStatus.TRIMMING,
+        ClipStatus.READY,
+        ClipStatus.UPLOADING,
+        ClipStatus.AWAITING_REVIEW,
+        ClipStatus.ERROR,
+    ],
+)
+async def test_save_draft_allowed_in_non_terminal_statuses(clip_repo, status):
+    clip = _make_clip(status=status)
+    clip_repo.get_by_id.return_value = clip
+    clip_repo.update.side_effect = lambda c: c
+
+    service = SaveClipDraftService(clip_repo)
+    updated = await service.execute(
+        clip.id,
+        ClipDraftUpdate(selected_title="New"),
+    )
+
+    assert updated.selected_title == "New"

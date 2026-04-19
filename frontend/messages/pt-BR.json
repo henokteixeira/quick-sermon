@@ -318,6 +318,88 @@
         "INTERNAL_ERROR": "Falha temporária. Tente novamente.",
         "unknown": "Erro ao publicar. Tente novamente."
       }
+    },
+    "detail_page": {
+      "back": "Voltar ao vídeo",
+      "titleFallback": "Clip {start}–{end}",
+      "loading": "Carregando clip...",
+      "loadError": "Erro ao carregar o clip.",
+      "meta": {
+        "duration": "{duration}",
+        "createdAt": "Criado em {date}",
+        "views": "{views, plural, =0 {Sem views} one {# view} other {# views}}"
+      },
+      "tabs": {
+        "edicao": "Edição",
+        "processamento": "Processamento",
+        "revisao": "Revisão"
+      },
+      "actions": {
+        "sendForReview": "Enviar pra revisão",
+        "sendingForReview": "Enviando...",
+        "publish": "Publicar no YouTube",
+        "publishing": "Publicando...",
+        "discard": "Descartar",
+        "discarding": "Descartando...",
+        "retry": "Tentar novamente",
+        "viewOnYoutube": "Ver no YouTube",
+        "editOnYoutube": "Editar no YouTube"
+      },
+      "edicao": {
+        "heading": "Configuração do clip",
+        "readOnlyHint": "Essa configuração é fixa. Para ajustar, crie um novo clip a partir do vídeo.",
+        "sourceCardTitle": "Vídeo de origem",
+        "sourceOpenYoutube": "Abrir no YouTube",
+        "segmentCardTitle": "Trecho",
+        "segmentStart": "Início",
+        "segmentEnd": "Fim",
+        "segmentDuration": "Duração",
+        "qualityCardTitle": "Qualidade",
+        "qualityLabel": "Resolução solicitada",
+        "resolutionLabel": "Resolução final",
+        "fileCardTitle": "Arquivo gerado",
+        "fileSize": "Tamanho",
+        "fileDownload": "Baixar arquivo",
+        "fileEmpty": "O arquivo ainda não foi gerado."
+      },
+      "processamento": {
+        "heading": "Pipeline de processamento",
+        "subheading": "Acompanhe Download, Corte e Upload para o YouTube.",
+        "stages": {
+          "download": "Download do vídeo",
+          "trim": "Corte do vídeo",
+          "upload": "Upload para o YouTube"
+        },
+        "status": {
+          "pending": "Aguardando",
+          "running": "Em andamento",
+          "completed": "Concluído",
+          "error": "Falhou"
+        },
+        "completedAt": "Concluído em {date}",
+        "percent": "{percent}%",
+        "speed": "· {speed}",
+        "retryDownload": "Tentar novamente",
+        "retryUpload": "Reenviar ao YouTube",
+        "retrying": "Tentando...",
+        "errorHint": "Veja o motivo e tente novamente ou descarte o clip.",
+        "emptyState": "O processamento ainda não começou.",
+        "activePipelineNote": "Essa aba atualiza automaticamente enquanto o pipeline está rodando."
+      },
+      "notFound": {
+        "title": "Clip não encontrado",
+        "description": "Esse clip pode ter sido excluído ou o link está incorreto.",
+        "back": "Voltar ao vídeo"
+      },
+      "discardConfirmTitle": "Descartar este clip?",
+      "discardConfirmDescriptionActive": "O clip ainda está sendo processado. O processamento será cancelado e o clip ficará marcado como descartado.",
+      "discardConfirmDescriptionAwaiting": "O vídeo será removido do YouTube e o clip ficará marcado como descartado.",
+      "discardConfirmDescriptionDefault": "O clip ficará marcado como descartado e não aparecerá mais na lista ativa.",
+      "discardConfirmConfirm": "Descartar definitivamente",
+      "discardConfirmCancel": "Manter",
+      "discardError": "Falha ao descartar o clip. Tente novamente.",
+      "retrySuccess": "Processamento reiniciado.",
+      "retryError": "Falha ao reiniciar o processamento."
     }
   },
   "settings": {

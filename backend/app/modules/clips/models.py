@@ -41,3 +41,7 @@ class Clip(Base, UUIDMixin, TimestampMixin):
     whatsapp_message: Mapped[str | None] = mapped_column(Text)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     discarded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    downloaded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    trimmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    uploaded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    temporal_workflow_id: Mapped[str | None] = mapped_column(String(200))

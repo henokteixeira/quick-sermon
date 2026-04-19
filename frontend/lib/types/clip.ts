@@ -34,10 +34,15 @@ export interface Clip {
   error_code: ClipErrorCode | null;
   error_message: string | null;
   submitted_by: string | null;
-  created_at: string;
   selected_title?: string | null;
   description?: string | null;
   whatsapp_message?: string | null;
+  published_at: string | null;
+  discarded_at: string | null;
+  downloaded_at: string | null;
+  trimmed_at: string | null;
+  uploaded_at: string | null;
+  created_at: string;
 }
 
 export interface ClipReviewData {
@@ -105,4 +110,27 @@ export interface VideoFormatsResponse {
   video_id: string;
   duration: number | null;
   formats: VideoFormat[];
+}
+
+export type PipelineStageStatus = "pending" | "running" | "completed" | "error";
+
+export interface ClipPipelineStage {
+  status: PipelineStageStatus;
+  percent: number | null;
+  speed: string | null;
+  completed_at: string | null;
+  error_code: string | null;
+  error_message: string | null;
+}
+
+export interface ClipPipeline {
+  download: ClipPipelineStage;
+  trim: ClipPipelineStage;
+  upload: ClipPipelineStage;
+}
+
+export interface ClipYouTubeStats {
+  view_count: number | null;
+  like_count: number | null;
+  comment_count: number | null;
 }

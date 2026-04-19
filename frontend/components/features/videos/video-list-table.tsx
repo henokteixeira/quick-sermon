@@ -18,6 +18,16 @@ export function VideoListTable() {
   const { data, isLoading } = useQuery({
     queryKey: ["videos", page, pageSize],
     queryFn: () => listVideos({ page, page_size: pageSize }),
+    refetchInterval: (query) => {
+      const items = query.state.data?.items ?? [];
+      const hasActive = items.some(
+        (v) =>
+          v.status === "pending" ||
+          v.status === "detecting" ||
+          v.status === "processing",
+      );
+      return hasActive ? 3_000 : 15_000;
+    },
   });
 
   if (isLoading) {

@@ -137,4 +137,25 @@ async def test_cannot_publish_without_youtube_upload(clip_repo, upload_repo):
     data = await service.execute(uuid.uuid4(), _make_user(UserRole.ADMIN))
 
     assert data.can_publish is False
+    # Discard is allowed for any non-terminal status, regardless of upload state.
+    assert data.can_discard is True
+
+
+async def test_cannot_discard_published_clip(clip_repo, upload_repo):
+    clip_repo.get_by_id.return_value = _make_clip(status=ClipStatus.PUBLISHED)
+    upload_repo.get_by_clip_id.return_value = _make_upload()
+
+    service = GetClipReviewService(clip_repo, upload_repo)
+    data = await service.execute(uuid.uuid4(), _make_user(UserRole.ADMIN))
+
+    assert data.can_discard is False
+
+
+async def test_cannot_discard_already_discarded_clip(clip_repo, upload_repo):
+    clip_repo.get_by_id.return_value = _make_clip(status=ClipStatus.DISCARDED)
+    upload_repo.get_by_clip_id.return_value = None
+
+    service = GetClipReviewService(clip_repo, upload_repo)
+    data = await service.execute(uuid.uuid4(), _make_user(UserRole.ADMIN))
+
     assert data.can_discard is False

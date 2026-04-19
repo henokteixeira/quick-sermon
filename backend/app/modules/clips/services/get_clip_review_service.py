@@ -52,6 +52,7 @@ class GetClipReviewService:
 
         is_admin = user.role == UserRole.ADMIN.value
         is_awaiting_review = clip.status == ClipStatus.AWAITING_REVIEW
+        is_terminal = clip.status in (ClipStatus.PUBLISHED, ClipStatus.DISCARDED)
 
         can_publish = (
             is_admin
@@ -59,7 +60,7 @@ class GetClipReviewService:
             and bool(youtube_video_id)
             and _draft_is_publishable(clip)
         )
-        can_discard = is_admin and is_awaiting_review and bool(youtube_video_id)
+        can_discard = is_admin and not is_terminal
 
         return ClipReviewData(
             clip=clip,

@@ -1,9 +1,9 @@
-import { ReviewLayout } from "@/components/features/review/review-layout";
+import { redirect } from "next/navigation";
 
-interface ReviewPageProps {
+export default function ClipReviewRedirect({
+  params,
+}: {
   params: { id: string; clipId: string };
-}
-
-export default function ReviewPage({ params }: ReviewPageProps) {
-  return <ReviewLayout videoId={params.id} clipId={params.clipId} />;
+}) {
+  redirect(`/videos/${params.id}/clip/${params.clipId}?tab=revisao`);
 }

@@ -3,9 +3,11 @@ import {
   Clip,
   ClipDraftUpdate,
   ClipListResponse,
+  ClipPipeline,
   ClipProgress,
   ClipPublishResponse,
   ClipReviewData,
+  ClipYouTubeStats,
   RegenerateField,
   VideoFormatsResponse,
 } from "../types/clip";
@@ -101,4 +103,18 @@ export async function regenerateField(
   field: RegenerateField
 ): Promise<void> {
   await apiClient.post(`/clips/${id}/regenerate/${field}`);
+}
+
+export async function getClipPipeline(id: string): Promise<ClipPipeline> {
+  const response = await apiClient.get<ClipPipeline>(`/clips/${id}/pipeline`);
+  return response.data;
+}
+
+export async function getClipYouTubeStats(
+  id: string
+): Promise<ClipYouTubeStats> {
+  const response = await apiClient.get<ClipYouTubeStats>(
+    `/clips/${id}/youtube-stats`
+  );
+  return response.data;
 }

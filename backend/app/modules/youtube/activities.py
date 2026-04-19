@@ -170,6 +170,10 @@ def update_upload_status(input: UploadStatusInput) -> None:
     if input.error_message:
         upload_values["error_message"] = input.error_message
 
+    clip_values: dict = {"status": input.clip_status}
+    if input.clip_status == ClipStatus.AWAITING_REVIEW:
+        clip_values["uploaded_at"] = datetime.now(timezone.utc)
+
     with Session(_sync_engine) as session:
         session.execute(
             update(YouTubeUpload)
@@ -179,7 +183,7 @@ def update_upload_status(input: UploadStatusInput) -> None:
         session.execute(
             update(Clip)
             .where(Clip.id == uuid.UUID(input.clip_id))
-            .values(status=input.clip_status)
+            .values(**clip_values)
         )
         session.commit()
 
