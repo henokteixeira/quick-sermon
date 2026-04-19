@@ -81,7 +81,9 @@ class DownloadAndTrimWorkflow:
             raise
 
         # --- Trim ---
-        await self._update_status(clip_id, status=ClipStatus.TRIMMING)
+        await self._update_status(
+            clip_id, status=ClipStatus.TRIMMING, mark_downloaded=True
+        )
         self._progress = {"stage": "trimming", "percent": 0.0, "speed": None}
 
         try:
@@ -119,6 +121,7 @@ class DownloadAndTrimWorkflow:
             file_size=trim_result.file_size,
             duration=trim_result.duration,
             resolution=trim_result.resolution,
+            mark_trimmed=True,
         )
         self._progress = {"stage": "ready", "percent": 100.0, "speed": None}
 

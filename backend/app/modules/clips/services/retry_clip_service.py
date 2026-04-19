@@ -37,6 +37,10 @@ class RetryClipService:
         clip.status = ClipStatus.PENDING
         clip.error_code = None
         clip.error_message = None
+        clip.downloaded_at = None
+        clip.trimmed_at = None
+        workflow_id = f"clip-{clip.id}-retry-{uuid.uuid4().hex[:8]}"
+        clip.temporal_workflow_id = workflow_id
         clip = await self.clip_repo.update(clip)
 
         await self.temporal_client.start_workflow(
@@ -48,7 +52,7 @@ class RetryClipService:
                 "end_time": clip.end_time,
                 "quality": clip.quality,
             },
-            id=f"clip-{clip.id}-retry-{uuid.uuid4().hex[:8]}",
+            id=workflow_id,
             task_queue=settings.TEMPORAL_TASK_QUEUE,
         )
 

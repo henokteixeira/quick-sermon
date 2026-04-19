@@ -15,9 +15,6 @@ from app.modules.clips.services.update_clip_status_service import update_clip_st
 
 logger = structlog.get_logger()
 
-DOWNLOAD_MARGIN_SECONDS = 150
-
-
 def _report_progress(
     clip_id: str, stage: str, percent: float, speed: str | None,
     started_at: float | None = None,
@@ -43,6 +40,8 @@ class StatusUpdateInput:
     file_size: int | None = None
     duration: int | None = None
     resolution: str | None = None
+    mark_downloaded: bool = False
+    mark_trimmed: bool = False
 
 
 @activity.defn
@@ -56,6 +55,8 @@ async def update_clip_status_activity(input: StatusUpdateInput) -> None:
         file_size=input.file_size,
         duration=input.duration,
         resolution=input.resolution,
+        mark_downloaded=input.mark_downloaded,
+        mark_trimmed=input.mark_trimmed,
     )
 
 
@@ -104,34 +105,22 @@ def _build_format_string(quality: str) -> str:
     )
 
 
-def _format_time(seconds: int) -> str:
-    h = seconds // 3600
-    m = (seconds % 3600) // 60
-    s = seconds % 60
-    return f"{h}:{m:02d}:{s:02d}"
-
-
 @activity.defn
 def download_video_segment(input: DownloadInput) -> DownloadResult:
     clip_dir = Path(settings.CLIPS_BASE_DIR) / input.clip_id
     clip_dir.mkdir(parents=True, exist_ok=True)
     raw_path = clip_dir / "raw.mp4"
 
-    margin_start = max(0, input.start_time - DOWNLOAD_MARGIN_SECONDS)
-    margin_end = input.end_time + DOWNLOAD_MARGIN_SECONDS
-
-    section = f"*{_format_time(margin_start)}-{_format_time(margin_end)}"
     format_str = input.format_id or _build_format_string(input.quality)
 
     cmd = [
         "yt-dlp",
         "--downloader", "native",
-        "-N", "4",
-        "--throttled-rate", "100K",
+        "-N", "8",
+        "--concurrent-fragments", "8",
         "--retries", "10",
         "--fragment-retries", "10",
         "-4",
-        "--download-sections", section,
         "-f", format_str,
         "--merge-output-format", "mp4",
         "-o", str(raw_path),
@@ -194,20 +183,6 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
             last_speed = dl_speed_match.group(1)
             updated = True
 
-        # ffmpeg output during merge/section-cut: time=00:12:34.56 speed=1.5x
-        if not updated:
-            expected_duration = (margin_end - margin_start) or 1
-            time_match = re.search(r"time=(\d+):(\d+):(\d+\.\d+)", line)
-            speed_match = re.search(r"speed=\s*(\S+)x", line)
-            if time_match:
-                h, m, s = time_match.groups()
-                elapsed = int(h) * 3600 + int(m) * 60 + float(s)
-                last_percent = min(99.0, round(elapsed / expected_duration * 100, 1))
-                updated = True
-            if speed_match:
-                last_speed = f"{speed_match.group(1)}x"
-                updated = True
-
         if updated:
             _report_progress(input.clip_id, "downloading", last_percent, last_speed, download_started_at)
 
@@ -224,12 +199,11 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
     logger.info(
         "download_complete",
         file_size=file_size,
-        margin_start=margin_start,
     )
 
     return DownloadResult(
         file_path=str(raw_path),
-        actual_start=float(margin_start),
+        actual_start=0.0,
         file_size=file_size,
     )
 

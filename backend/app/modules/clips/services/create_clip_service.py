@@ -44,6 +44,7 @@ class CreateClipService:
         )
         clip = await self.clip_repo.create(clip)
 
+        workflow_id = f"clip-{clip.id}"
         await self.temporal_client.start_workflow(
             "DownloadAndTrimWorkflow",
             {
@@ -54,8 +55,11 @@ class CreateClipService:
                 "quality": data.quality,
                 "format_id": data.format_id,
             },
-            id=f"clip-{clip.id}",
+            id=workflow_id,
             task_queue=settings.TEMPORAL_TASK_QUEUE,
         )
+
+        clip.temporal_workflow_id = workflow_id
+        clip = await self.clip_repo.update(clip)
 
         return clip

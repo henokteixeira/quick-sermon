@@ -14,13 +14,16 @@ from app.modules.clips.repositories.clip_repository import ClipRepository
 from app.modules.clips.schemas import (
     ClipCreate,
     ClipDraftUpdate,
+    ClipPipelineResponse,
     ClipPublishResponse,
     ClipResponse,
     ClipReviewResponse,
+    ClipYouTubeStatsResponse,
 )
 from app.modules.clips.services.create_clip_service import CreateClipService
 from app.modules.clips.services.delete_clip_service import DeleteClipService
 from app.modules.clips.services.discard_clip_service import DiscardClipService
+from app.modules.clips.services.get_clip_pipeline_service import GetClipPipelineService
 from app.modules.clips.services.get_clip_progress_service import GetClipProgressService
 from app.modules.clips.services.get_clip_review_service import GetClipReviewService
 from app.modules.clips.services.get_clip_service import GetClipService
@@ -34,10 +37,17 @@ from app.modules.users.enums import UserRole
 from app.modules.users.models import User
 from app.modules.videos.dependencies import get_video_repository
 from app.modules.videos.repositories.video_repository import VideoRepository
-from app.modules.youtube.dependencies import get_youtube_upload_repository
+from app.modules.youtube.dependencies import (
+    get_youtube_connection_repository,
+    get_youtube_upload_repository,
+)
+from app.modules.youtube.repositories.youtube_connection_repository import (
+    YouTubeConnectionRepository,
+)
 from app.modules.youtube.repositories.youtube_upload_repository import (
     YouTubeUploadRepository,
 )
+from app.modules.youtube.services.get_video_stats_service import GetVideoStatsService
 
 REGEN_ALLOWED_FIELDS = {"titles", "description", "whatsapp_message"}
 
@@ -91,6 +101,42 @@ async def get_clip_progress(
 ) -> dict:
     service = GetClipProgressService(clip_repo)
     return await service.execute(clip_id)
+
+
+@router.get("/{clip_id}/pipeline", response_model=ClipPipelineResponse)
+async def get_clip_pipeline(
+    clip_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    clip_repo: ClipRepository = Depends(get_clip_repository),
+    upload_repo: YouTubeUploadRepository = Depends(get_youtube_upload_repository),
+) -> ClipPipelineResponse:
+    service = GetClipPipelineService(clip_repo, upload_repo)
+    pipeline = await service.execute(clip_id)
+    return ClipPipelineResponse.model_validate(
+        {
+            "download": pipeline.download,
+            "trim": pipeline.trim,
+            "upload": pipeline.upload,
+        }
+    )
+
+
+@router.get("/{clip_id}/youtube-stats", response_model=ClipYouTubeStatsResponse)
+async def get_clip_youtube_stats(
+    clip_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    connection_repo: YouTubeConnectionRepository = Depends(
+        get_youtube_connection_repository
+    ),
+    upload_repo: YouTubeUploadRepository = Depends(get_youtube_upload_repository),
+) -> ClipYouTubeStatsResponse:
+    service = GetVideoStatsService(connection_repo, upload_repo)
+    stats = await service.execute(clip_id)
+    return ClipYouTubeStatsResponse(
+        view_count=stats.view_count,
+        like_count=stats.like_count,
+        comment_count=stats.comment_count,
+    )
 
 
 @router.post("/{clip_id}/retry", response_model=ClipResponse)
@@ -216,7 +262,8 @@ async def discard_clip(
     upload_repo: YouTubeUploadRepository = Depends(get_youtube_upload_repository),
     db: AsyncSession = Depends(get_db),
 ) -> ClipResponse:
-    service = DiscardClipService(clip_repo, upload_repo)
+    temporal_client = await get_temporal_client()
+    service = DiscardClipService(clip_repo, upload_repo, temporal_client)
     clip = await service.execute(clip_id)
     await db.commit()
     return ClipResponse.model_validate(clip)

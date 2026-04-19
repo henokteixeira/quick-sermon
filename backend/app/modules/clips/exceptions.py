@@ -32,3 +32,13 @@ class InvalidClipDraftException(ValidationException):
 class ClipUploadMissingException(ValidationException):
     def __init__(self):
         super().__init__("Nenhum upload do YouTube encontrado para este clip.")
+
+
+class ClipAlreadyPublishedException(ConflictException):
+    def __init__(self):
+        super().__init__("Este clip ja foi publicado e nao pode ser descartado.")
+
+
+class ClipAlreadyDiscardedException(ConflictException):
+    def __init__(self):
+        super().__init__("Este clip ja foi descartado.")

@@ -2,8 +2,9 @@ import uuid
 
 from app.modules.clips.enums import ClipStatus
 from app.modules.clips.exceptions import (
+    ClipAlreadyDiscardedException,
+    ClipAlreadyPublishedException,
     ClipNotFoundException,
-    ClipNotInReviewException,
 )
 from app.modules.clips.models import Clip
 from app.modules.clips.repositories.clip_repository import ClipRepository
@@ -19,8 +20,10 @@ class SaveClipDraftService:
         if not clip:
             raise ClipNotFoundException(str(clip_id))
 
-        if clip.status != ClipStatus.AWAITING_REVIEW:
-            raise ClipNotInReviewException(clip.status)
+        if clip.status == ClipStatus.PUBLISHED:
+            raise ClipAlreadyPublishedException()
+        if clip.status == ClipStatus.DISCARDED:
+            raise ClipAlreadyDiscardedException()
 
         update_data = data.model_dump(exclude_unset=True)
         for field, value in update_data.items():

@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy import update
@@ -25,6 +26,8 @@ async def update_clip_status(
     file_size: int | None = None,
     duration: int | None = None,
     resolution: str | None = None,
+    mark_downloaded: bool = False,
+    mark_trimmed: bool = False,
 ) -> None:
     engine = _get_engine()
     async with AsyncSession(engine) as session:
@@ -41,6 +44,10 @@ async def update_clip_status(
             values["duration"] = duration
         if resolution is not None:
             values["resolution"] = resolution
+        if mark_downloaded:
+            values["downloaded_at"] = datetime.now(timezone.utc)
+        if mark_trimmed:
+            values["trimmed_at"] = datetime.now(timezone.utc)
 
         await session.execute(
             update(Clip).where(Clip.id == uuid.UUID(clip_id)).values(**values)

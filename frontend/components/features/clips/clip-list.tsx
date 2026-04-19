@@ -6,17 +6,17 @@ import { useTranslations } from "next-intl";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   listClips,
-  retryClip,
   deleteClip,
   getClipProgress,
   getClipStreamUrl,
 } from "@/lib/api/clips";
-import { triggerUpload, getUploadByClip } from "@/lib/api/youtube";
-import { getApiErrorCode } from "@/lib/api/client";
 import { Clip, ClipProgress } from "@/lib/types/clip";
 import { ClipStatusBadge } from "./clip-status-badge";
-import { ClipPlayerDialog } from "./clip-player-dialog";
-import { formatTime, formatFileSizeFromBytes, formatDuration } from "@/lib/formatters";
+import {
+  formatTime,
+  formatFileSizeFromBytes,
+  formatDuration,
+} from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -98,20 +98,12 @@ function ClipProgressBar({ clipId }: { clipId: string }) {
   );
 }
 
-function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPlay: (clip: Clip, youtubeVideoId?: string | null) => void }) {
+function ClipItem({ clip, videoId }: { clip: Clip; videoId: string }) {
   const t = useTranslations("clips");
   const tErrors = useTranslations("clips.errors");
-  const tUploadErrors = useTranslations("clips.uploadErrors");
   const queryClient = useQueryClient();
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-
-  const retryMutation = useMutation({
-    mutationFn: () => retryClip(clip.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clips", videoId] });
-    },
-  });
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteClip(clip.id),
@@ -121,62 +113,37 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
     },
   });
 
-  const isActive = clip.status === "downloading" || clip.status === "trimming" || clip.status === "uploading";
+  const isActive =
+    clip.status === "downloading" ||
+    clip.status === "trimming" ||
+    clip.status === "uploading";
   const isReady = clip.status === "ready";
   const isPublished = clip.status === "published";
   const isAwaitingReview = clip.status === "awaiting_review";
   const isDiscarded = clip.status === "discarded";
+  const canDownloadFile = isReady || isAwaitingReview || isPublished;
+  const canDelete = !isDiscarded && !isAwaitingReview && !isPublished && !isActive;
 
-  const isUploading = clip.status === "uploading";
-  const canDownloadFile = isReady || isAwaitingReview;
-
-  const { data: lastUpload } = useQuery({
-    queryKey: ["youtube-upload", clip.id],
-    queryFn: () => getUploadByClip(clip.id),
-    enabled: isReady || isPublished || isUploading || isAwaitingReview,
-    refetchInterval: (query) => {
-      const hasVideoId = !!query.state.data?.youtube_video_id;
-      if (hasVideoId) return false;
-      if (isUploading) return 2_000;
-      return false;
-    },
-  });
-
-  async function handleDownload() {
+  async function handleDownload(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
     try {
       const url = await getClipStreamUrl(clip.id);
       window.open(url, "_blank", "noopener,noreferrer");
     } catch {
-      setUploadError(tUploadErrors("unknown"));
+      setDownloadError(t("uploadErrors.unknown"));
     }
   }
 
-  const lastUploadFailed = lastUpload?.youtube_status === "failed";
-
-  const uploadMutation = useMutation({
-    mutationFn: () => triggerUpload({ clip_id: clip.id }),
-    onSuccess: () => {
-      setUploadError(null);
-      queryClient.invalidateQueries({ queryKey: ["clips", videoId] });
-      queryClient.invalidateQueries({ queryKey: ["youtube-upload", clip.id] });
-    },
-    onError: (error) => {
-      const code = getApiErrorCode(error);
-      setUploadError(tUploadErrors.has(code) ? tUploadErrors(code) : tUploadErrors("unknown"));
-    },
-  });
-
-  const isClickable = isReady || isPublished || isAwaitingReview;
   const accentClass = STATUS_ACCENT[clip.status] || "border-l-transparent";
 
   return (
-    <div
+    <Link
+      href={`/videos/${videoId}/clip/${clip.id}`}
       className={cn(
-        "rounded-xl border border-border bg-card border-l-[3px] transition-all",
-        accentClass,
-        isClickable && "cursor-pointer hover:border-amber-500/20 hover:shadow-md hover:shadow-amber-500/[0.03]"
+        "group block rounded-xl border border-border bg-card border-l-[3px] transition-all cursor-pointer hover:border-amber-500/20 hover:shadow-md hover:shadow-amber-500/[0.03]",
+        accentClass
       )}
-      onClick={isClickable ? () => onPlay(clip, isPublished ? lastUpload?.youtube_video_id : null) : undefined}
     >
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
@@ -232,18 +199,15 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
               </p>
             )}
 
-            {uploadError && (
-              <p className="text-xs text-red-600 mt-2.5">{uploadError}</p>
-            )}
-
-            {lastUploadFailed && !uploadError && (
-              <p className="text-xs text-red-600 mt-2.5">
-                {lastUpload.error_message || tUploadErrors("unknown")}
-              </p>
+            {downloadError && (
+              <p className="text-xs text-red-600 mt-2.5">{downloadError}</p>
             )}
           </div>
 
-          <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="flex items-center gap-1 shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
             {canDownloadFile && (
               <button
                 onClick={handleDownload}
@@ -258,69 +222,13 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
                 <span className="hidden sm:inline">{t("download")}</span>
               </button>
             )}
-            {isPublished && lastUpload?.youtube_video_id && (
-              <a
-                href={`https://studio.youtube.com/video/${lastUpload.youtube_video_id}/edit`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                </svg>
-                <span className="hidden sm:inline">{t("editOnYouTube")}</span>
-              </a>
-            )}
-            {isAwaitingReview && (
-              <Link
-                href={`/videos/${videoId}/clip/${clip.id}/review`}
-                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 dark:text-purple-300 transition-colors"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 20h9" />
-                  <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
-                </svg>
-                <span className="hidden sm:inline">{t("review")}</span>
-              </Link>
-            )}
-            {isReady && (
+            {canDelete && (
               <button
-                onClick={() => uploadMutation.mutate()}
-                disabled={uploadMutation.isPending}
-                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-50"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                </svg>
-                <span className="hidden sm:inline">
-                  {uploadMutation.isPending ? t("uploading") : lastUploadFailed ? t("retryUpload") : t("sendForReview")}
-                </span>
-              </button>
-            )}
-            {clip.status === "error" && (
-              <button
-                onClick={() => retryMutation.mutate()}
-                disabled={retryMutation.isPending}
-                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors disabled:opacity-50"
-              >
-                <svg
-                  className="w-3.5 h-3.5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="23 4 23 10 17 10" />
-                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-                </svg>
-                {t("retry")}
-              </button>
-            )}
-            {!isDiscarded && !isAwaitingReview && !isPublished && (
-              <button
-                onClick={() => setDeleteOpen(true)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setDeleteOpen(true);
+                }}
                 className="inline-flex items-center h-8 px-2 rounded-lg text-xs text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
               >
                 <svg
@@ -342,32 +250,38 @@ function ClipItem({ clip, videoId, onPlay }: { clip: Clip; videoId: string; onPl
 
         {/* Delete confirmation */}
         <div onClick={(e) => e.stopPropagation()}>
-        <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-          <DialogContent className="sm:max-w-sm">
-            <DialogHeader>
-              <DialogTitle>{t("deleteTitle")}</DialogTitle>
-              <DialogDescription>{t("deleteDescription")}</DialogDescription>
-            </DialogHeader>
-            <div className="flex gap-3 justify-end mt-2">
-              <button
-                onClick={() => setDeleteOpen(false)}
-                className="h-9 px-4 rounded-lg border border-input text-sm font-medium hover:bg-muted transition-colors"
-              >
-                {t("cancel")}
-              </button>
-              <button
-                onClick={() => deleteMutation.mutate()}
-                disabled={deleteMutation.isPending}
-                className="h-9 px-4 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {deleteMutation.isPending ? t("deleting") : t("confirmDelete")}
-              </button>
-            </div>
-          </DialogContent>
-        </Dialog>
+          <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+            <DialogContent className="sm:max-w-sm">
+              <DialogHeader>
+                <DialogTitle>{t("deleteTitle")}</DialogTitle>
+                <DialogDescription>{t("deleteDescription")}</DialogDescription>
+              </DialogHeader>
+              <div className="flex gap-3 justify-end mt-2">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setDeleteOpen(false);
+                  }}
+                  className="h-9 px-4 rounded-lg border border-input text-sm font-medium hover:bg-muted transition-colors"
+                >
+                  {t("cancel")}
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    deleteMutation.mutate();
+                  }}
+                  disabled={deleteMutation.isPending}
+                  className="h-9 px-4 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {deleteMutation.isPending ? t("deleting") : t("confirmDelete")}
+                </button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -377,8 +291,6 @@ interface ClipListProps {
 
 export function ClipList({ videoId }: ClipListProps) {
   const t = useTranslations("clips.list");
-  const [playingClip, setPlayingClip] = useState<Clip | null>(null);
-  const [playingYouTubeId, setPlayingYouTubeId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["clips", videoId],
@@ -433,19 +345,10 @@ export function ClipList({ videoId }: ClipListProps) {
   }
 
   return (
-    <>
-      <div className="space-y-3">
-        {clips.map((clip) => (
-          <ClipItem key={clip.id} clip={clip} videoId={videoId} onPlay={(c, ytId) => { setPlayingClip(c); setPlayingYouTubeId(ytId || null); }} />
-        ))}
-      </div>
-
-      <ClipPlayerDialog
-        clip={playingClip}
-        open={!!playingClip}
-        onOpenChange={(open) => { if (!open) { setPlayingClip(null); setPlayingYouTubeId(null); } }}
-        youtubeVideoId={playingYouTubeId}
-      />
-    </>
+    <div className="space-y-3">
+      {clips.map((clip) => (
+        <ClipItem key={clip.id} clip={clip} videoId={videoId} />
+      ))}
+    </div>
   );
 }

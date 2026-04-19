@@ -79,7 +79,10 @@ class TriggerUploadService:
         )
         upload = await self.upload_repo.create(upload)
 
+        workflow_id = f"youtube-upload-{upload.id}"
         clip.status = ClipStatus.UPLOADING
+        clip.temporal_workflow_id = workflow_id
+        clip.uploaded_at = None
         await self.clip_repo.update(clip)
 
         await self.temporal_client.start_workflow(
@@ -91,7 +94,7 @@ class TriggerUploadService:
                 "title": upload_title,
                 "description": upload_description,
             },
-            id=f"youtube-upload-{upload.id}",
+            id=workflow_id,
             task_queue=settings.TEMPORAL_TASK_QUEUE,
         )
 

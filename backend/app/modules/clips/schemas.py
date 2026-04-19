@@ -48,6 +48,12 @@ class ClipResponse(BaseModel):
     error_code: ClipErrorCode | None
     error_message: str | None
     submitted_by: uuid.UUID | None
+    selected_title: str | None
+    published_at: datetime | None
+    discarded_at: datetime | None
+    downloaded_at: datetime | None
+    trimmed_at: datetime | None
+    uploaded_at: datetime | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -103,3 +109,26 @@ class VideoFormatsResponse(BaseModel):
     video_id: uuid.UUID
     duration: int | None
     formats: list[VideoFormat]
+
+
+class ClipPipelineStageResponse(BaseModel):
+    status: str
+    percent: float | None
+    speed: str | None
+    completed_at: datetime | None
+    error_code: str | None
+    error_message: str | None
+
+    model_config = {"from_attributes": True}
+
+
+class ClipPipelineResponse(BaseModel):
+    download: ClipPipelineStageResponse
+    trim: ClipPipelineStageResponse
+    upload: ClipPipelineStageResponse
+
+
+class ClipYouTubeStatsResponse(BaseModel):
+    view_count: int | None
+    like_count: int | None
+    comment_count: int | None
