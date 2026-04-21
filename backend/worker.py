@@ -8,18 +8,24 @@ from temporalio.worker import Worker
 
 from app.core.config import settings
 from app.core.logging import setup_logging
-from app.modules.clips.workflows import DownloadAndTrimWorkflow
 from app.modules.clips.activities import (
     download_video_segment,
     trim_video,
     update_clip_status_activity,
 )
-from app.modules.youtube.workflows import UploadToYouTubeWorkflow
+from app.modules.clips.workflows import DownloadAndTrimWorkflow
+from app.modules.videos.activities import (
+    detect_chapters_activity,
+    fetch_captions_activity,
+    persist_detection_result_activity,
+)
+from app.modules.videos.workflows import DetectSermonTimestampsWorkflow
 from app.modules.youtube.activities import (
     increment_quota,
     update_upload_status,
     upload_to_youtube,
 )
+from app.modules.youtube.workflows import UploadToYouTubeWorkflow
 
 logger = structlog.get_logger()
 
@@ -39,7 +45,11 @@ async def main() -> None:
         namespace=settings.TEMPORAL_NAMESPACE,
     )
 
-    workflows = [DownloadAndTrimWorkflow, UploadToYouTubeWorkflow]
+    workflows = [
+        DownloadAndTrimWorkflow,
+        UploadToYouTubeWorkflow,
+        DetectSermonTimestampsWorkflow,
+    ]
     activities = [
         download_video_segment,
         trim_video,
@@ -47,6 +57,9 @@ async def main() -> None:
         upload_to_youtube,
         update_upload_status,
         increment_quota,
+        detect_chapters_activity,
+        fetch_captions_activity,
+        persist_detection_result_activity,
     ]
 
     worker = Worker(

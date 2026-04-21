@@ -27,6 +27,16 @@ As the interview progresses, keep a mental log of every decision made and its ra
 - **Open questions** — anything left unresolved
 - **Scope** — what's in and what's out
 
+## Final Checklist
+
+Before concluding the interview, run through these checks explicitly with the user — do NOT skip any:
+
+- [ ] **Permissões definidas?** — Todas as permissões necessárias foram identificadas e mapeadas?
+- [ ] **Casos de erro mapeados?** — Todos os cenários de falha foram considerados e têm tratamento definido?
+- [ ] **Decisões de negócio são do usuário?** — As decisões de negócio foram tomadas pelo usuário, não sugeridas pela AI? Se alguma decisão de negócio partiu da AI, destacar e pedir confirmação explícita.
+- [ ] **Critérios de aceite objetivos?** — Os critérios de aceite são objetivos, verificáveis e testáveis?
+- [ ] **Casos de borda cobertos?** — Existe algum caso de borda que não foi considerado durante a discussão?
+
 ## Updating the Linear Task
 
 When the interview reaches a natural conclusion (all branches resolved, or the user says they're done), and a Linear task ID was provided:

@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getVideo } from "@/lib/api/videos";
 import { createClip, getVideoFormats } from "@/lib/api/clips";
+import { getDetection } from "@/lib/api/detection";
 import { VideoFormat } from "@/lib/types/clip";
 import { useYouTubePlayer } from "@/lib/hooks/use-youtube-player";
 import { formatTime, parseTime, formatFileSize } from "@/lib/formatters";
@@ -15,6 +16,14 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+
+const DETECTION_CONFIDENCE_THRESHOLD = 80;
+
+function parseSuggested(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const num = Number(value);
+  return Number.isFinite(num) && num >= 0 ? num : undefined;
+}
 
 export default function ClipEditorPage({
   params,
@@ -25,10 +34,19 @@ export default function ClipEditorPage({
   const router = useRouter();
   const queryClient = useQueryClient();
   const t = useTranslations("clips.editor");
+  const tDetection = useTranslations("videos.detection");
+  const searchParams = useSearchParams();
+  const suggestedStart = parseSuggested(searchParams.get("suggested_start"));
+  const suggestedEnd = parseSuggested(searchParams.get("suggested_end"));
 
   const { data: video, isLoading: videoLoading } = useQuery({
     queryKey: ["video", id],
     queryFn: () => getVideo(id),
+  });
+
+  const { data: detection } = useQuery({
+    queryKey: ["detection", id],
+    queryFn: () => getDetection(id),
   });
 
   const videoDuration = video?.duration ?? 0;
@@ -43,14 +61,31 @@ export default function ClipEditorPage({
   // Set initial range when video loads
   useEffect(() => {
     if (videoDuration > 0 && endTime === 0) {
-      const defaultStart = Math.round(videoDuration * 0.1);
-      const defaultEnd = Math.min(videoDuration, Math.round(videoDuration * 0.6));
-      setStartTime(defaultStart);
-      setEndTime(defaultEnd);
-      setStartInput(formatTime(defaultStart));
-      setEndInput(formatTime(defaultEnd));
+      const initialStart =
+        suggestedStart ?? Math.round(videoDuration * 0.1);
+      const initialEnd =
+        suggestedEnd ??
+        Math.min(videoDuration, Math.round(videoDuration * 0.6));
+      setStartTime(initialStart);
+      setEndTime(initialEnd);
+      setStartInput(formatTime(initialStart));
+      setEndInput(formatTime(initialEnd));
     }
-  }, [videoDuration, endTime]);
+  }, [videoDuration, endTime, suggestedStart, suggestedEnd]);
+
+  function applySuggestedDetection() {
+    if (
+      !detection ||
+      detection.start_seconds == null ||
+      detection.end_seconds == null
+    ) {
+      return;
+    }
+    setStartTime(detection.start_seconds);
+    setEndTime(detection.end_seconds);
+    setStartInput(formatTime(detection.start_seconds));
+    setEndInput(formatTime(detection.end_seconds));
+  }
 
   const player = useYouTubePlayer({
     videoId: video?.youtube_video_id ?? "",
@@ -227,6 +262,37 @@ export default function ClipEditorPage({
           <div id="yt-clip-editor" className="absolute inset-0 w-full h-full" />
         </div>
       </div>
+
+      {/* Detection suggestion */}
+      {detection?.status === "completed" &&
+        detection.start_seconds != null &&
+        detection.end_seconds != null && (
+          <div className="mb-5 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-4 flex items-start justify-between gap-3 flex-wrap">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-foreground">
+                {tDetection("detected")}{" "}
+                <span className="text-muted-foreground tabular-nums">
+                  ({formatTime(detection.start_seconds)} →{" "}
+                  {formatTime(detection.end_seconds)},{" "}
+                  {tDetection("confidence")}: {detection.confidence ?? 0}%)
+                </span>
+              </p>
+              {(detection.confidence ?? 0) < DETECTION_CONFIDENCE_THRESHOLD && (
+                <Alert className="mt-2 py-2">
+                  <AlertDescription className="text-xs">
+                    {tDetection("confidenceLow")}
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+            <button
+              onClick={applySuggestedDetection}
+              className="h-9 px-4 rounded-lg border border-input text-xs font-semibold hover:bg-muted transition-colors whitespace-nowrap"
+            >
+              {tDetection("useSuggested")}
+            </button>
+          </div>
+        )}
 
       {/* Timeline + Controls */}
       <div className="rounded-xl border border-border bg-card p-5 sm:p-6 mb-5">

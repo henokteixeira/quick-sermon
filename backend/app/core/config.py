@@ -23,9 +23,16 @@ class Settings(BaseSettings):
 
     # Storage
     CLIPS_BASE_DIR: str = "/data/clips"
+    VIDEOS_BASE_DIR: str = "/data/videos"
 
-    # Ollama
-    OLLAMA_BASE_URL: str = "http://ollama:11434"
+    # OpenAI (reservado para QS-75 — refinamento com IA)
+    OPENAI_API_KEY: str = ""
+
+    # Sermon detection (QS-58)
+    SERMON_MIN_DURATION: int = 900
+    SERMON_MAX_DURATION: int = 4500
+    DETECTION_SKIP_MIN_DURATION: int = 300
+    DETECTION_WORKFLOW_TIMEOUT_MINUTES: int = 15
 
     # YouTube
     YOUTUBE_CLIENT_ID: str = ""

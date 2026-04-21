@@ -147,6 +147,19 @@
       "awaiting_review": "Revisão",
       "published": "Publicado",
       "error": "Erro"
+    },
+    "detection": {
+      "detecting": "Detectando pregação automaticamente…",
+      "detected": "Pregação detectada",
+      "confidence": "Confiança",
+      "confidenceLow": "Confiança baixa. Confira o trecho antes de criar o clipe.",
+      "from": "de",
+      "to": "até",
+      "useSuggested": "Usar pregação sugerida",
+      "editManually": "Editar manualmente",
+      "retry": "Tentar novamente",
+      "failed": "Não conseguimos detectar a pregação automaticamente.",
+      "skipped": "Detecção pulada (vídeo curto ou ao vivo)."
     }
   },
   "clips": {
