@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, HttpUrl
 
-from app.modules.videos.enums import VideoStatus
+from app.modules.videos.enums import DetectionMethod, DetectionStatus, VideoStatus
 
 
 class VideoCreate(BaseModel):
@@ -37,5 +37,20 @@ class VideoResponse(BaseModel):
     upload_date: str | None
     submitted_by: uuid.UUID | None
     created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class DetectionResponse(BaseModel):
+    id: uuid.UUID
+    video_id: uuid.UUID
+    status: DetectionStatus
+    method: DetectionMethod | None
+    start_seconds: int | None
+    end_seconds: int | None
+    confidence: int | None
+    error_message: str | None
+    created_at: datetime
+    completed_at: datetime | None
 
     model_config = {"from_attributes": True}

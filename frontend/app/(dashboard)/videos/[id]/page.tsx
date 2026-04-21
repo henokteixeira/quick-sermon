@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getVideo, deleteVideo, updateVideo, refreshVideo } from "@/lib/api/videos";
 import { VideoStatusBadge } from "@/components/features/videos/video-status-badge";
+import { DetectionCard } from "@/components/features/videos/detection-card";
 import { ClipList } from "@/components/features/clips/clip-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -310,6 +311,9 @@ export default function VideoDetailPage({
               </div>
             )}
           </div>
+
+          {/* Detection status */}
+          <DetectionCard videoId={id} />
 
           {/* Info cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

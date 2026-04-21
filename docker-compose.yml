@@ -56,13 +56,6 @@ services:
     depends_on:
       - temporal
 
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-
   backend:
     build:
       context: ./backend
@@ -72,7 +65,7 @@ services:
       TEMPORAL_HOST: temporal:7233
       TEMPORAL_NAMESPACE: default
       TEMPORAL_TASK_QUEUE: video-processing
-      OLLAMA_BASE_URL: http://ollama:11434
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       SECRET_KEY: change-me-in-production
       DEBUG: "true"
       YOUTUBE_CLIENT_ID: ${YOUTUBE_CLIENT_ID:-}
@@ -83,6 +76,7 @@ services:
       - "8000:8000"
     volumes:
       - clips_data:/data/clips
+      - videos_data:/data/videos
     depends_on:
       db:
         condition: service_healthy
@@ -98,13 +92,14 @@ services:
       TEMPORAL_HOST: temporal:7233
       TEMPORAL_NAMESPACE: default
       TEMPORAL_TASK_QUEUE: video-processing
-      OLLAMA_BASE_URL: http://ollama:11434
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       SECRET_KEY: change-me-in-production
       YOUTUBE_CLIENT_ID: ${YOUTUBE_CLIENT_ID:-}
       YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET:-}
       YOUTUBE_OAUTH_ENCRYPTION_KEY: ${YOUTUBE_OAUTH_ENCRYPTION_KEY:-}
     volumes:
       - clips_data:/data/clips
+      - videos_data:/data/videos
     depends_on:
       db:
         condition: service_healthy
@@ -133,5 +128,5 @@ services:
 volumes:
   db_data:
   temporal_db_data:
-  ollama_data:
   clips_data:
+  videos_data:

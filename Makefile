@@ -19,7 +19,7 @@ migration:
 	docker compose exec backend alembic revision --autogenerate -m "$(msg)"
 
 test-backend:
-	cd backend && pytest -v
+	docker compose exec backend pytest -v
 
 test-frontend:
 	cd frontend && npm test
