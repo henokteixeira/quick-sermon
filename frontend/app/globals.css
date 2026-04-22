@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Quick Sermon — Warm Stone/Amber theme */
+    /* Quick Sermon — Warm Stone/Amber theme (light fallback) */
     --background: 60 9% 97.8%;
     --foreground: 24 10% 10%;
     --card: 0 0% 100%;
@@ -26,39 +26,47 @@
     --ring: 38 92% 50%;
     --radius: 0.625rem;
 
-    /* Sidebar */
     --sidebar: 24 10% 10%;
     --sidebar-foreground: 24 6% 75%;
     --sidebar-accent: 38 92% 50%;
 
-    /* Typography */
     --font-serif: var(--font-dm-serif);
   }
 
   .dark {
-    --background: 24 10% 6%;
-    --foreground: 60 9% 97.8%;
-    --card: 24 10% 10%;
-    --card-foreground: 60 9% 97.8%;
-    --popover: 24 10% 10%;
-    --popover-foreground: 60 9% 97.8%;
-    --primary: 60 9% 97.8%;
-    --primary-foreground: 24 10% 10%;
-    --secondary: 24 6% 15%;
-    --secondary-foreground: 60 9% 97.8%;
-    --muted: 24 6% 15%;
-    --muted-foreground: 24 6% 65%;
-    --accent: 38 92% 50%;
-    --accent-foreground: 24 10% 10%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 60 9% 97.8%;
-    --border: 24 6% 18%;
-    --input: 24 6% 18%;
+    /* Values mirror frontend/redesing/project/components/tokens.jsx */
+    --background: 24 12% 4%;                   /* #0c0a09 stone-950 warm */
+    --foreground: 60 9% 98%;                   /* #fafaf9 stone-50 */
+    --card: 24 14% 8%;                         /* #171412 bgElev */
+    --card-foreground: 60 9% 98%;
+    --popover: 24 13% 10%;                     /* #1c1917 bgElev2 */
+    --popover-foreground: 60 9% 98%;
+    --primary: 60 9% 98%;
+    --primary-foreground: 24 12% 4%;
+    --secondary: 24 13% 10%;
+    --secondary-foreground: 60 9% 98%;
+    --muted: 24 13% 10%;
+    --muted-foreground: 20 6% 64%;             /* #a8a29e fgSubtle */
+    --accent: 38 92% 50%;                      /* #f59e0b amber-500 */
+    --accent-foreground: 24 12% 4%;
+    --destructive: 0 91% 71%;                  /* #f87171 red-400 */
+    --destructive-foreground: 60 9% 98%;
+    --border: 18 13% 15%;                      /* #2a2522 line */
+    --input: 18 13% 15%;
     --ring: 38 92% 50%;
 
-    --sidebar: 24 10% 6%;
-    --sidebar-foreground: 24 6% 65%;
+    --sidebar: 17 25% 3%;                      /* #0a0807 darker than bg */
+    --sidebar-foreground: 20 6% 64%;
     --sidebar-accent: 38 92% 50%;
+
+    /* Auxiliary tokens used by custom primitives */
+    --bg-subtle: 24 13% 12%;                   /* #201c19 hover on elev */
+    --line-strong: 20 12% 20%;                 /* #3a322d hover borders */
+    --fg-muted: 24 5% 83%;                     /* #d6d3d1 stone-300 */
+    --fg-faint: 25 5% 44%;                     /* #78716c stone-500 */
+    --fg-ghost: 30 4% 31%;                     /* #57534e stone-600 */
+    --amber-bright: 43 96% 56%;                /* #fbbf24 amber-400 */
+    --amber-deep: 32 94% 44%;                  /* #d97706 amber-600 */
   }
 
   * {
@@ -66,10 +74,11 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
   }
 
-  /* Fix Chrome autofill dark theme */
+  /* Chrome autofill in dark theme */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
@@ -77,5 +86,47 @@
     -webkit-text-fill-color: #d6d3d1 !important;
     caret-color: #d6d3d1 !important;
     border-color: #44403c !important;
+  }
+}
+
+@layer utilities {
+  .qs-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .qs-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+  }
+  .qs-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@keyframes qs-ping {
+  75%,
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes qs-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes qs-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

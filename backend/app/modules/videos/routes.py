@@ -8,6 +8,8 @@ from app.core.database import get_db
 from app.core.schemas import PaginatedResponse
 from app.core.temporal_client import get_temporal_client
 from app.modules.auth.dependencies import get_current_user
+from app.modules.clips.dependencies import get_clip_repository
+from app.modules.clips.repositories.clip_repository import ClipRepository
 from app.modules.users.models import User
 from app.modules.videos.dependencies import (
     get_video_detection_repository,
@@ -24,6 +26,7 @@ from app.modules.videos.schemas import (
     VideoResponse,
     VideoUpdate,
 )
+from app.modules.videos.services.build_video_responses import build_video_responses
 from app.modules.videos.services.delete_video_service import DeleteVideoService
 from app.modules.videos.services.fetch_formats_service import FetchFormatsService
 from app.modules.videos.services.get_detection_service import GetDetectionService
@@ -73,8 +76,10 @@ async def list_videos(
     page_size: int = Query(default=20, ge=1, le=100),
     user: User = Depends(get_current_user),
     video_repo: VideoRepository = Depends(get_video_repository),
+    clip_repo: ClipRepository = Depends(get_clip_repository),
+    detection_repo: VideoDetectionRepository = Depends(get_video_detection_repository),
 ) -> PaginatedResponse[VideoResponse]:
-    service = ListVideosService(video_repo)
+    service = ListVideosService(video_repo, clip_repo, detection_repo)
     return await service.execute(status, page, page_size)
 
 
@@ -83,10 +88,13 @@ async def get_video(
     video_id: uuid.UUID,
     user: User = Depends(get_current_user),
     video_repo: VideoRepository = Depends(get_video_repository),
+    clip_repo: ClipRepository = Depends(get_clip_repository),
+    detection_repo: VideoDetectionRepository = Depends(get_video_detection_repository),
 ) -> VideoResponse:
     service = GetVideoService(video_repo)
     video = await service.execute(video_id)
-    return VideoResponse.model_validate(video)
+    responses = await build_video_responses([video], clip_repo, detection_repo)
+    return responses[0]
 
 
 @router.patch("/{video_id}", response_model=VideoResponse)

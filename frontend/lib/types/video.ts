@@ -19,6 +19,8 @@ export interface Video {
   upload_date: string | null;
   submitted_by: string | null;
   created_at: string;
+  clip_count: number;
+  aggregated_status: VideoStatus | null;
 }
 
 export interface VideoListResponse {

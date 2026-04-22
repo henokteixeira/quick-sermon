@@ -7,6 +7,11 @@ RUN pip install --no-cache-dir --prefix=/install -r requirements.txt -r requirem
 
 FROM python:3.12-slim
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY --from=builder /install /usr/local

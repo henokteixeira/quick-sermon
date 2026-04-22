@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from app.core.ytdlp import build_auth_args, run_yt_dlp
+
 
 @dataclass
 class CaptionCue:
@@ -59,6 +61,7 @@ class CaptionsFetcher:
             "--no-warnings",
             "--output",
             output_template,
+            *build_auth_args(),
             source_url,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
@@ -71,22 +74,16 @@ class CaptionsFetcher:
 
 class ChaptersFetcher:
     async def fetch(self, source_url: str) -> dict[str, Any]:
-        proc = await asyncio.create_subprocess_exec(
-            "yt-dlp",
-            "--dump-json",
-            "--skip-download",
-            "--no-warnings",
-            source_url,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
+        empty = {"chapters": [], "duration": 0, "is_live": False}
+        result = await run_yt_dlp(
+            ["--dump-json", "--skip-download", "--no-warnings", source_url]
         )
-        stdout, _ = await proc.communicate()
-        if not stdout:
-            return {"chapters": [], "duration": 0, "is_live": False}
+        if not result.ok or not result.stdout:
+            return empty
         try:
-            data = json.loads(stdout.decode("utf-8"))
+            data = json.loads(result.stdout.decode("utf-8"))
         except json.JSONDecodeError:
-            return {"chapters": [], "duration": 0, "is_live": False}
+            return empty
         return {
             "chapters": data.get("chapters") or [],
             "duration": int(data.get("duration") or 0),

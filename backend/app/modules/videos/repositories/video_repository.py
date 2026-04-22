@@ -1,4 +1,5 @@
 import uuid
+from collections.abc import Sequence
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,6 +15,16 @@ class VideoRepository:
     async def get_by_id(self, video_id: uuid.UUID) -> Video | None:
         result = await self.session.execute(select(Video).where(Video.id == video_id))
         return result.scalar_one_or_none()
+
+    async def get_thumbnails_by_ids(
+        self, video_ids: Sequence[uuid.UUID]
+    ) -> dict[uuid.UUID, str | None]:
+        if not video_ids:
+            return {}
+        result = await self.session.execute(
+            select(Video.id, Video.thumbnail_url).where(Video.id.in_(video_ids))
+        )
+        return {video_id: thumbnail for video_id, thumbnail in result.all()}
 
     async def get_by_url(self, url: str) -> Video | None:
         result = await self.session.execute(select(Video).where(Video.source_url == url))

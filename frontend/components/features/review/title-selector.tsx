@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RefreshCw, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Btn } from "@/components/features/ui/btn";
 
 const MAX_LEN = 100;
-const MANUAL_VALUE = "__manual__";
 
 interface TitleSelectorProps {
   generated: string[] | null;
@@ -17,12 +15,6 @@ interface TitleSelectorProps {
   onRegenerate: () => void;
   disabled?: boolean;
   readOnly?: boolean;
-}
-
-function pickSelection(generated: string[] | null, value: string): string {
-  if (!value) return "";
-  if (generated?.includes(value)) return value;
-  return MANUAL_VALUE;
 }
 
 export function TitleSelector({
@@ -34,121 +26,152 @@ export function TitleSelector({
   readOnly,
 }: TitleSelectorProps) {
   const t = useTranslations("clips.review_page");
-  const [selection, setSelection] = useState<string>(pickSelection(generated, value));
+  const [manualMode, setManualMode] = useState(() => {
+    if (!generated || generated.length === 0) return true;
+    return !!value && !generated.includes(value);
+  });
+
+  const options = generated ?? [];
+  const primary = options[0] ?? null;
+  const secondary = options.slice(1);
 
   const chars = value.length;
   const overLimit = chars > MAX_LEN;
 
-  function handleRadioChange(next: string) {
-    setSelection(next);
-    if (next === MANUAL_VALUE) {
-      // Preserve existing manual value if any; otherwise blank
-      if (generated?.includes(value)) onChange("");
-    } else {
-      onChange(next);
-    }
+  const isManualActive = manualMode || options.length === 0;
+
+  function pickTitle(title: string) {
+    setManualMode(false);
+    onChange(title);
   }
 
-  const showManualInput = selection === MANUAL_VALUE;
-  const options = generated ?? [];
-  const hasGenerated = options.length > 0;
+  function enterManual() {
+    setManualMode(true);
+    if (options.includes(value)) onChange("");
+  }
 
   return (
-    <section className="rounded-xl border border-border bg-card">
-      <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Label className="text-sm font-semibold text-foreground">
-            {t("titleSection")}
-          </Label>
-          <span className="text-xs text-muted-foreground">({t("titleRequired")})</span>
-        </div>
-        <button
-          type="button"
+    <section className="overflow-hidden rounded-xl border border-qs-line bg-qs-bg-elev">
+      <header className="flex items-center gap-2.5 border-b border-qs-line px-4 py-3">
+        <Sparkles className="h-[13px] w-[13px] text-qs-purple" />
+        <span className="text-[12px] font-semibold text-qs-fg">
+          {t("titleSection")}
+        </span>
+        <span className="font-mono text-[10px] text-qs-fg-faint">
+          {chars}/{MAX_LEN}
+        </span>
+        <div className="flex-1" />
+        <Btn
+          size="sm"
+          variant="ghost"
+          icon={<RefreshCw className="h-[11px] w-[11px]" />}
           onClick={onRegenerate}
           disabled={disabled || readOnly}
-          className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-amber-700 hover:bg-amber-50 disabled:opacity-40 dark:text-amber-400 dark:hover:bg-amber-500/10"
         >
-          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 2v6h-6" />
-            <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-            <path d="M3 22v-6h6" />
-            <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-          </svg>
-          {t("titleRegenerate")}
-        </button>
+          Regenerar
+        </Btn>
       </header>
 
-      <div className="px-4 py-4">
-        {!hasGenerated && (
-          <p className="mb-4 rounded-lg border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+      <div className="px-4 pb-1.5 pt-3">
+        {options.length === 0 && !isManualActive && (
+          <p className="mb-3 rounded-lg border border-dashed border-qs-line bg-qs-bg-elev-2 p-3 text-[12px] text-qs-fg-faint">
             {t("aiPlaceholder")}
           </p>
         )}
 
-        {hasGenerated && (
-          <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-              {t("titleOptions")}
+        {primary && !isManualActive && (
+          <button
+            type="button"
+            onClick={() => pickTitle(primary)}
+            disabled={readOnly}
+            className={cn(
+              "mb-2.5 w-full rounded-md border border-[rgba(167,139,250,0.2)] bg-[rgba(167,139,250,0.05)] p-3 text-left transition-colors",
+              value === primary
+                ? "ring-2 ring-[rgba(167,139,250,0.35)]"
+                : "hover:bg-[rgba(167,139,250,0.08)]",
+              readOnly && "cursor-not-allowed",
+            )}
+          >
+            <p className="font-serif text-[17px] leading-[1.25] tracking-[-0.3px] text-qs-fg">
+              {primary}
             </p>
-            <RadioGroup
-              value={selection}
-              onValueChange={handleRadioChange}
-              className="mt-2 space-y-1.5"
-              disabled={readOnly}
-            >
-              {options.map((option, idx) => {
-                const id = `title-option-${idx}`;
-                const isSelected = selection === option;
-                return (
-                  <label
-                    key={id}
-                    htmlFor={id}
-                    className={cn(
-                      "flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm leading-snug transition-colors",
-                      isSelected
-                        ? "border-amber-400/60 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-500/10"
-                        : "border-border hover:bg-muted/40"
-                    )}
-                  >
-                    <RadioGroupItem value={option} id={id} className="mt-0.5" />
-                    <span className="flex-1">{option}</span>
-                  </label>
-                );
-              })}
-              <label
-                htmlFor="title-manual"
-                className={cn(
-                  "flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors",
-                  selection === MANUAL_VALUE
-                    ? "border-amber-400/60 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-500/10"
-                    : "border-border hover:bg-muted/40"
-                )}
-              >
-                <RadioGroupItem value={MANUAL_VALUE} id="title-manual" className="mt-0.5" />
-                <span className="flex-1 text-muted-foreground">{t("titleManual")}</span>
-              </label>
-            </RadioGroup>
-          </div>
+            <div className="mt-2 flex items-center gap-2 text-[10px] text-qs-fg-faint">
+              <span className="font-mono">
+                {primary.length}/{MAX_LEN}
+              </span>
+              <span>·</span>
+              <span className="flex items-center gap-1 text-qs-purple">
+                <Sparkles className="h-[9px] w-[9px]" />
+                Sugerido pela IA
+              </span>
+            </div>
+          </button>
         )}
 
-        {(showManualInput || !hasGenerated) && (
-          <div className={cn(hasGenerated && "mt-4")}>
-            <Input
+        {secondary.length > 0 && !isManualActive && (
+          <>
+            <p className="mb-2 text-[11px] text-qs-fg-faint">Outras opções:</p>
+            {secondary.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => pickTitle(opt)}
+                disabled={readOnly}
+                className={cn(
+                  "mb-1.5 block w-full rounded-md border px-3 py-2.5 text-left text-[12px] leading-[1.35] text-qs-fg-muted transition-colors",
+                  value === opt
+                    ? "border-qs-amber bg-[rgba(245,158,11,0.06)]"
+                    : "border-qs-line hover:border-qs-line-strong hover:bg-qs-bg-subtle",
+                  readOnly && "cursor-not-allowed",
+                )}
+              >
+                {opt}
+              </button>
+            ))}
+          </>
+        )}
+
+        {isManualActive && (
+          <div className="mb-2">
+            <input
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              placeholder={t("titleManual")}
-              maxLength={MAX_LEN + 50}
-              disabled={readOnly}
+              readOnly={readOnly}
+              placeholder="Escreva um título curto e impactante"
+              className="h-11 w-full rounded-lg border border-qs-line bg-qs-bg-elev-2 px-3 text-[13px] text-qs-fg outline-none placeholder:text-qs-fg-ghost focus:border-qs-amber"
             />
             <div
               className={cn(
-                "mt-1.5 text-right text-xs tabular-nums",
-                overLimit ? "text-red-600" : "text-muted-foreground"
+                "mt-1 text-right font-mono text-[10.5px] tabular-nums",
+                overLimit ? "text-qs-danger" : "text-qs-fg-faint",
               )}
             >
-              {t("titleCharCount", { count: chars })}
+              {chars}/{MAX_LEN}
             </div>
           </div>
+        )}
+      </div>
+
+      <div className="border-t border-qs-line/40 px-4 py-2.5">
+        {isManualActive ? (
+          options.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setManualMode(false)}
+              className="text-[11px] text-qs-fg-faint transition-colors hover:text-qs-amber-bright"
+            >
+              ← Voltar para sugestões da IA
+            </button>
+          )
+        ) : (
+          <button
+            type="button"
+            onClick={enterManual}
+            disabled={readOnly}
+            className="text-[11px] text-qs-fg-faint transition-colors hover:text-qs-amber-bright disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Escrever manualmente →
+          </button>
         )}
       </div>
     </section>

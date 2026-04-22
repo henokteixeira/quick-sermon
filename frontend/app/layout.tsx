@@ -27,9 +27,9 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className="dark">
       <body
-        className={`${inter.variable} ${dmSerif.variable} ${inter.className} antialiased`}
+        className={`${inter.variable} ${dmSerif.variable} ${inter.className} antialiased bg-background text-foreground`}
       >
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>{children}</QueryProvider>

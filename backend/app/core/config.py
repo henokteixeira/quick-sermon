@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     YOUTUBE_CLIENT_SECRET: str = ""
     YOUTUBE_OAUTH_ENCRYPTION_KEY: str = ""
 
+    # yt-dlp authentication (optional cookies.txt to bypass YouTube bot check)
+    YTDLP_COOKIES_FILE: str = ""
+
     # YouTube OAuth redirect (external URL where the backend is reachable)
     YOUTUBE_REDIRECT_BASE_URL: str = "http://localhost"
 

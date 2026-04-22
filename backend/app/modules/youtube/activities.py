@@ -238,6 +238,29 @@ def update_youtube_privacy(video_id: str, privacy_status: str) -> None:
     ).execute()
 
 
+def update_youtube_video_snippet(
+    video_id: str, title: str, description: str
+) -> None:
+    """Synchronous helper — update the snippet (title/description) of a YouTube video."""
+    connection_data = _fetch_connection_sync()
+    if not connection_data:
+        raise RuntimeError("No YouTube connection configured")
+
+    credentials = _get_credentials(connection_data)
+    youtube = build("youtube", "v3", credentials=credentials)
+    youtube.videos().update(
+        part="snippet",
+        body={
+            "id": video_id,
+            "snippet": {
+                "title": title,
+                "description": description,
+                "categoryId": "22",
+            },
+        },
+    ).execute()
+
+
 def delete_youtube_video(video_id: str) -> None:
     """Synchronous helper — delete a video from YouTube."""
     connection_data = _fetch_connection_sync()

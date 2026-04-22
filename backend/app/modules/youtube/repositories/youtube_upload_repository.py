@@ -1,4 +1,5 @@
 import uuid
+from collections.abc import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,6 +25,22 @@ class YouTubeUploadRepository:
             .limit(1)
         )
         return result.scalar_one_or_none()
+
+    async def list_by_clip_ids(
+        self, clip_ids: Sequence[uuid.UUID]
+    ) -> dict[uuid.UUID, YouTubeUpload]:
+        if not clip_ids:
+            return {}
+        result = await self.session.execute(
+            select(YouTubeUpload)
+            .where(YouTubeUpload.clip_id.in_(clip_ids))
+            .order_by(YouTubeUpload.created_at.desc())
+        )
+        mapping: dict[uuid.UUID, YouTubeUpload] = {}
+        for upload in result.scalars().all():
+            if upload.clip_id not in mapping:
+                mapping[upload.clip_id] = upload
+        return mapping
 
     async def create(self, upload: YouTubeUpload) -> YouTubeUpload:
         self.session.add(upload)

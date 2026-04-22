@@ -15,7 +15,10 @@ from app.modules.clips.exceptions import (
 from app.modules.clips.models import Clip
 from app.modules.clips.repositories.clip_repository import ClipRepository
 from app.modules.clips.schemas import DESCRIPTION_MAX_LEN, TITLE_MAX_LEN
-from app.modules.youtube.activities import update_youtube_privacy
+from app.modules.youtube.activities import (
+    update_youtube_privacy,
+    update_youtube_video_snippet,
+)
 from app.modules.youtube.exceptions import (
     YouTubeApiException,
     YouTubeInsufficientScopeException,
@@ -54,6 +57,12 @@ class PublishClipService:
         video_id = upload.youtube_video_id
 
         try:
+            await asyncio.to_thread(
+                update_youtube_video_snippet,
+                video_id,
+                (clip.selected_title or "").strip(),
+                (clip.description or "").strip(),
+            )
             await asyncio.to_thread(update_youtube_privacy, video_id, "public")
         except HttpError as exc:
             status = getattr(exc.resp, "status", None)

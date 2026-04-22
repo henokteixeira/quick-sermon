@@ -91,7 +91,7 @@
   "videos": {
     "title": "Vídeos",
     "subtitle": "Gerencie e acompanhe seus vídeos de pregação",
-    "newVideo": "Novo Vídeo",
+    "newVideo": "Novo vídeo",
     "submit": {
       "title": "Submeter Vídeo",
       "subtitle": "Cole a URL de uma live do YouTube para iniciar o processamento",
@@ -175,6 +175,7 @@
       "qualityPlaceholder": "Selecionar qualidade",
       "loadingFormats": "Carregando formatos...",
       "noFormats": "Nenhum formato disponível",
+      "loadFormatsError": "Não foi possível carregar os formatos. Tente novamente em instantes.",
       "estimatedSize": "Tamanho estimado",
       "sizeWarning": "Atenção: o arquivo pode ultrapassar 2 GB. O download pode ser mais lento.",
       "submit": "Criar clip",

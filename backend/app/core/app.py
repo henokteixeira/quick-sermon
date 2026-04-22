@@ -36,6 +36,7 @@ def create_app() -> FastAPI:
     app.add_exception_handler(AppException, app_exception_handler)
 
     # Routers
+    from app.modules.analytics.routes import router as analytics_router
     from app.modules.auth.routes import router as auth_router
     from app.modules.clips.routes import router as clips_router
     from app.modules.health.routes import router as health_router
@@ -49,5 +50,6 @@ def create_app() -> FastAPI:
     app.include_router(videos_router)
     app.include_router(clips_router)
     app.include_router(youtube_router)
+    app.include_router(analytics_router)
 
     return app

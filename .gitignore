@@ -51,3 +51,7 @@ temp/
 *.mkv
 *.m4a
 !frontend/public/**
+
+# Secrets (yt-dlp cookies, etc.)
+secrets/*
+!secrets/.gitkeep

@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.modules.youtube.enums import YouTubeUploadErrorCode, YouTubeUploadStatus
 
@@ -22,8 +22,6 @@ class OAuthAuthorizeResponse(BaseModel):
 
 class UploadRequest(BaseModel):
     clip_id: uuid.UUID
-    title: str | None = Field(default=None, max_length=100)
-    description: str | None = None
 
 
 class YouTubeUploadResponse(BaseModel):

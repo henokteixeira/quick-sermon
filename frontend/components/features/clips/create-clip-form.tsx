@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClip, getVideoFormats } from "@/lib/api/clips";
+import { getApiErrorMessage } from "@/lib/api/client";
 import { VideoFormat } from "@/lib/types/clip";
 import {
   Dialog,
@@ -47,14 +48,19 @@ export function CreateClipForm({
   const {
     data: formatsData,
     isLoading: formatsLoading,
+    error: formatsError,
   } = useQuery({
     queryKey: ["video-formats", videoId, clipDuration],
     queryFn: () => getVideoFormats(videoId, clipDuration),
     enabled: open,
     staleTime: 60_000,
+    retry: false,
   });
 
   const formats = formatsData?.formats ?? [];
+  const formatsErrorMessage = formatsError
+    ? getApiErrorMessage(formatsError) ?? t("loadFormatsError")
+    : null;
 
   useEffect(() => {
     if (formats.length > 0 && !selectedFormat) {
@@ -88,7 +94,7 @@ export function CreateClipForm({
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clips", videoId] });
+      queryClient.invalidateQueries({ queryKey: ["clips"] });
       onOpenChange(false);
     },
   });
@@ -183,6 +189,12 @@ export function CreateClipForm({
               <p className="text-xs text-muted-foreground">
                 {t("loadingFormats")}
               </p>
+            ) : formatsErrorMessage ? (
+              <Alert variant="destructive" className="py-2">
+                <AlertDescription className="text-xs">
+                  {formatsErrorMessage}
+                </AlertDescription>
+              </Alert>
             ) : formats.length === 0 ? (
               <p className="text-xs text-muted-foreground">
                 {t("noFormats")}

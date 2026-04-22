@@ -11,6 +11,7 @@ import structlog
 from temporalio import activity
 
 from app.core.config import settings
+from app.core.ytdlp import build_auth_args
 from app.modules.clips.services.update_clip_status_service import update_clip_status
 
 logger = structlog.get_logger()
@@ -126,6 +127,7 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
         "-o", str(raw_path),
         "--no-playlist",
         "--newline",
+        *build_auth_args(),
         input.source_url,
     ]
 

@@ -42,8 +42,6 @@ class TriggerUploadService:
         self,
         clip_id: uuid.UUID,
         user_id: uuid.UUID,
-        title: str | None = None,
-        description: str | None = None,
     ) -> YouTubeUpload:
         connection = await self.connection_repo.get_active()
         if not connection:
@@ -68,8 +66,10 @@ class TriggerUploadService:
         if not video:
             raise ClipNotFoundException(str(clip_id))
 
-        upload_title = title or f"{video.title or 'Clip'} — Clip"
-        upload_description = description or f"Clip extraido de {video.title or video.source_url}"
+        upload_title = clip.selected_title or f"{video.title or 'Clip'} — Clip"
+        upload_description = (
+            clip.description or f"Clip extraido de {video.title or video.source_url}"
+        )
 
         upload = YouTubeUpload(
             clip_id=clip_id,

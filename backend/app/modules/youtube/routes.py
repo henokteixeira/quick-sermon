@@ -139,7 +139,7 @@ async def trigger_upload(
     service = TriggerUploadService(
         connection_repo, upload_repo, clip_repo, video_repo, temporal_client
     )
-    upload = await service.execute(data.clip_id, user.id, data.title, data.description)
+    upload = await service.execute(data.clip_id, user.id)
     await db.commit()
     return YouTubeUploadResponse.model_validate(upload)
 

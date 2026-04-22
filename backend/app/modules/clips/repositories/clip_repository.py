@@ -1,4 +1,5 @@
 import uuid
+from collections.abc import Sequence
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,6 +15,40 @@ class ClipRepository:
     async def get_by_id(self, clip_id: uuid.UUID) -> Clip | None:
         result = await self.session.execute(select(Clip).where(Clip.id == clip_id))
         return result.scalar_one_or_none()
+
+    async def count_active_by_video_ids(
+        self, video_ids: Sequence[uuid.UUID]
+    ) -> dict[uuid.UUID, int]:
+        if not video_ids:
+            return {}
+        result = await self.session.execute(
+            select(Clip.video_id, func.count(Clip.id))
+            .where(Clip.video_id.in_(video_ids))
+            .where(Clip.status != ClipStatus.DISCARDED)
+            .group_by(Clip.video_id)
+        )
+        return {video_id: count for video_id, count in result.all()}
+
+    async def list_by_status(self, status: ClipStatus) -> list[Clip]:
+        result = await self.session.execute(
+            select(Clip).where(Clip.status == status).order_by(Clip.created_at.desc())
+        )
+        return list(result.scalars().all())
+
+    async def get_status_counts_by_video_ids(
+        self, video_ids: Sequence[uuid.UUID]
+    ) -> dict[uuid.UUID, dict[str, int]]:
+        if not video_ids:
+            return {}
+        result = await self.session.execute(
+            select(Clip.video_id, Clip.status, func.count(Clip.id))
+            .where(Clip.video_id.in_(video_ids))
+            .group_by(Clip.video_id, Clip.status)
+        )
+        counts: dict[uuid.UUID, dict[str, int]] = {}
+        for video_id, status, count in result.all():
+            counts.setdefault(video_id, {})[status] = count
+        return counts
 
     async def create(self, clip: Clip) -> Clip:
         self.session.add(clip)

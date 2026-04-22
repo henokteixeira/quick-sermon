@@ -37,6 +37,8 @@ class VideoResponse(BaseModel):
     upload_date: str | None
     submitted_by: uuid.UUID | None
     created_at: datetime
+    clip_count: int = 0
+    aggregated_status: VideoStatus | None = None
 
     model_config = {"from_attributes": True}
 

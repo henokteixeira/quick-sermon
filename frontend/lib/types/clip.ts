@@ -43,6 +43,7 @@ export interface Clip {
   trimmed_at: string | null;
   uploaded_at: string | null;
   created_at: string;
+  video_thumbnail_url?: string | null;
 }
 
 export interface ClipReviewData {
