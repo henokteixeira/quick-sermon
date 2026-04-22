@@ -55,6 +55,7 @@ class ClipResponse(BaseModel):
     trimmed_at: datetime | None
     uploaded_at: datetime | None
     created_at: datetime
+    video_thumbnail_url: str | None = None
 
     model_config = {"from_attributes": True}
 

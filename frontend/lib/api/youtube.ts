@@ -26,8 +26,6 @@ export async function disconnectYouTube(): Promise<void> {
 
 export async function triggerUpload(data: {
   clip_id: string;
-  title?: string;
-  description?: string;
 }): Promise<YouTubeUpload> {
   const response = await apiClient.post<YouTubeUpload>("/youtube/uploads", data);
   return response.data;

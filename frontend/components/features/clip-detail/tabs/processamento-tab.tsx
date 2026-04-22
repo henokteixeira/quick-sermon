@@ -50,20 +50,20 @@ export function ProcessamentoTab({
   return (
     <div className="space-y-4">
       <header>
-        <h2 className="font-serif text-xl text-foreground">{t("heading")}</h2>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          {t("subheading")}
-        </p>
+        <h2 className="font-serif text-[20px] leading-tight text-qs-fg">
+          {t("heading")}
+        </h2>
+        <p className="mt-0.5 text-[12px] text-qs-fg-subtle">{t("subheading")}</p>
       </header>
 
       {isLoading ? (
-        <div className="rounded-xl border border-border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
+        <div className="rounded-xl border border-qs-line bg-qs-bg-elev px-4 py-8 text-center text-[13px] text-qs-fg-subtle">
           {t("status.running")}...
         </div>
       ) : allPending ? (
-        <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-12 text-center">
+        <div className="rounded-xl border border-dashed border-qs-line bg-qs-bg-elev px-4 py-12 text-center">
           <svg
-            className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40"
+            className="mx-auto mb-3 h-8 w-8 text-qs-fg-ghost"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -74,10 +74,10 @@ export function ProcessamentoTab({
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
-          <p className="text-sm text-muted-foreground">{t("emptyState")}</p>
+          <p className="text-[13px] text-qs-fg-subtle">{t("emptyState")}</p>
         </div>
       ) : pipeline ? (
-        <ol className="relative">
+        <ol className="relative rounded-xl border border-qs-line bg-qs-bg-elev p-5">
           {STAGE_ORDER.map((key, index) => {
             const stage = pipeline[key];
             const isUploadStage = key === "upload";
@@ -91,7 +91,7 @@ export function ProcessamentoTab({
                   type="button"
                   onClick={onRetryDownload}
                   disabled={retryingDownload}
-                  className="inline-flex h-8 items-center rounded-lg border border-blue-500/30 bg-blue-50 px-3 text-xs font-medium text-blue-700 transition-all duration-200 hover:bg-blue-100 active:scale-[0.98] disabled:opacity-60 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
+                  className="inline-flex h-8 items-center rounded-lg border border-[rgba(96,165,250,0.3)] bg-[rgba(96,165,250,0.10)] px-3 text-[11px] font-medium text-qs-info transition-colors hover:bg-[rgba(96,165,250,0.18)] disabled:opacity-60"
                 >
                   {retryingDownload ? t("retrying") : t("retryDownload")}
                 </button>
@@ -103,7 +103,7 @@ export function ProcessamentoTab({
                   type="button"
                   onClick={onRetryUpload}
                   disabled={retryingUpload}
-                  className="inline-flex h-8 items-center rounded-lg border border-red-500/30 bg-red-50 px-3 text-xs font-medium text-red-700 transition-all duration-200 hover:bg-red-100 active:scale-[0.98] disabled:opacity-60 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
+                  className="inline-flex h-8 items-center rounded-lg border border-[rgba(248,113,113,0.3)] bg-[rgba(248,113,113,0.10)] px-3 text-[11px] font-medium text-qs-danger transition-colors hover:bg-[rgba(248,113,113,0.18)] disabled:opacity-60"
                 >
                   {retryingUpload ? t("retrying") : t("retryUpload")}
                 </button>
@@ -128,8 +128,8 @@ export function ProcessamentoTab({
                     className={cn(
                       "absolute left-5 top-10 bottom-0 w-px",
                       stage.status === "completed"
-                        ? "bg-emerald-400/60 dark:bg-emerald-500/40"
-                        : "bg-border"
+                        ? "bg-[rgba(52,211,153,0.4)]"
+                        : "bg-qs-line",
                     )}
                   />
                 )}
@@ -141,13 +141,13 @@ export function ProcessamentoTab({
 
                 <div className="min-w-0 flex-1 pt-0.5">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <h3 className="text-sm font-semibold text-foreground">
+                    <h3 className="text-[13px] font-semibold text-qs-fg">
                       {t(`stages.${key}`)}
                     </h3>
                     <span
                       className={cn(
-                        "text-xs font-medium",
-                        statusTextColor(stage.status)
+                        "font-mono text-[11px] font-medium",
+                        statusTextColor(stage.status),
                       )}
                     >
                       {t(`status.${stage.status}`)}
@@ -157,22 +157,20 @@ export function ProcessamentoTab({
                   {stage.status === "running" && (
                     <div className="mt-2">
                       {stage.percent !== null && (
-                        <div className="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
-                          <span className="font-mono font-medium text-foreground">
+                        <div className="flex items-center justify-between font-mono text-[11px] tabular-nums text-qs-fg-faint">
+                          <span className="font-medium text-qs-fg-muted">
                             {stage.percent.toFixed(0)}%
                           </span>
-                          {stage.speed && (
-                            <span className="font-mono">{stage.speed}</span>
-                          )}
+                          {stage.speed && <span>{stage.speed}</span>}
                         </div>
                       )}
-                      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-qs-bg-elev-2">
                         <div
                           className={cn(
                             "h-full rounded-full transition-all duration-500",
                             stage.percent === null
-                              ? "w-full animate-pulse bg-gradient-to-r from-blue-500/40 to-blue-400/40"
-                              : "bg-gradient-to-r from-blue-500 to-blue-400"
+                              ? "w-full animate-pulse bg-qs-amber/40"
+                              : "bg-qs-amber",
                           )}
                           style={
                             stage.percent !== null
@@ -185,7 +183,7 @@ export function ProcessamentoTab({
                   )}
 
                   {stage.status === "completed" && stage.completed_at && (
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="mt-1 font-mono text-[11px] text-qs-fg-faint">
                       {t("completedAt", {
                         date: formatDate(stage.completed_at),
                       })}
@@ -194,7 +192,7 @@ export function ProcessamentoTab({
 
                   {stage.status === "error" && errorText && (
                     <div className="mt-2 space-y-2">
-                      <p className="rounded-lg border border-red-300/40 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+                      <p className="rounded-lg border border-[rgba(248,113,113,0.28)] bg-[rgba(248,113,113,0.10)] px-3 py-2 text-[11px] text-qs-danger">
                         {errorText}
                       </p>
                       {retryCta}
@@ -272,25 +270,25 @@ function StageBubble({
 function bubbleClasses(status: PipelineStageStatus) {
   switch (status) {
     case "completed":
-      return "border border-emerald-300/60 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300";
+      return "border border-[rgba(52,211,153,0.3)] bg-[rgba(52,211,153,0.12)] text-qs-ok";
     case "running":
-      return "border border-blue-300/60 bg-blue-50 text-blue-700 shadow-sm shadow-blue-500/10 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300";
+      return "border border-[rgba(245,158,11,0.3)] bg-[rgba(245,158,11,0.10)] text-qs-amber-bright";
     case "error":
-      return "border border-red-300/60 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300";
+      return "border border-[rgba(248,113,113,0.3)] bg-[rgba(248,113,113,0.10)] text-qs-danger";
     default:
-      return "border border-dashed border-border bg-muted text-muted-foreground";
+      return "border border-dashed border-qs-line bg-qs-bg-elev-2 text-qs-fg-faint";
   }
 }
 
 function statusTextColor(status: PipelineStageStatus) {
   switch (status) {
     case "completed":
-      return "text-emerald-600 dark:text-emerald-400";
+      return "text-qs-ok";
     case "running":
-      return "text-blue-600 dark:text-blue-400";
+      return "text-qs-amber-bright";
     case "error":
-      return "text-red-600 dark:text-red-400";
+      return "text-qs-danger";
     default:
-      return "text-muted-foreground";
+      return "text-qs-fg-faint";
   }
 }

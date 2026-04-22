@@ -1,16 +1,36 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
+import {
+  ArrowLeft,
+  Check,
+  Loader2,
+  Trash2,
+  Upload,
+  Youtube,
+} from "lucide-react";
 import { getClipYouTubeStats } from "@/lib/api/clips";
+import { getVideo } from "@/lib/api/videos";
 import { Clip, ClipReviewData } from "@/lib/types/clip";
-import { ClipStatusBadge } from "@/components/features/clips/clip-status-badge";
-import { formatTime, formatDate, formatViews } from "@/lib/formatters";
+import { Btn } from "@/components/features/ui/btn";
+import {
+  DownloadMenu,
+  DownloadIcons,
+} from "@/components/features/ui/download-menu";
+import { SaveStatus } from "@/lib/hooks/use-clip-autosave";
+import { cn } from "@/lib/utils";
+import {
+  formatFileSizeFromBytes,
+  formatTime,
+} from "@/lib/formatters";
 
 interface DetailHeaderProps {
   clip: Clip;
   review: ClipReviewData | undefined;
   isAdmin: boolean;
+  autosaveStatus: SaveStatus;
   onSendForReview: () => void;
   sendingForReview: boolean;
   onPublish: () => void;
@@ -19,12 +39,14 @@ interface DetailHeaderProps {
   discarding: boolean;
   onRetry: () => void;
   retrying: boolean;
+  onDownloadFile: () => void;
 }
 
 export function DetailHeader({
   clip,
   review,
   isAdmin,
+  autosaveStatus,
   onSendForReview,
   sendingForReview,
   onPublish,
@@ -33,17 +55,23 @@ export function DetailHeader({
   discarding,
   onRetry,
   retrying,
+  onDownloadFile,
 }: DetailHeaderProps) {
-  const t = useTranslations("clips.detail_page");
+  const tDetail = useTranslations("clips.detail_page");
+
+  const { data: video } = useQuery({
+    queryKey: ["video", clip.video_id],
+    queryFn: () => getVideo(clip.video_id),
+    staleTime: 60_000,
+  });
 
   const title =
     clip.selected_title?.trim() ||
-    t("titleFallback", {
+    tDetail("titleFallback", {
       start: formatTime(clip.start_time),
       end: formatTime(clip.end_time),
     });
 
-  const duration = clip.duration ? formatTime(clip.duration) : null;
   const youtubeUrl = review?.youtube_url ?? null;
   const isPublished = clip.status === "published";
   const isAwaitingReview = clip.status === "awaiting_review";
@@ -59,131 +87,133 @@ export function DetailHeader({
     staleTime: 60_000,
   });
 
-  const metaItems: React.ReactNode[] = [];
-  if (duration) {
-    metaItems.push(
-      <span key="duration" className="inline-flex items-center gap-1.5 tabular-nums">
-        <svg
-          className="h-3.5 w-3.5 opacity-50"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
-        </svg>
-        {duration}
-      </span>
-    );
-  }
-  metaItems.push(
-    <span key="created" className="inline-flex items-center gap-1.5">
-      <svg
-        className="h-3.5 w-3.5 opacity-50"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-      </svg>
-      {t("meta.createdAt", { date: formatDate(clip.created_at) })}
-    </span>
-  );
-  if (isPublished && stats?.view_count != null) {
-    metaItems.push(
-      <span key="views" className="inline-flex items-center gap-1.5 tabular-nums">
-        <svg
-          className="h-3.5 w-3.5 opacity-50"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-          <circle cx="12" cy="12" r="3" />
-        </svg>
-        {t("meta.views", { views: formatViews(stats.view_count) })}
-      </span>
-    );
-  }
+  const downloadOptions = [
+    {
+      id: "clip",
+      icon: DownloadIcons.clip,
+      label: "Clipe exportado",
+      meta: clip.file_size
+        ? `MP4 · ${clip.resolution ?? clip.quality} · ${formatFileSizeFromBytes(clip.file_size)}`
+        : `MP4 · ${clip.resolution ?? clip.quality}`,
+      primary: true,
+      onSelect: onDownloadFile,
+      disabled: !clip.file_path,
+    },
+    {
+      id: "video",
+      icon: DownloadIcons.video,
+      label: "Vídeo original",
+      meta: video?.source_url
+        ? `Link YouTube · ${video.source_url.replace(/^https?:\/\//, "").slice(0, 28)}…`
+        : "Link do YouTube",
+      onSelect: () => {
+        if (video?.source_url) window.open(video.source_url, "_blank");
+      },
+      disabled: !video?.source_url,
+    },
+    {
+      id: "audio",
+      icon: DownloadIcons.audio,
+      label: "Apenas áudio",
+      meta: "MP3 · em breve",
+      disabled: true,
+    },
+    {
+      id: "captions",
+      icon: DownloadIcons.captions,
+      label: "Legendas",
+      meta: "SRT · em breve",
+      disabled: true,
+    },
+    {
+      id: "transcript",
+      icon: DownloadIcons.transcript,
+      label: "Transcrição",
+      meta: "TXT · em breve",
+      disabled: true,
+    },
+  ];
 
   return (
-    <div className="mb-6">
-      <div className="mb-3 flex items-start gap-3">
-        <h1 className="flex-1 font-serif text-2xl leading-tight text-foreground">
-          {title}
-        </h1>
-        <div className="shrink-0 pt-1">
-          <ClipStatusBadge status={clip.status} />
+    <div className="mb-[18px] flex flex-col">
+      {/* Back link */}
+      <Link
+        href={`/videos/${clip.video_id}`}
+        className="mb-3.5 flex w-fit items-center gap-1.5 text-[12px] text-qs-fg-subtle transition-colors hover:text-qs-fg-muted"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" />
+        <span className="max-w-[420px] truncate">
+          Voltar para {video?.title ?? "vídeo"}
+        </span>
+      </Link>
+
+      {/* Title row */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="font-serif text-[26px] leading-[1.15] tracking-[-0.5px] text-qs-fg">
+            {title}
+          </h1>
+          <p className="mt-1.5 text-[13px] text-qs-fg-subtle">
+            Revise o conteúdo gerado e publique no YouTube.
+          </p>
         </div>
-      </div>
+        <div className="flex items-center gap-1.5">
+          <SaveIndicator status={autosaveStatus} />
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
-        {metaItems.map((node, idx) => (
-          <span key={idx} className="inline-flex items-center gap-3">
-            {idx > 0 && (
-              <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/40" />
-            )}
-            {node}
-          </span>
-        ))}
+          <DownloadMenu options={downloadOptions} />
 
-        <div className="ml-auto flex items-center gap-2">
           {canDiscardHere && (
-            <button
-              type="button"
+            <Btn
+              size="sm"
+              variant="danger"
+              icon={<Trash2 className="h-3 w-3" />}
               onClick={onDiscard}
               disabled={discarding}
-              className="inline-flex h-9 items-center rounded-lg border border-border px-3 text-xs font-medium text-muted-foreground transition-all duration-200 hover:border-red-400/50 hover:bg-red-50 hover:text-red-700 disabled:opacity-50 dark:hover:bg-red-500/10 dark:hover:text-red-300"
             >
-              {discarding ? t("actions.discarding") : t("actions.discard")}
-            </button>
+              {discarding ? tDetail("actions.discarding") : "Descartar"}
+            </Btn>
           )}
 
           {isReady && (
-            <button
-              type="button"
+            <Btn
+              size="sm"
+              variant="primary"
+              icon={<Upload className="h-3 w-3" />}
               onClick={onSendForReview}
               disabled={sendingForReview}
-              className="inline-flex h-9 items-center rounded-lg bg-amber-500 px-4 text-xs font-semibold text-stone-950 shadow-sm shadow-amber-500/20 transition-all duration-200 hover:bg-amber-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {sendingForReview
-                ? t("actions.sendingForReview")
-                : t("actions.sendForReview")}
-            </button>
+                ? tDetail("actions.sendingForReview")
+                : tDetail("actions.sendForReview")}
+            </Btn>
           )}
 
           {isAwaitingReview && isAdmin && (
-            <button
-              type="button"
+            <Btn
+              size="sm"
+              variant="primary"
+              icon={<Upload className="h-3 w-3" />}
               onClick={onPublish}
               disabled={publishing}
-              className="inline-flex h-9 items-center rounded-lg bg-amber-500 px-4 text-xs font-semibold text-stone-950 shadow-sm shadow-amber-500/20 transition-all duration-200 hover:bg-amber-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {publishing ? t("actions.publishing") : t("actions.publish")}
-            </button>
+              {publishing ? tDetail("actions.publishing") : "Publicar no YouTube"}
+            </Btn>
           )}
 
           {isError && (
-            <button
-              type="button"
+            <Btn
+              size="sm"
+              variant="primary"
+              icon={
+                <Loader2
+                  className={cn("h-3 w-3", retrying && "animate-spin")}
+                />
+              }
               onClick={onRetry}
               disabled={retrying}
-              className="inline-flex h-9 items-center rounded-lg bg-blue-600 px-4 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60"
             >
-              {t("actions.retry")}
-            </button>
+              {tDetail("actions.retry")}
+            </Btn>
           )}
 
           {isPublished && youtubeUrl && (
@@ -191,20 +221,63 @@ export function DetailHeader({
               href={youtubeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-50 px-3 text-xs font-semibold text-red-700 transition-all duration-200 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
+              className="inline-flex h-[30px] items-center gap-1.5 rounded-lg border border-[rgba(255,0,51,0.3)] bg-[rgba(255,0,51,0.08)] px-3 text-[12px] font-semibold text-[#ff6b8a] transition-colors hover:bg-[rgba(255,0,51,0.14)]"
             >
-              <svg
-                className="h-3.5 w-3.5"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-              </svg>
-              {t("actions.viewOnYoutube")}
+              <Youtube className="h-3 w-3" />
+              Ver no YouTube
             </a>
+          )}
+
+          {isPublished && stats?.view_count != null && (
+            <span className="flex h-[30px] items-center gap-1 rounded-lg border border-qs-line bg-qs-bg-elev-2 px-2 font-mono text-[11px] text-qs-fg-muted">
+              {formatCount(stats.view_count)} views
+            </span>
           )}
         </div>
       </div>
     </div>
   );
+}
+
+function SaveIndicator({ status }: { status: SaveStatus }) {
+  const t = useTranslations("clips.review_page");
+  if (status === "idle") {
+    return (
+      <span className="mr-1 flex items-center gap-1.5 text-[11px] text-qs-fg-faint">
+        <Check className="h-2.5 w-2.5 text-qs-ok" />
+        {t("savedJustNow")}
+      </span>
+    );
+  }
+  const dotClass =
+    status === "error"
+      ? "bg-qs-danger"
+      : status === "saving"
+        ? "bg-qs-amber animate-pulse"
+        : "bg-qs-ok";
+  const textClass =
+    status === "error" ? "text-qs-danger" : "text-qs-fg-faint";
+  const label =
+    status === "saving"
+      ? t("savingNow")
+      : status === "saved"
+        ? t("savedJustNow")
+        : t("saveError");
+  return (
+    <span
+      className={cn(
+        "mr-1 flex items-center gap-1.5 text-[11px]",
+        textClass,
+      )}
+    >
+      <span className={cn("h-1.5 w-1.5 rounded-full", dotClass)} />
+      {label}
+    </span>
+  );
+}
+
+function formatCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toLocaleString("pt-BR");
 }

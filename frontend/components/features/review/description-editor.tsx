@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RefreshCw, Sparkles } from "lucide-react";
+import { Btn } from "@/components/features/ui/btn";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +14,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
 
 const MAX_LEN = 5000;
 
@@ -43,11 +42,8 @@ export function DescriptionEditor({
   const userEdited = !!value && value !== (generated ?? "");
 
   function handleRegenerateClick() {
-    if (userEdited) {
-      setConfirmOpen(true);
-    } else {
-      onRegenerate();
-    }
+    if (userEdited) setConfirmOpen(true);
+    else onRegenerate();
   }
 
   function handleConfirmRegenerate() {
@@ -55,53 +51,50 @@ export function DescriptionEditor({
     onRegenerate();
   }
 
-  const hasContent = !!value;
-
   return (
-    <section className="rounded-xl border border-border bg-card">
-      <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-        <Label className="text-sm font-semibold text-foreground">
+    <section className="overflow-hidden rounded-xl border border-qs-line bg-qs-bg-elev">
+      <header className="flex items-center gap-2.5 border-b border-qs-line px-4 py-3">
+        <Sparkles className="h-[13px] w-[13px] text-qs-purple" />
+        <span className="text-[12px] font-semibold text-qs-fg">
           {t("descriptionSection")}
-        </Label>
-        <button
-          type="button"
+        </span>
+        <span className="font-mono text-[10px] text-qs-fg-faint">
+          {chars}/{MAX_LEN}
+        </span>
+        <div className="flex-1" />
+        <Btn
+          size="sm"
+          variant="ghost"
+          icon={<RefreshCw className="h-[11px] w-[11px]" />}
           onClick={handleRegenerateClick}
           disabled={disabled || readOnly}
-          className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-amber-700 hover:bg-amber-50 disabled:opacity-40 dark:text-amber-400 dark:hover:bg-amber-500/10"
         >
-          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 2v6h-6" />
-            <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-            <path d="M3 22v-6h6" />
-            <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-          </svg>
-          {t("descriptionRegenerate")}
-        </button>
+          Regenerar
+        </Btn>
       </header>
 
-      <div className="px-4 py-4">
-        {!hasContent && !generated && (
-          <p className="mb-3 rounded-lg border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+      <div className="p-4">
+        {!value && !generated && (
+          <p className="mb-3 rounded-lg border border-dashed border-qs-line bg-qs-bg-elev-2 p-3 text-[12px] text-qs-fg-faint">
             {t("aiPlaceholder")}
           </p>
         )}
 
-        <Textarea
-          className="min-h-[160px] resize-y"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={t("descriptionPlaceholder")}
-          maxLength={MAX_LEN + 500}
-          disabled={readOnly}
-        />
-        <div
-          className={cn(
-            "mt-1.5 text-right text-xs tabular-nums",
-            overLimit ? "text-red-600" : "text-muted-foreground"
-          )}
-        >
-          {t("descriptionCharCount", { count: chars })}
+        <div className="rounded-md border border-qs-line bg-qs-bg-elev-2">
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={t("descriptionPlaceholder")}
+            maxLength={MAX_LEN + 500}
+            disabled={readOnly}
+            className="min-h-[180px] w-full resize-y whitespace-pre-line rounded-md bg-transparent p-3.5 text-[12px] leading-[1.6] text-qs-fg-muted outline-none placeholder:text-qs-fg-ghost"
+          />
         </div>
+        {overLimit && (
+          <p className="mt-1.5 text-right font-mono text-[10.5px] text-qs-danger">
+            Excedeu o limite de {MAX_LEN} caracteres
+          </p>
+        )}
       </div>
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
@@ -123,4 +116,3 @@ export function DescriptionEditor({
     </section>
   );
 }
-

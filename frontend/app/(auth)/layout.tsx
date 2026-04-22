@@ -1,41 +1,25 @@
-"use client";
-
-import { useEffect } from "react";
+import { AmberGlow } from "@/components/features/ui/amber-glow";
+import { Logomark } from "@/components/features/ui/logomark";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    document.documentElement.style.backgroundColor = "#0c0a09";
-    document.body.style.backgroundColor = "#0c0a09";
-    return () => {
-      document.documentElement.style.backgroundColor = "";
-      document.body.style.backgroundColor = "";
-    };
-  }, []);
-
   return (
-    <div className="fixed inset-0 bg-stone-950 text-stone-200 flex flex-col overflow-auto">
-      {/* Ambient glows */}
-      <div className="absolute w-[400px] h-[400px] rounded-full bg-amber-500/10 blur-[120px] top-[5%] left-[15%] pointer-events-none" />
-      <div className="absolute w-[300px] h-[300px] rounded-full bg-amber-700/8 blur-[100px] bottom-[10%] right-[20%] pointer-events-none" />
+    <div className="qs-root relative flex min-h-screen flex-col overflow-hidden bg-background text-qs-fg-muted">
+      <AmberGlow size={380} opacity={0.12} top={-80} left={-60} />
+      <AmberGlow size={300} opacity={0.08} bottom={-40} right={-40} color="deep" />
 
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-12">
-        {/* Logo */}
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-9 h-9 rounded-lg bg-amber-500 flex items-center justify-center">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
-          </div>
-          <span className="text-stone-400 text-sm font-medium tracking-widest uppercase">
-            Quick Sermon
-          </span>
-        </div>
+      <div className="relative z-10 flex items-center gap-2.5 px-6 py-7 md:px-10 md:py-8">
+        <Logomark size={30} />
+        <span className="text-[11px] font-semibold uppercase tracking-[2px] text-qs-fg-subtle">
+          Quick Sermon
+        </span>
+      </div>
 
-        <div className="w-full max-w-sm">{children}</div>
+      <div className="relative z-10 flex flex-1 items-center justify-center px-6 pb-10 md:px-10">
+        <div className="w-full max-w-[380px]">{children}</div>
       </div>
     </div>
   );

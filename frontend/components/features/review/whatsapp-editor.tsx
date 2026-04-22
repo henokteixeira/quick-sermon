@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Copy, MessageCircle, RefreshCw } from "lucide-react";
+import { Btn } from "@/components/features/ui/btn";
 
 interface WhatsappEditorProps {
   value: string;
@@ -35,61 +35,51 @@ export function WhatsappEditor({
   }
 
   return (
-    <section className="rounded-xl border border-border bg-card">
-      <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-        <Label className="text-sm font-semibold text-foreground">
+    <section className="overflow-hidden rounded-xl border border-qs-line bg-qs-bg-elev">
+      <header className="flex items-center gap-2.5 border-b border-qs-line px-4 py-3">
+        <MessageCircle className="h-[13px] w-[13px] text-qs-ok" />
+        <span className="text-[12px] font-semibold text-qs-fg">
           {t("whatsappSection")}
-        </Label>
-        <button
-          type="button"
-          onClick={onRegenerate}
-          disabled={disabled || readOnly}
-          className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-amber-700 hover:bg-amber-50 disabled:opacity-40 dark:text-amber-400 dark:hover:bg-amber-500/10"
-        >
-          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 2v6h-6" />
-            <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-            <path d="M3 22v-6h6" />
-            <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-          </svg>
-          {t("whatsappRegenerate")}
-        </button>
-      </header>
-
-      <div className="px-4 py-4">
-        <Textarea
-          className="min-h-[110px] resize-y"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={t("whatsappPlaceholder")}
-          disabled={readOnly}
-        />
-
-        <div className="mt-3 flex items-center justify-between gap-3">
-          <span className="text-xs text-muted-foreground">
-            {!copyEnabled && t("whatsappCopyDisabledHint")}
-          </span>
-          <button
-            type="button"
+        </span>
+        <div className="flex-1" />
+        <div className="flex gap-1">
+          <Btn
+            size="sm"
+            variant="ghost"
+            icon={<RefreshCw className="h-[11px] w-[11px]" />}
+            onClick={onRegenerate}
+            disabled={disabled || readOnly}
+          >
+            Regenerar
+          </Btn>
+          <Btn
+            size="sm"
+            variant="secondary"
+            icon={<Copy className="h-[11px] w-[11px]" />}
             onClick={handleCopy}
             disabled={!copyEnabled || !value}
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-background px-3 text-xs font-medium text-foreground hover:bg-muted disabled:opacity-40"
+            title={!copyEnabled ? t("whatsappCopyDisabledHint") : undefined}
           >
-            <svg
-              className="h-3.5 w-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
-            {t("whatsappCopy")}
-          </button>
+            Copiar
+          </Btn>
         </div>
+      </header>
+
+      <div className="p-4">
+        <div className="rounded-md border border-[rgba(74,222,128,0.15)] bg-[rgba(74,222,128,0.04)]">
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={t("whatsappPlaceholder")}
+            disabled={readOnly}
+            className="min-h-[140px] w-full resize-y whitespace-pre-line rounded-md bg-transparent p-3.5 text-[12px] leading-[1.55] text-qs-fg-muted outline-none placeholder:text-qs-fg-ghost"
+          />
+        </div>
+        {!copyEnabled && (
+          <p className="mt-2 text-[11px] text-qs-fg-faint">
+            {t("whatsappCopyDisabledHint")}
+          </p>
+        )}
       </div>
     </section>
   );

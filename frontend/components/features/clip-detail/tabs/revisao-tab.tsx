@@ -1,10 +1,17 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Eye } from "lucide-react";
 import { regenerateField } from "@/lib/api/clips";
-import { Clip, ClipDraftUpdate, ClipReviewData, RegenerateField } from "@/lib/types/clip";
+import { getVideo } from "@/lib/api/videos";
+import {
+  Clip,
+  ClipDraftUpdate,
+  ClipReviewData,
+  RegenerateField,
+} from "@/lib/types/clip";
 import { SaveStatus } from "@/lib/hooks/use-clip-autosave";
 import { TitleSelector } from "@/components/features/review/title-selector";
 import { DescriptionEditor } from "@/components/features/review/description-editor";
@@ -12,6 +19,8 @@ import { WhatsappEditor } from "@/components/features/review/whatsapp-editor";
 import { YouTubeEmbedPlayer } from "@/components/features/review/youtube-embed-player";
 import { LocalVideoPlayer } from "@/components/features/review/local-video-player";
 import { PublishedBanner } from "@/components/features/review/published-banner";
+import { StatusBadge } from "@/components/features/ui/status-badge";
+import { ThumbPlaceholder } from "@/components/features/ui/thumb-placeholder";
 import { formatTime } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +30,7 @@ interface RevisaoTabProps {
   draft: ClipDraftUpdate;
   onDraftChange: <K extends keyof ClipDraftUpdate>(
     field: K,
-    value: ClipDraftUpdate[K]
+    value: ClipDraftUpdate[K],
   ) => void;
   autosaveStatus: SaveStatus;
   isAdmin: boolean;
@@ -42,11 +51,8 @@ export function RevisaoTab({
     onError: (err) => {
       const status = (err as { response?: { status?: number } })?.response
         ?.status;
-      if (status === 501) {
-        toast.error(t("aiNotAvailable"));
-      } else {
-        toast.error(t("publishError.unknown"));
-      }
+      if (status === 501) toast.error(t("aiNotAvailable"));
+      else toast.error(t("publishError.unknown"));
     },
   });
 
@@ -61,30 +67,46 @@ export function RevisaoTab({
   const whatsappValue = draft.whatsapp_message ?? "";
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-3.5">
       {clip.status === "published" && (
         <PublishedBanner youtubeUrl={youtubeUrl} />
       )}
       {clip.status === "discarded" && (
-        <div className="rounded-xl border border-stone-300 bg-stone-50 p-3 text-sm text-stone-700 dark:border-stone-600 dark:bg-stone-900/40 dark:text-stone-300">
+        <div className="rounded-xl border border-qs-line bg-qs-bg-elev p-3 text-[13px] text-qs-fg-muted">
           <p className="font-semibold">{t("discardedBannerTitle")}</p>
-          <p className="text-xs text-stone-600 dark:text-stone-400">
+          <p className="text-[11px] text-qs-fg-faint">
             {t("discardedBannerDescription")}
           </p>
         </div>
       )}
       {!isAdmin && isAwaitingReview && (
-        <div className="rounded-xl border border-amber-300/50 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+        <div className="rounded-xl border border-[rgba(245,158,11,0.28)] bg-[rgba(245,158,11,0.06)] p-3 text-[11px] text-qs-amber-bright">
           {t("publishDisabledByRole")}
         </div>
       )}
 
-      <div className="flex items-center justify-end">
-        <SaveIndicator status={autosaveStatus} />
-      </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[380px_1fr]">
+        {/* LEFT — Preview + meta */}
+        <div className="flex flex-col gap-3.5">
+          {youtubeVideoId ? (
+            <YouTubeEmbedPlayer videoId={youtubeVideoId} title={titleValue} />
+          ) : hasLocalFile ? (
+            <LocalVideoPlayer clipId={clip.id} />
+          ) : (
+            <PreviewPlaceholder clip={clip} />
+          )}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="min-w-0 space-y-5">
+          <DetailsCard
+            clip={clip}
+            review={review}
+            autosaveStatus={autosaveStatus}
+          />
+
+          <SourceCard videoId={clip.video_id} />
+        </div>
+
+        {/* RIGHT — Editors */}
+        <div className="flex min-w-0 flex-col gap-3.5">
           <TitleSelector
             generated={review?.generated_titles ?? null}
             value={titleValue}
@@ -93,7 +115,6 @@ export function RevisaoTab({
             disabled={regenerateMutation.isPending}
             readOnly={isReadOnly}
           />
-
           <DescriptionEditor
             generated={review?.generated_description ?? null}
             value={descriptionValue}
@@ -102,7 +123,6 @@ export function RevisaoTab({
             disabled={regenerateMutation.isPending}
             readOnly={isReadOnly}
           />
-
           <WhatsappEditor
             value={whatsappValue}
             onChange={(v) => onDraftChange("whatsapp_message", v)}
@@ -112,20 +132,40 @@ export function RevisaoTab({
             readOnly={isReadOnly}
           />
         </div>
+      </div>
+    </div>
+  );
+}
 
-        <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start">
-          {youtubeVideoId ? (
-            <YouTubeEmbedPlayer videoId={youtubeVideoId} title={titleValue} />
-          ) : hasLocalFile ? (
-            <LocalVideoPlayer clipId={clip.id} />
-          ) : (
-            <div className="flex aspect-video items-center justify-center rounded-xl border border-border bg-muted text-sm text-muted-foreground">
-              {t("loading")}
-            </div>
-          )}
-
-          <DetailsCard clip={clip} review={review} />
-        </aside>
+function PreviewPlaceholder({ clip }: { clip: Clip }) {
+  const duration = clip.duration ?? clip.end_time - clip.start_time;
+  return (
+    <div className="relative aspect-video overflow-hidden rounded-xl border border-qs-line bg-black">
+      <div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(135deg, #1a1a1a 0 6px, #0a0a0a 6px 12px)",
+        }}
+      >
+        <div className="flex h-[52px] w-[52px] items-center justify-center rounded-full bg-white/10 backdrop-blur-[10px]">
+          <svg
+            className="ml-0.5 h-[18px] w-[18px] text-qs-fg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+        </div>
+      </div>
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-3">
+        <div className="h-[2px] overflow-hidden rounded-[2px] bg-white/20">
+          <div className="h-full w-[34%] bg-qs-amber" />
+        </div>
+        <div className="mt-1.5 flex justify-between font-mono text-[9px] text-white/80">
+          <span>{formatTime(Math.floor(duration * 0.34))}</span>
+          <span>{formatTime(duration)}</span>
+        </div>
       </div>
     </div>
   );
@@ -134,65 +174,99 @@ export function RevisaoTab({
 function DetailsCard({
   clip,
   review,
+  autosaveStatus,
 }: {
   clip: Clip;
   review: ClipReviewData | undefined;
+  autosaveStatus: SaveStatus;
 }) {
   const t = useTranslations("clips.review_page");
-
   const visibility =
     clip.status === "published"
       ? t("visibilityPublic")
       : t("visibilityUnlisted");
-  const visibilityColor =
-    clip.status === "published"
-      ? "text-emerald-600 dark:text-emerald-400"
-      : "text-muted-foreground";
+  const duration = clip.duration ?? clip.end_time - clip.start_time;
+  const statusLabel = labelForClipStatus(clip.status);
 
   return (
-    <div className="rounded-xl border border-border bg-card">
-      <div className="divide-y divide-border text-xs">
-        <DetailRow label={t("detailsVisibility")}>
-          <span className={cn("font-medium", visibilityColor)}>{visibility}</span>
+    <div className="overflow-hidden rounded-xl border border-qs-line bg-qs-bg-elev">
+      <div className="flex items-center justify-between border-b border-qs-line px-4 py-2.5">
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-[1px] text-qs-fg-subtle">
+          Detalhes
+        </span>
+        <SaveIndicator status={autosaveStatus} />
+      </div>
+      <DetailRow label="Status">
+        <StatusBadge
+          state={clip.status}
+          label={statusLabel}
+        />
+      </DetailRow>
+      <DetailRow label="Visibilidade">
+        <span className="flex items-center gap-1.5 text-[12px] text-qs-fg">
+          <Eye className="h-3 w-3" />
+          {visibility}
+        </span>
+      </DetailRow>
+      <DetailRow label="Trecho">
+        <span className="font-mono text-[12px] tabular-nums text-qs-fg">
+          {formatTime(clip.start_time)} → {formatTime(clip.end_time)}
+        </span>
+      </DetailRow>
+      <DetailRow label="Duração" last={!review?.youtube_url && !clip.published_at}>
+        <span className="font-mono text-[12px] tabular-nums text-qs-fg">
+          {formatTime(duration)}
+        </span>
+      </DetailRow>
+      {review?.youtube_url && (
+        <DetailRow label="Link do YouTube" last={!clip.published_at}>
+          <a
+            href={review.youtube_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="truncate font-mono text-[12px] text-qs-amber-bright hover:underline"
+          >
+            {review.youtube_url.replace(/^https?:\/\//, "")}
+          </a>
         </DetailRow>
-
-        <DetailRow label={t("detailsTrecho")}>
-          <span className="font-mono tabular-nums">
-            {formatTime(clip.start_time)} — {formatTime(clip.end_time)}
+      )}
+      {clip.published_at && (
+        <DetailRow label="Publicado em" last>
+          <span className="text-[12px] text-qs-fg">
+            {new Date(clip.published_at).toLocaleString("pt-BR", {
+              dateStyle: "short",
+              timeStyle: "short",
+            })}
           </span>
         </DetailRow>
+      )}
+    </div>
+  );
+}
 
-        {clip.duration != null && (
-          <DetailRow label={t("detailsDuration")}>
-            <span className="font-mono tabular-nums">
-              {formatTime(clip.duration)}
-            </span>
-          </DetailRow>
-        )}
+function SourceCard({ videoId }: { videoId: string }) {
+  const { data: video } = useQuery({
+    queryKey: ["video", videoId],
+    queryFn: () => getVideo(videoId),
+    staleTime: 60_000,
+  });
 
-        {review?.youtube_url && (
-          <DetailRow label={t("detailsYoutubeLink")}>
-            <a
-              href={review.youtube_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="truncate text-amber-600 hover:underline dark:text-amber-400"
-            >
-              {review.youtube_url.replace(/^https?:\/\//, "")}
-            </a>
-          </DetailRow>
-        )}
-
-        {clip.published_at && (
-          <DetailRow label={t("detailsPublishedAt")}>
-            <span>
-              {new Date(clip.published_at).toLocaleString("pt-BR", {
-                dateStyle: "short",
-                timeStyle: "short",
-              })}
-            </span>
-          </DetailRow>
-        )}
+  return (
+    <div className="rounded-xl border border-qs-line bg-qs-bg-elev p-3.5">
+      <div className="flex items-center gap-2.5">
+        <ThumbPlaceholder
+          width={60}
+          height={34}
+          imageUrl={video?.thumbnail_url ?? undefined}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="mb-0.5 text-[11px] text-qs-fg-faint">
+            Vídeo de origem
+          </div>
+          <div className="truncate text-[12px] font-medium text-qs-fg">
+            {video?.title ?? "Carregando…"}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -201,16 +275,21 @@ function DetailsCard({
 function DetailRow({
   label,
   children,
+  last,
 }: {
   label: string;
   children: React.ReactNode;
+  last?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 px-3 py-2.5">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="min-w-0 max-w-[60%] truncate text-right text-foreground">
-        {children}
-      </span>
+    <div
+      className={cn(
+        "flex items-center justify-between gap-3 px-4 py-2.5",
+        !last && "border-b border-qs-line/50",
+      )}
+    >
+      <span className="text-[11px] text-qs-fg-faint">{label}</span>
+      <span className="min-w-0 max-w-[60%] text-right">{children}</span>
     </div>
   );
 }
@@ -221,23 +300,42 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
 
   const dotClass =
     status === "error"
-      ? "bg-red-500"
+      ? "bg-qs-danger"
       : status === "saving"
-      ? "bg-amber-500 animate-pulse"
-      : "bg-emerald-500";
+        ? "bg-qs-amber animate-pulse"
+        : "bg-qs-ok";
   const textClass =
-    status === "error" ? "text-red-600" : "text-muted-foreground";
+    status === "error" ? "text-qs-danger" : "text-qs-fg-faint";
   const label =
     status === "saving"
       ? t("savingNow")
       : status === "saved"
-      ? t("savedJustNow")
-      : t("saveError");
-
+        ? t("savedJustNow")
+        : t("saveError");
   return (
-    <span className={cn("inline-flex items-center gap-1.5 text-xs", textClass)}>
-      <span className={cn("h-1.5 w-1.5 rounded-full", dotClass)} />
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 text-[10px]",
+        textClass,
+      )}
+    >
+      <span className={cn("h-1 w-1 rounded-full", dotClass)} />
       {label}
     </span>
   );
+}
+
+function labelForClipStatus(status: Clip["status"]): string {
+  const map: Record<Clip["status"], string> = {
+    pending: "Aguardando",
+    downloading: "Baixando",
+    trimming: "Cortando",
+    ready: "Pronto",
+    uploading: "Enviando",
+    awaiting_review: "Em revisão",
+    published: "Publicado",
+    discarded: "Descartado",
+    error: "Erro",
+  };
+  return map[status];
 }

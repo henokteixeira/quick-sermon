@@ -77,8 +77,9 @@ async def list_clips(
     page_size: int = Query(default=20, ge=1, le=100),
     user: User = Depends(get_current_user),
     clip_repo: ClipRepository = Depends(get_clip_repository),
+    video_repo: VideoRepository = Depends(get_video_repository),
 ) -> PaginatedResponse[ClipResponse]:
-    service = ListClipsService(clip_repo)
+    service = ListClipsService(clip_repo, video_repo)
     return await service.execute(video_id, status, page, page_size)
 
 

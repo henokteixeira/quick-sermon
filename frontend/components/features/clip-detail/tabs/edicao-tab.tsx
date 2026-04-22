@@ -43,7 +43,7 @@ export function EdicaoTab({ clip, videoId }: EdicaoTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start gap-2 rounded-xl border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+      <div className="flex items-start gap-2 rounded-xl border border-dashed border-qs-line bg-qs-bg-elev p-3 text-[12px] text-qs-fg-subtle">
         <svg
           className="mt-0.5 h-4 w-4 shrink-0 opacity-60"
           viewBox="0 0 24 24"
@@ -70,7 +70,7 @@ export function EdicaoTab({ clip, videoId }: EdicaoTabProps) {
               href={video.source_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 truncate text-amber-600 transition-colors hover:text-amber-500 hover:underline dark:text-amber-400"
+              className="inline-flex items-center gap-1 truncate text-qs-amber-bright transition-colors hover:text-qs-amber hover:underline"
             >
               {t("sourceOpenYoutube")}
               <svg
@@ -110,7 +110,7 @@ export function EdicaoTab({ clip, videoId }: EdicaoTabProps) {
           </span>
         </DetailRow>
         <DetailRow label={t("segmentDuration")}>
-          <span className="font-mono tabular-nums font-semibold text-foreground">
+          <span className="font-mono tabular-nums font-semibold text-qs-fg">
             {duration}
           </span>
         </DetailRow>
@@ -121,7 +121,7 @@ export function EdicaoTab({ clip, videoId }: EdicaoTabProps) {
 
       <Card title={t("qualityCardTitle")}>
         <DetailRow label={t("qualityLabel")}>
-          <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px] font-medium tabular-nums">
+          <span className="rounded-md bg-qs-bg-elev-2 px-2 py-0.5 font-mono text-[11px] font-medium tabular-nums text-qs-fg-muted">
             {clip.quality}
           </span>
         </DetailRow>
@@ -141,14 +141,14 @@ export function EdicaoTab({ clip, videoId }: EdicaoTabProps) {
               </span>
             </DetailRow>
             <div className="flex items-center justify-between gap-3 px-3 py-3">
-              <span className="text-xs text-muted-foreground">
+              <span className="text-[11px] text-qs-fg-faint">
                 Download direto
               </span>
               <div className="flex flex-col items-end gap-1">
                 <button
                   type="button"
                   onClick={handleDownload}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-background px-3 text-xs font-medium text-foreground transition-all duration-200 hover:border-amber-500/40 hover:bg-amber-50 active:scale-[0.98] dark:hover:bg-amber-500/10"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-qs-line bg-qs-bg-elev-2 px-3 text-[11px] font-medium text-qs-fg-muted transition-colors hover:border-[rgba(245,158,11,0.35)] hover:bg-[rgba(245,158,11,0.08)]"
                 >
                   <svg
                     className="h-3.5 w-3.5"
@@ -166,7 +166,7 @@ export function EdicaoTab({ clip, videoId }: EdicaoTabProps) {
                   {t("fileDownload")}
                 </button>
                 {downloadError && (
-                  <span className="text-xs text-red-600">
+                  <span className="text-[11px] text-qs-danger">
                     Falha ao baixar. Tente novamente.
                   </span>
                 )}
@@ -174,7 +174,7 @@ export function EdicaoTab({ clip, videoId }: EdicaoTabProps) {
             </div>
           </>
         ) : (
-          <p className="px-3 py-8 text-center text-xs text-muted-foreground">
+          <p className="px-3 py-8 text-center text-[12px] text-qs-fg-faint">
             {t("fileEmpty")}
           </p>
         )}
@@ -191,13 +191,13 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-xl border border-border bg-card">
-      <header className="border-b border-border px-4 py-2.5">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <section className="overflow-hidden rounded-xl border border-qs-line bg-qs-bg-elev">
+      <header className="border-b border-qs-line px-4 py-2.5">
+        <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[1px] text-qs-fg-faint">
           {title}
         </h3>
       </header>
-      <div className="divide-y divide-border">{children}</div>
+      <div className="divide-y divide-qs-line">{children}</div>
     </section>
   );
 }
@@ -210,9 +210,9 @@ function DetailRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 px-3 py-2.5 text-xs">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="min-w-0 max-w-[60%] text-right text-foreground">
+    <div className="flex items-center justify-between gap-3 px-3 py-2.5 text-[12px]">
+      <span className="text-qs-fg-faint">{label}</span>
+      <span className="min-w-0 max-w-[60%] text-right text-qs-fg-muted">
         {children}
       </span>
     </div>

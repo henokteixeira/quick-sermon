@@ -21,6 +21,14 @@ class VideoInaccessibleException(ValidationException):
         super().__init__(message)
 
 
+class YouTubeRateLimitException(ValidationException):
+    def __init__(self):
+        super().__init__(
+            "O YouTube esta limitando nossas requisicoes. "
+            "Aguarde alguns minutos e tente novamente."
+        )
+
+
 class DetectionNotFoundException(NotFoundException):
     def __init__(self, identifier: str | None = None):
         super().__init__("Detection", identifier)

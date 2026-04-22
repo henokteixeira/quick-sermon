@@ -5,17 +5,48 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getVideo, deleteVideo, updateVideo, refreshVideo } from "@/lib/api/videos";
-import { VideoStatusBadge } from "@/components/features/videos/video-status-badge";
-import { DetectionCard } from "@/components/features/videos/detection-card";
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Download,
+  Edit3,
+  Eye,
+  Loader2,
+  Play,
+  RefreshCw,
+  Scissors,
+  Sparkles,
+  Trash2,
+  Tv2,
+} from "lucide-react";
+import {
+  getVideo,
+  deleteVideo,
+  updateVideo,
+  refreshVideo,
+} from "@/lib/api/videos";
+import { getDetection, retryDetection } from "@/lib/api/detection";
+import { listClips } from "@/lib/api/clips";
 import { ClipList } from "@/components/features/clips/clip-list";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Btn } from "@/components/features/ui/btn";
+import { Tab } from "@/components/features/ui/tab";
+import { StatusBadge } from "@/components/features/ui/status-badge";
+import { InfoTile } from "@/components/features/ui/info-tile";
+import { WaveformMini } from "@/components/features/ui/waveform";
+import { PageTopbar } from "@/components/features/ui/page-topbar";
+import {
+  DownloadMenu,
+  DownloadIcons,
+} from "@/components/features/ui/download-menu";
 import { cn } from "@/lib/utils";
 import {
-  formatDuration,
   formatDate,
-  formatViews,
+  formatDuration,
+  formatTime,
   formatUploadDate,
+  formatViews,
 } from "@/lib/formatters";
 import {
   Dialog,
@@ -24,8 +55,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { Detection } from "@/lib/types/detection";
+import type { Video } from "@/lib/types/video";
 
-type Tab = "details" | "clips";
+type DetailTab = "details" | "clips";
 
 export default function VideoDetailPage({
   params,
@@ -36,15 +69,19 @@ export default function VideoDetailPage({
   const router = useRouter();
   const queryClient = useQueryClient();
   const t = useTranslations("videos.detail");
-  const tClips = useTranslations("clips");
   const searchParams = useSearchParams();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const initialTab = searchParams.get("tab") === "clips" ? "clips" : "details";
-  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
+  const [activeTab, setActiveTab] = useState<DetailTab>(initialTab);
 
   const { data: video, isLoading } = useQuery({
     queryKey: ["video", id],
     queryFn: () => getVideo(id),
+  });
+
+  const { data: clipsList } = useQuery({
+    queryKey: ["clips", id],
+    queryFn: () => listClips({ video_id: id }),
   });
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -105,15 +142,14 @@ export default function VideoDetailPage({
 
   if (isLoading) {
     return (
-      <div className="max-w-[960px] mx-auto space-y-6">
-        <Skeleton className="h-5 w-24" />
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-5 w-40" />
         <Skeleton className="h-8 w-2/3" />
-        <div className="flex gap-2">
-          <Skeleton className="h-7 w-20 rounded-full" />
-          <Skeleton className="h-7 w-16 rounded-full" />
+        <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
+          <Skeleton className="aspect-video rounded-xl" />
+          <Skeleton className="h-[220px] rounded-xl" />
         </div>
-        <Skeleton className="aspect-video rounded-xl" />
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
             <Skeleton key={i} className="h-20 rounded-xl" />
           ))}
@@ -124,251 +160,437 @@ export default function VideoDetailPage({
 
   if (!video) return null;
 
-  const tabs: { key: Tab; label: string }[] = [
-    { key: "details", label: t("tabDetails") },
-    { key: "clips", label: t("tabClips") },
-  ];
-
-  const infoItems = [
-    {
-      label: t("duration"),
-      value: formatDuration(video.duration),
-      icon: (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
-        </svg>
-      ),
-    },
-    {
-      label: t("channel"),
-      value: video.channel_name || "--",
-      icon: (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-      ),
-    },
-    {
-      label: t("views"),
-      value: formatViews(video.view_count),
-      icon: (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-          <circle cx="12" cy="12" r="3" />
-        </svg>
-      ),
-    },
-    {
-      label: t("uploadDate"),
-      value: formatUploadDate(video.upload_date),
-      icon: (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-          <line x1="16" y1="2" x2="16" y2="6" />
-          <line x1="8" y1="2" x2="8" y2="6" />
-          <line x1="3" y1="10" x2="21" y2="10" />
-        </svg>
-      ),
-    },
-  ];
+  const awaitingReview = (clipsList?.items ?? []).filter(
+    (c) => c.status === "awaiting_review",
+  ).length;
+  const clipCount = clipsList?.total ?? 0;
+  const headerStatus = video.aggregated_status ?? video.status;
 
   return (
-    <div className="relative max-w-[960px] mx-auto">
-      {/* Ambient glow */}
-      <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[400px] h-[200px] rounded-full bg-amber-500/[0.03] blur-[80px] pointer-events-none" />
-
+    <>
+      <PageTopbar title="Detalhes do Vídeo" />
+    <div className="flex flex-col">
       {/* Back */}
       <Link
         href="/videos"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+        className="mb-5 flex w-fit items-center gap-1.5 text-[12px] text-qs-fg-subtle transition-colors hover:text-qs-fg-muted"
       >
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-        {t("back")}
+        <ArrowLeft className="h-3.5 w-3.5" />
+        Voltar para vídeos
       </Link>
 
-      {/* Title + status + actions */}
-      <div className="mb-6">
-        {isEditingTitle ? (
-          <input
-            ref={titleInputRef}
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            onBlur={saveTitle}
-            onKeyDown={handleTitleKeyDown}
-            disabled={updateMutation.isPending}
-            className="text-xl sm:text-2xl font-serif text-foreground leading-tight bg-transparent border-b-2 border-amber-500 outline-none w-full mb-3"
-          />
-        ) : (
-          <h1 className="text-xl sm:text-2xl font-serif text-foreground leading-tight mb-3">
-            {video.title || t("title")}
-          </h1>
-        )}
-
-        <div className="flex items-center gap-3 flex-wrap">
-          <VideoStatusBadge status={video.status} />
-          <div className="flex-1" />
-          <div className="flex items-center gap-1">
-            <button
-              onClick={startEditingTitle}
-              title={t("editTitle")}
-              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-muted-foreground text-xs font-medium hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-              </svg>
-              <span className="hidden sm:inline">{t("editTitle")}</span>
-            </button>
-            <button
-              onClick={() => setDeleteOpen(true)}
-              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-red-500 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              </svg>
-              <span className="hidden sm:inline">{t("delete")}</span>
-            </button>
+      {/* Title + actions */}
+      <div className="mb-[18px] flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          {isEditingTitle ? (
+            <input
+              ref={titleInputRef}
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onBlur={saveTitle}
+              onKeyDown={handleTitleKeyDown}
+              disabled={updateMutation.isPending}
+              className="w-full border-b-2 border-qs-amber bg-transparent pb-1 font-serif text-[28px] leading-tight tracking-[-0.5px] text-qs-fg outline-none"
+            />
+          ) : (
+            <h1 className="font-serif text-[28px] leading-[1.15] tracking-[-0.5px] text-qs-fg">
+              {video.title || t("title")}
+            </h1>
+          )}
+          <div className="mt-2.5 flex flex-wrap items-center gap-2.5">
+            {awaitingReview > 0 ? (
+              <StatusBadge
+                state="awaiting_review"
+                label={`${awaitingReview} clip${awaitingReview === 1 ? "" : "s"} em revisão`}
+              />
+            ) : (
+              <StatusBadge
+                state={headerStatus}
+                label={labelForVideoStatus(headerStatus)}
+              />
+            )}
+            <span className="text-[11px] text-qs-fg-faint">
+              Submetido em {formatDate(video.created_at)}
+            </span>
           </div>
+        </div>
+        <div className="flex items-center gap-1.5">
+          {activeTab === "details" ? (
+            <>
+              <VideoDownloadMenu video={video} />
+              <Btn
+                size="sm"
+                variant="ghost"
+                icon={<Edit3 className="h-3 w-3" />}
+                onClick={startEditingTitle}
+              >
+                Renomear
+              </Btn>
+              <Btn
+                size="sm"
+                variant="ghost"
+                icon={<Trash2 className="h-3 w-3 text-qs-danger" />}
+                onClick={() => setDeleteOpen(true)}
+              >
+                Excluir
+              </Btn>
+            </>
+          ) : (
+            <>
+              <Btn
+                size="sm"
+                variant="ghost"
+                icon={<Download className="h-3 w-3" />}
+              >
+                Baixar tudo
+              </Btn>
+              <Btn
+                size="sm"
+                variant="ghost"
+                icon={<Sparkles className="h-3 w-3" />}
+              >
+                Detectar novamente
+              </Btn>
+            </>
+          )}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center border-b border-border mb-6">
-        <div className="flex items-center gap-0.5 flex-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={cn(
-                "relative px-4 py-2.5 text-sm font-medium transition-colors rounded-t-lg",
-                activeTab === tab.key
-                  ? "text-amber-600 dark:text-amber-400"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {tab.label}
-              {activeTab === tab.key && (
-                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-amber-500 rounded-full" />
-              )}
-            </button>
-          ))}
-        </div>
-        {activeTab === "clips" && (
-          <Link
-            href={`/videos/${id}/clip/new`}
-            className="inline-flex items-center gap-1.5 h-8 px-4 rounded-lg bg-amber-500 text-stone-950 text-xs font-semibold hover:bg-amber-400 transition-all shadow-sm shadow-amber-500/20 mb-1 active:scale-[0.97]"
+      <div className="mb-[22px] flex items-end border-b border-qs-line">
+        <Tab active={activeTab === "details"} onClick={() => setActiveTab("details")}>
+          {t("tabDetails")}
+        </Tab>
+        <Tab
+          active={activeTab === "clips"}
+          onClick={() => setActiveTab("clips")}
+          badge={clipCount > 0 ? clipCount : undefined}
+        >
+          {t("tabClips")}
+        </Tab>
+        <div className="flex-1" />
+        <div className="pb-2">
+          <Btn
+            size="sm"
+            variant="primary"
+            icon={<Scissors className="h-3 w-3" />}
+            onClick={() => router.push(`/videos/${id}/clip/new`)}
           >
-            <svg
-              className="w-3.5 h-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            {tClips("createClip")}
-          </Link>
-        )}
+            Criar clip
+          </Btn>
+        </div>
       </div>
 
       {/* Tab: Details */}
       {activeTab === "details" && (
-        <div className="space-y-5">
-          {/* YouTube Embed / Thumbnail */}
-          <div className="rounded-xl overflow-hidden border border-border shadow-sm">
-            {video.youtube_video_id ? (
-              <div className="relative aspect-video bg-black">
-                <iframe
-                  src={`https://www.youtube.com/embed/${video.youtube_video_id}`}
-                  title={video.title || ""}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="absolute inset-0 w-full h-full"
-                />
-              </div>
-            ) : video.thumbnail_url ? (
-              <div className="relative aspect-video bg-muted">
-                <img
-                  src={video.thumbnail_url}
-                  alt={video.title || ""}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="aspect-video bg-muted flex items-center justify-center">
-                <svg className="w-10 h-10 text-muted-foreground/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-              </div>
-            )}
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr]">
+            <VideoPlayer video={video} />
+            <DetectionBlock videoId={id} />
           </div>
 
-          {/* Detection status */}
-          <DetectionCard videoId={id} />
-
-          {/* Info cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {infoItems.map((item) => (
-              <div
-                key={item.label}
-                className="rounded-xl border border-border bg-card p-4 transition-colors hover:border-amber-500/20"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-amber-500/60">{item.icon}</span>
-                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">
-                    {item.label}
-                  </p>
-                </div>
-                <p className="text-sm font-semibold text-foreground tabular-nums truncate">
-                  {item.value}
-                </p>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+            <InfoTile
+              icon={<Clock />}
+              label="Duração"
+              value={formatDuration(video.duration)}
+              mono
+            />
+            <InfoTile
+              icon={<Tv2 />}
+              label="Canal"
+              value={video.channel_name || "—"}
+            />
+            <InfoTile
+              icon={<Eye />}
+              label="Visualizações"
+              value={formatViews(video.view_count)}
+              mono
+            />
+            <InfoTile
+              icon={<Calendar />}
+              label="Publicado em"
+              value={formatUploadDate(video.upload_date)}
+            />
           </div>
-
-          {/* Submitted date (subtle, below the main info) */}
-          <p className="text-xs text-muted-foreground px-1">
-            {t("submittedAt")}: {formatDate(video.created_at)}
-          </p>
         </div>
       )}
 
       {/* Tab: Clips */}
       {activeTab === "clips" && <ClipList videoId={id} />}
 
-      {/* Delete confirmation dialog */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>{t("deleteTitle")}</DialogTitle>
             <DialogDescription>{t("deleteDescription")}</DialogDescription>
           </DialogHeader>
-          <div className="flex gap-3 justify-end mt-2">
-            <button
-              onClick={() => setDeleteOpen(false)}
-              className="h-9 px-4 rounded-lg border border-input text-sm font-medium hover:bg-muted transition-colors"
-            >
+          <div className="mt-2 flex justify-end gap-3">
+            <Btn variant="outline" onClick={() => setDeleteOpen(false)}>
               {t("cancel")}
-            </button>
-            <button
+            </Btn>
+            <Btn
+              variant="danger"
               onClick={() => deleteMutation.mutate()}
               disabled={deleteMutation.isPending}
-              className="h-9 px-4 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
             >
               {deleteMutation.isPending ? t("deleting") : t("confirmDelete")}
-            </button>
+            </Btn>
           </div>
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
+}
+
+function labelForVideoStatus(status: Video["status"]): string {
+  const map: Record<Video["status"], string> = {
+    pending: "Aguardando",
+    detecting: "Detectando",
+    processing: "Processando",
+    awaiting_review: "Em revisão",
+    published: "Publicado",
+    error: "Erro",
+  };
+  return map[status];
+}
+
+function VideoPlayer({ video }: { video: Video }) {
+  if (video.youtube_video_id) {
+    return (
+      <div className="relative aspect-video overflow-hidden rounded-xl border border-qs-line bg-black">
+        <iframe
+          src={`https://www.youtube.com/embed/${video.youtube_video_id}`}
+          title={video.title || ""}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="absolute inset-0 h-full w-full"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative aspect-video overflow-hidden rounded-xl border border-qs-line bg-black">
+      <div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(135deg, #1a1a1a 0 6px, #0a0a0a 6px 12px)",
+        }}
+      >
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-[10px]">
+          <Play className="ml-0.5 h-[22px] w-[22px] text-qs-fg" fill="currentColor" />
+        </div>
+      </div>
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3.5 py-3.5">
+        <div className="h-[3px] overflow-hidden rounded-[2px] bg-white/20">
+          <div className="h-full w-[24%] bg-qs-amber" />
+        </div>
+        <div className="mt-1.5 flex justify-between font-mono text-[10px] text-white/80">
+          <span>00:00</span>
+          <span>{formatDuration(video.duration)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DetectionBlock({ videoId }: { videoId: string }) {
+  const t = useTranslations("videos.detection");
+  const queryClient = useQueryClient();
+
+  const { data: detection, isLoading } = useQuery({
+    queryKey: ["detection", videoId],
+    queryFn: () => getDetection(videoId),
+    refetchInterval: (q) => (q.state.data?.status === "running" ? 3_000 : false),
+  });
+
+  const retryMutation = useMutation({
+    mutationFn: () => retryDetection(videoId),
+    onSuccess: (next) => queryClient.setQueryData(["detection", videoId], next),
+  });
+
+  if (isLoading || !detection) {
+    return (
+      <div className="rounded-xl border border-qs-line bg-qs-bg-elev p-[18px]">
+        <Skeleton className="h-[180px] w-full" />
+      </div>
+    );
+  }
+
+  if (detection.status === "running") {
+    return (
+      <div className="flex h-full flex-col rounded-xl border border-qs-line bg-qs-bg-elev p-[18px]">
+        <div className="mb-3 flex items-center gap-2">
+          <Sparkles className="h-3.5 w-3.5 text-qs-amber-bright" />
+          <span className="font-mono text-[11px] font-semibold uppercase tracking-[1px] text-qs-fg-subtle">
+            Detectando pregação
+          </span>
+        </div>
+        <p className="text-[12px] leading-[1.5] text-qs-fg-muted">
+          {t("detecting")} Pode levar alguns minutos.
+        </p>
+        <div className="mt-auto flex items-center gap-2 pt-4 text-qs-amber-bright">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <span className="text-[11px]">Analisando áudio e legendas…</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (detection.status === "skipped") {
+    return (
+      <div className="flex h-full items-center justify-center rounded-xl border border-qs-line bg-qs-bg-elev p-[18px] text-center">
+        <p className="text-[12px] text-qs-fg-subtle">{t("skipped")}</p>
+      </div>
+    );
+  }
+
+  if (detection.status === "failed") {
+    return (
+      <div className="flex h-full flex-col gap-3 rounded-xl border border-qs-line bg-qs-bg-elev p-[18px]">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-3.5 w-3.5 text-qs-fg-faint" />
+          <span className="font-mono text-[11px] font-semibold uppercase tracking-[1px] text-qs-fg-subtle">
+            Detecção
+          </span>
+        </div>
+        <p className="text-[12px] text-qs-fg-muted">{t("failed")}</p>
+        <Btn
+          size="sm"
+          variant="secondary"
+          icon={
+            <RefreshCw
+              className={cn("h-3 w-3", retryMutation.isPending && "animate-spin")}
+            />
+          }
+          onClick={() => retryMutation.mutate()}
+          disabled={retryMutation.isPending}
+        >
+          {retryMutation.isPending ? "..." : t("retry")}
+        </Btn>
+      </div>
+    );
+  }
+
+  return <DetectionCompleted videoId={videoId} detection={detection} />;
+}
+
+function DetectionCompleted({
+  videoId,
+  detection,
+}: {
+  videoId: string;
+  detection: Detection;
+}) {
+  const start = detection.start_seconds ?? 0;
+  const end = detection.end_seconds ?? 0;
+  const confidence = detection.confidence ?? 0;
+  const duration = end - start;
+  const clipUrl = `/videos/${videoId}/clip/new?suggested_start=${start}&suggested_end=${end}`;
+
+  return (
+    <div className="rounded-xl border border-qs-line bg-qs-bg-elev p-[18px]">
+      <div className="mb-3 flex items-center gap-2">
+        <Sparkles className="h-3.5 w-3.5 text-qs-amber-bright" />
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-[1px] text-qs-fg-subtle">
+          Pregação detectada
+        </span>
+        <div className="flex-1" />
+        <span className="rounded bg-[rgba(52,211,153,0.12)] px-1.5 py-0.5 text-[10px] font-semibold text-qs-ok">
+          {confidence}% confiança
+        </span>
+      </div>
+
+      <p className="mb-3.5 text-[12px] leading-[1.5] text-qs-fg-muted">
+        Detectamos uma pregação de{" "}
+        <span className="font-mono font-semibold text-qs-fg">
+          {formatTime(start)}
+        </span>{" "}
+        até{" "}
+        <span className="font-mono font-semibold text-qs-fg">
+          {formatTime(end)}
+        </span>
+        .
+      </p>
+
+      <div className="mb-3.5 rounded-lg border border-qs-line bg-qs-bg-elev-2 p-2.5">
+        <div className="mb-1.5 flex items-center justify-between">
+          <span className="text-[11px] text-qs-fg-faint">Trecho sugerido</span>
+          <span className="font-mono text-[10px] text-qs-fg-faint">
+            {formatDurationShort(duration)}
+          </span>
+        </div>
+        <WaveformMini selection={[0.13, 0.67]} />
+      </div>
+
+      <div className="flex gap-1.5">
+        <Link
+          href={clipUrl}
+          className="inline-flex h-[30px] flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-qs-amber px-3 text-[12px] font-semibold text-[#0c0a09] shadow-[0_1px_2px_rgba(0,0,0,0.2),0_0_0_1px_rgba(245,158,11,0.3),0_4px_14px_rgba(245,158,11,0.25)] transition-colors hover:bg-qs-amber-bright"
+        >
+          Usar pregação sugerida
+        </Link>
+        <Link
+          href={clipUrl}
+          className="inline-flex h-[30px] items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-qs-line bg-qs-bg-elev-2 px-3 text-[12px] font-semibold text-qs-fg-muted transition-colors hover:border-qs-line-strong"
+        >
+          <Edit3 className="h-3 w-3" />
+          Editar
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function VideoDownloadMenu({ video }: { video: Video }) {
+  // Downloads available at the video level: source video, subtitles (placeholder).
+  const options = [
+    {
+      id: "video",
+      icon: DownloadIcons.video,
+      label: "Vídeo original",
+      meta: video.duration
+        ? `MP4 · ${formatDuration(video.duration)}`
+        : "MP4 · aguardando dados",
+      primary: true,
+      onSelect: () => {
+        if (video.source_url) window.open(video.source_url, "_blank");
+      },
+      disabled: !video.source_url,
+    },
+    {
+      id: "audio",
+      icon: DownloadIcons.audio,
+      label: "Apenas áudio",
+      meta: "MP3 · em breve",
+      disabled: true,
+    },
+    {
+      id: "captions",
+      icon: DownloadIcons.captions,
+      label: "Legendas",
+      meta: "SRT · PT-BR · em breve",
+      disabled: true,
+    },
+    {
+      id: "transcript",
+      icon: DownloadIcons.transcript,
+      label: "Transcrição",
+      meta: "TXT · em breve",
+      disabled: true,
+    },
+  ];
+  return <DownloadMenu options={options} />;
+}
+
+function formatDurationShort(seconds: number): string {
+  if (!seconds) return "—";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}min ${String(s).padStart(2, "0")}s`;
 }
