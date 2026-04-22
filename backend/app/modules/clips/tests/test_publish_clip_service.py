@@ -64,6 +64,10 @@ def _patch_youtube(monkeypatch):
         "app.modules.clips.services.publish_clip_service.update_youtube_privacy",
         lambda video_id, privacy_status: None,
     )
+    monkeypatch.setattr(
+        "app.modules.clips.services.publish_clip_service.update_youtube_video_snippet",
+        lambda video_id, title, description: None,
+    )
 
 
 async def test_publish_happy_path_flips_privacy_and_marks_published(clip_repo, upload_repo):
@@ -101,6 +105,37 @@ async def test_publish_calls_update_privacy_with_public(clip_repo, upload_repo):
         await service.execute(clip.id)
 
     assert called == {"video_id": "video-xyz", "privacy_status": "public"}
+
+
+async def test_publish_syncs_snippet_before_privacy(clip_repo, upload_repo):
+    clip = _make_clip(selected_title="Titulo final", description="Descricao final.")
+    upload = _make_upload(youtube_video_id="video-xyz")
+    clip_repo.get_by_id.return_value = clip
+    clip_repo.update.side_effect = lambda c: c
+    upload_repo.get_by_clip_id.return_value = upload
+
+    calls: list[tuple] = []
+
+    def fake_snippet(video_id, title, description):
+        calls.append(("snippet", video_id, title, description))
+
+    def fake_privacy(video_id, privacy_status):
+        calls.append(("privacy", video_id, privacy_status))
+
+    with patch(
+        "app.modules.clips.services.publish_clip_service.update_youtube_video_snippet",
+        fake_snippet,
+    ), patch(
+        "app.modules.clips.services.publish_clip_service.update_youtube_privacy",
+        fake_privacy,
+    ):
+        service = PublishClipService(clip_repo, upload_repo)
+        await service.execute(clip.id)
+
+    assert calls == [
+        ("snippet", "video-xyz", "Titulo final", "Descricao final."),
+        ("privacy", "video-xyz", "public"),
+    ]
 
 
 async def test_publish_raises_when_clip_missing(clip_repo, upload_repo):

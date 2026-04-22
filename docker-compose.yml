@@ -71,12 +71,14 @@ services:
       YOUTUBE_CLIENT_ID: ${YOUTUBE_CLIENT_ID:-}
       YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET:-}
       YOUTUBE_OAUTH_ENCRYPTION_KEY: ${YOUTUBE_OAUTH_ENCRYPTION_KEY:-}
+      YTDLP_COOKIES_FILE: /secrets/youtube-cookies.txt
       FRONTEND_URL: http://localhost:3000
     ports:
       - "8000:8000"
     volumes:
       - clips_data:/data/clips
       - videos_data:/data/videos
+      - ./secrets/youtube-cookies.txt:/secrets/youtube-cookies.txt
     depends_on:
       db:
         condition: service_healthy
@@ -97,9 +99,11 @@ services:
       YOUTUBE_CLIENT_ID: ${YOUTUBE_CLIENT_ID:-}
       YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET:-}
       YOUTUBE_OAUTH_ENCRYPTION_KEY: ${YOUTUBE_OAUTH_ENCRYPTION_KEY:-}
+      YTDLP_COOKIES_FILE: /secrets/youtube-cookies.txt
     volumes:
       - clips_data:/data/clips
       - videos_data:/data/videos
+      - ./secrets/youtube-cookies.txt:/secrets/youtube-cookies.txt
     depends_on:
       db:
         condition: service_healthy

@@ -227,9 +227,10 @@ async def save_clip_draft(
     data: ClipDraftUpdate,
     user: User = Depends(get_current_user),
     clip_repo: ClipRepository = Depends(get_clip_repository),
+    upload_repo: YouTubeUploadRepository = Depends(get_youtube_upload_repository),
     db: AsyncSession = Depends(get_db),
 ) -> ClipResponse:
-    service = SaveClipDraftService(clip_repo)
+    service = SaveClipDraftService(clip_repo, upload_repo)
     clip = await service.execute(clip_id, data)
     await db.commit()
     return ClipResponse.model_validate(clip)

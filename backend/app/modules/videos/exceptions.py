@@ -29,6 +29,14 @@ class YouTubeRateLimitException(ValidationException):
         )
 
 
+class YouTubeBotCheckException(ValidationException):
+    def __init__(self):
+        super().__init__(
+            "O YouTube esta exigindo autenticacao para acessar este video. "
+            "Configure cookies do YouTube no servidor (YTDLP_COOKIES_FILE) para prosseguir."
+        )
+
+
 class DetectionNotFoundException(NotFoundException):
     def __init__(self, identifier: str | None = None):
         super().__init__("Detection", identifier)
