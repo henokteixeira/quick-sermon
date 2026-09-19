@@ -1,21 +1,24 @@
 # PRD — Sistema de Clips de Pregações
-## Versão 2.0 | Março 2026 | Status: Em Revisão
+## Versão 2.1 | Atualizado em 2026-04-24 | Status: MVP (V1) em implementação avançada
+
+> **Nota de versão:** este documento foi atualizado para refletir o estado real da implementação em abril de 2026. Mudanças arquiteturais e de regra de negócio realizadas durante a execução (KAI-51/52/54/55, QS-58, QS-72 e redesign v2) estão incorporadas nas seções correspondentes. Ver [Apêndice A — Changelog](#apêndice-a--changelog-2026-04) para o detalhamento por seção.
 
 ---
 
 ## Índice
 
-1. [Visão do Produto](#1-visão-do-produto)      
+1. [Visão do Produto](#1-visão-do-produto)
 2. [Objetivos e Métricas de Sucesso](#2-objetivos-e-métricas-de-sucesso)
 3. [Personas](#3-personas)
 4. [Escopo](#4-escopo)
-5. [Arquitetura de Fluxo](#5-arquitetura-de-fluxo)
-6. [Requisitos Funcionais](#6-requisitos-funcionais)
+5. [Arquitetura de Fluxo](#5-arquitetura-de-fluxo) (inclui 5.0 Modelo de Domínio)
+6. [Requisitos Funcionais](#6-requisitos-funcionais) (RF-01 a RF-11)
 7. [Requisitos Não-Funcionais](#7-requisitos-não-funcionais)
 8. [Fluxos de Erro e Edge Cases](#8-fluxos-de-erro-e-edge-cases)
 9. [Riscos e Dependências](#9-riscos-e-dependências)
 10. [Roadmap](#10-roadmap)
 11. [Glossário](#11-glossário)
+12. [Apêndice A — Changelog (2026-04)](#apêndice-a--changelog-2026-04)
 
 ---
 
@@ -132,21 +135,28 @@ O produto só entra em produção se **todos** os critérios abaixo forem atendi
 
 ### 4.1 Incluído na V1
 
-| Funcionalidade | Prioridade |
-|---|---|
-| Detecção automática de timestamps da pregação | Must Have |
-| Download otimizado do segmento via yt-dlp | Must Have |
-| Corte automático de vídeo | Must Have |
-| Upload para YouTube (não-listado por padrão) | Must Have |
-| Geração de 5 opções de título (IA) | Must Have |
-| Geração de descrição estruturada (IA) | Must Have |
-| Geração de mensagem para WhatsApp (IA) | Must Have |
-| Interface de revisão com preview do YouTube | Must Have |
-| Publicação com um clique | Must Have |
-| Autenticação e controle de acesso por roles | Must Have |
-| Ajuste manual de timestamps (fallback) | Must Have |
-| Dashboard com status em tempo real | Should Have |
-| Detecção de versículos citados | Could Have |
+Status (2026-04-24): ✅ entregue · 🔄 parcial · ⏳ pendente
+
+| Funcionalidade | Prioridade | Status | Referências |
+|---|---|---|---|
+| Submissão e validação de URL de live | Must Have | ✅ | KAI-51 |
+| Detecção automática de timestamps (MVP: chapters + captions density) | Must Have | ✅ | QS-58 |
+| Ajuste manual de timestamps (fallback) | Must Have | ✅ | Clip editor (KAI-52) |
+| Download otimizado do segmento via yt-dlp | Must Have | ✅ | KAI-52, KAI-71 |
+| Corte automático de vídeo (FFmpeg stream copy) | Must Have | ✅ | KAI-52 |
+| Upload para YouTube como `unlisted` + OAuth 2.0 | Must Have | ✅ | KAI-54 |
+| Interface de revisão com preview do YouTube | Must Have | ✅ | KAI-55 |
+| Publicação com um clique (muda privacy → `public`) | Must Have | ✅ | KAI-55 |
+| Descartar clip (soft delete + remoção do YouTube) | Must Have | ✅ | KAI-55 |
+| Autenticação e controle de acesso por roles | Must Have | ✅ | KAI-57 |
+| Página de detalhes do clip com abas | Must Have | ✅ | QS-72 |
+| Dashboard com status em tempo real (polling React Query) | Should Have | ✅ | Redesign v2 (PR #11) |
+| Geração de 5 opções de título (IA) | Must Have | ⏳ | KAI-59 — endpoint retorna 501 |
+| Geração de descrição estruturada (IA) | Must Have | ⏳ | KAI-60 — endpoint retorna 501 |
+| Geração de mensagem para WhatsApp (IA) | Must Have | ⏳ | KAI-61 — endpoint retorna 501 |
+| Notificações em tempo real | Should Have | 🔄 | Drawer/página mockados; backend SSE fica em KAI-63 |
+| Gestão de usuários (admin) | Should Have | 🔄 | Backend completo; UI usa dados mockados |
+| Detecção de versículos citados | Could Have | ⏳ | Fora do MVP; candidato a V2 |
 
 ### 4.2 Fora do Escopo (V1)
 
@@ -163,7 +173,9 @@ O produto só entra em produção se **todos** os critérios abaixo forem atendi
 
 | Versão | Funcionalidades |
 |---|---|
-| V2 | Legendas automáticas (Whisper), LLMs na nuvem (Gemini/ChatGPT) para geração de conteúdo, clips curtos para Reels/Shorts |
+| V1 (em curso) | Pipeline end-to-end manual + detecção MVP (chapters + captions density) sem IA |
+| V1.1 | Geração de conteúdo com LLM na nuvem (KAI-59/60/61) — ativar endpoints 501 |
+| V2 | Refinamento de detecção de timestamps com Whisper/LLM (QS-75), legendas automáticas completas, clips curtos para Reels/Shorts, notificações reais via SSE/WebSocket (KAI-63) |
 | V3 | Thumbnails com IA, publicação multiplataforma, analytics avançado |
 | V4 | Multi-tenant, aplicativo mobile |
 
@@ -171,39 +183,61 @@ O produto só entra em produção se **todos** os critérios abaixo forem atendi
 
 ## 5. Arquitetura de Fluxo
 
+### 5.0 Modelo de Domínio (atualizado)
+
+O domínio foi refinado durante a implementação para separar três entidades independentes:
+
+- **Video** — a live original submetida pelo editor. Agrupa os clips extraídos dela. Um `Video` pode ter 0..N `Clip`s.
+- **VideoDetection** — resultado do pipeline de detecção automática de timestamps da pregação (tabela separada com seus próprios estados, métodos e fases em JSONB).
+- **Clip** — segmento específico da pregação (recortes com `start_time`/`end_time`). Tem ciclo de vida próprio (download → trim → upload → review → publish/discard) e é a entidade principal para a publicação.
+
+> **Observação importante:** `video.status` é hoje um *dead state* (permanece `PENDING`). O status visível ao usuário é sempre agregado a partir de `VideoDetection.status` e dos `Clip.status` associados. Corrigir esse comportamento ou consolidar como derivado oficial fica no backlog.
+
 ### 5.1 Fluxo Principal (Happy Path)
 
 ```
 [Editor cola URL da live]
         ↓
-[Sistema valida URL e exibe preview]
+[Sistema valida URL, busca metadados via yt-dlp e exibe preview]
         ↓
-[IA detecta timestamps da pregação]
-    ↓           ↓
-[Confiança ≥ 80%]  [Confiança < 80%]
-    ↓                    ↓
-[Auto-confirma]    [Editor ajusta manualmente]
+[Video criado → dispara DetectSermonTimestampsWorkflow (Temporal)]
         ↓
-[Editor clica "Processar"]
+[Cascata de detecção MVP (sem IA)]
+  ├── Chapters (yt-dlp dump-json) — short-circuit se confidence ≥ 90%
+  └── Captions density (VTT) com gap híbrido 5s → 10s
         ↓
-[Pipeline automático executa]
-  ├── Download do segmento (yt-dlp)
-  ├── Corte do vídeo (FFmpeg)
-  ├── Upload para YouTube (não-listado)
-  └── Geração de conteúdo (LLM local)
+[Confiança ≥ 80%]              [Confiança < 80% ou SKIPPED]
+    ↓                                    ↓
+[Sugestão pré-preenchida]   [Editor ajusta manualmente no clip editor]
         ↓
-[Notificação: "Pronto para revisão"]
+[Editor confirma timestamps e clica "Criar clip"]
         ↓
-[Editor acessa página de revisão]
-  ├── Preview do vídeo no YouTube
-  ├── Seleciona título (5 opções)
-  ├── Revisa/edita descrição
-  └── Copia mensagem WhatsApp
+[Clip criado → dispara DownloadAndTrimWorkflow (Temporal)]
+  ├── DOWNLOADING — yt-dlp (heartbeat a cada 5%, timeout 2h)
+  └── TRIMMING — FFmpeg stream copy (timeout 10min)
         ↓
-[Editor clica "Publicar"]
+[Clip em READY — disponível para stream local e download pelo editor]
         ↓
-[Vídeo torna-se público no YouTube]
+[Editor clica "Enviar pra revisão" → UploadToYouTubeWorkflow]
+  └── UPLOADING — Google Resumable Upload como `unlisted`
+        ↓
+[Clip em AWAITING_REVIEW]
+        ↓
+[Editor abre /videos/[id]/clip/[clipId]?tab=revisao]
+  ├── Player embed do YouTube (preview unlisted)
+  ├── Edita título (radio de 5 opções IA + manual) — auto-save debounce 1s
+  ├── Edita descrição (≤ 5000 chars) — auto-save debounce 1s
+  └── Edita mensagem WhatsApp (botão "Copiar" desabilitado até publicar)
+        ↓
+[Admin clica "Publicar" → POST /clips/{id}/publish]
+  └── videos.update no YouTube muda privacy para `public`
+        ↓
+[Clip em PUBLISHED — banner com link público + WhatsApp habilitado]
 ```
+
+**Caminhos alternativos:**
+- Editor pode clicar **"Descartar"** (admin-only) em qualquer estado exceto `PUBLISHED` → soft delete + `videos.delete` no YouTube quando já havia upload.
+- Erros em qualquer stage transicionam para `ERROR` com `error_code` específico; editor dispara **"Retry"** em `POST /clips/{id}/retry`.
 
 ### 5.2 Casos de Uso
 
@@ -268,12 +302,27 @@ Cada requisito inclui: descrição, critérios de aceitação (AC) e comportamen
 
 **Descrição:** O sistema deve identificar automaticamente o início e o fim da pregação dentro da live.
 
-**Critérios de Aceitação:**
-- AC-02.1: O sistema retorna timestamps de início e fim com precisão de ±2 minutos em ≥ 85% dos vídeos do conjunto de testes.
-- AC-02.2: O sistema exibe um indicador de confiança (%) junto aos timestamps sugeridos.
-- AC-02.3: Quando confiança < 80%, o sistema exibe alerta visual e habilita automaticamente o editor manual de timestamps.
-- AC-02.4: O sistema considera o padrão de culto: louvor → pregação → encerramento. Vídeos fora desse padrão devem ir para revisão manual.
-- AC-02.5: O tempo máximo para retornar os timestamps é 60 segundos após submissão da URL.
+> **Mudança em 2026-04-20 (QS-58 — MVP Simplification):** a detecção da V1 opera **sem IA**. Após 7 iterações com Whisper + LLM (Ollama, gpt-4o-mini) e VAD, o melhor baseline ficou em 4/10 hits no dataset. Decidimos shippar um MVP minimalista baseado apenas em sinais determinísticos do YouTube e abrir a issue [QS-75](https://linear.app/kairon-tech/issue/QS-75) para refinamento com IA em versão futura.
+
+**Algoritmo MVP (V1):**
+1. **Chapters (yt-dlp dump-json)** — se o criador marcou capítulos na live, casar heurísticas de palavras-chave (ex.: *pregação*, *palavra*, *mensagem*). Short-circuit retornando imediatamente quando a confiança for ≥ 90%.
+2. **Captions density (VTT)** — baixar legendas automáticas, identificar o maior bloco contínuo (com *gap híbrido*: tenta `gap_tolerance=5s` primeiro; se o bloco resultante for implausível — menor que ~15min — refaz com `gap_tolerance=10s`). Confiança derivada da densidade de cues: `max(40, min(82, int(40 + density * 4)))`.
+3. **Fallback `SKIPPED`** — se ambos os sinais falharem (sem chapters e sem legendas), a detection fica como `SKIPPED` com `error_message="sem_legendas_disponiveis"`; o editor ajusta timestamps manualmente no clip editor. **Sem retry automático** — resultado é determinístico.
+
+**Critérios de Aceitação (V1):**
+- AC-02.1: O sistema retorna timestamps de início e fim em ≥ 80% dos vídeos com legendas ou capítulos disponíveis (baseline observado no dataset: 3–5/10 hits).
+- AC-02.2: O sistema exibe um indicador de confiança (%) junto aos timestamps sugeridos. O cap superior é **82%** (limite da fórmula sem IA) — alerta visual `< 80%` aparecerá na maioria dos casos, o que é honesto com o MVP.
+- AC-02.3: Quando confiança < 80% ou status `SKIPPED`, o sistema habilita automaticamente o editor manual de timestamps e exibe mensagem de ação recomendada.
+- AC-02.4: O tempo máximo para retornar os timestamps é 60 segundos após submissão da URL (geralmente 20–30s).
+- AC-02.5: Vídeos sem chapters nem captions disponíveis são marcados como `SKIPPED` com mensagem clara; editor segue manualmente.
+
+**Critérios para V2 (QS-75, backlog):**
+- Precisão de ±2 min em ≥ 85% do dataset, com Whisper amostrado nas fronteiras + LLM refinando o bloco.
+- Cap de confiança elevado para `≥ 95%` nos casos de alta certeza.
+
+**Fixtures e dataset de validação:**
+- `backend/app/modules/videos/tests/fixtures/reference_videos.json` — 10 vídeos com ground truth.
+- `backend/scripts/test_detection_dataset.py` — script batch para rodar e comparar baseline.
 
 **Falha:** Ver [EC-02](#ec-02--detecção-com-baixa-confiança-ou-falha-total).
 
@@ -310,15 +359,16 @@ Cada requisito inclui: descrição, critérios de aceitação (AC) e comportamen
 
 ### RF-05 — Upload para YouTube
 
-**Descrição:** O sistema deve fazer upload automático do vídeo processado para o canal do YouTube da igreja.
+**Descrição:** O sistema deve fazer upload automático do clip processado para o canal do YouTube da igreja, como último passo antes da revisão.
 
 **Critérios de Aceitação:**
-- AC-05.1: O vídeo é enviado como "não-listado" por padrão; nunca como público automaticamente.
-- AC-05.2: O upload inclui: arquivo de vídeo, título provisório, descrição provisória.
-- AC-05.3: O progresso de upload é exibido em tempo real.
-- AC-05.4: Após upload bem-sucedido, o sistema retorna o link do vídeo no YouTube para uso na revisão.
-- AC-05.5: O sistema respeita os limites de quota da YouTube Data API v3 (10.000 unidades/dia) e exibe aviso quando ≥ 80% da quota for consumida.
-- AC-05.6: A autenticação com a API do YouTube usa OAuth 2.0; tokens são armazenados de forma segura (não em texto plano).
+- AC-05.1: O vídeo é enviado como **`unlisted`** por padrão; o clip transiciona para `AWAITING_REVIEW` e **nunca** fica público automaticamente.
+- AC-05.2: O upload inclui: arquivo de vídeo, título provisório (ou o `selected_title` se já salvo como rascunho), descrição provisória.
+- AC-05.3: O upload utiliza a **Google Resumable Upload API**; o progresso é exibido em tempo real via polling do `get_clip_pipeline_service`.
+- AC-05.4: Após upload bem-sucedido, `clips.youtube_video_id` e a URL pública são persistidos; a tela de revisão passa a conseguir embed do vídeo.
+- AC-05.5: O sistema respeita os limites de quota da YouTube Data API v3 (10.000 unidades/dia); o contador `daily_quota_used` é incrementado por chamada e exibido no Settings/QuotaCard.
+- AC-05.6: A autenticação usa **OAuth 2.0** com escopo **`youtube.force-ssl`** (necessário para `videos.update` em RF-07 e `videos.delete` em RF-10). Tokens são armazenados criptografados com AES-256 em `youtube_connections.access_token` e `refresh_token`.
+- AC-05.7: Erro `insufficientPermissions` é mapeado como `YOUTUBE_INSUFFICIENT_SCOPE` e o frontend pede reconexão.
 
 **Falha:** Ver [EC-05](#ec-05--falha-no-upload-para-o-youtube).
 
@@ -328,8 +378,11 @@ Cada requisito inclui: descrição, critérios de aceitação (AC) e comportamen
 
 **Descrição:** O sistema deve gerar automaticamente títulos, descrição e mensagem de WhatsApp para a pregação.
 
-> **V1:** Processamento via LLM local (ex: Ollama). Sem custo por chamada, mas dependente dos recursos de hardware da máquina.
-> **V2 (planejado):** Migração para LLMs na nuvem (Gemini, ChatGPT) para maior qualidade de geração.
+> **Status (2026-04-24):** ⏳ **Pendente**. Endpoints existem em `POST /clips/{id}/regenerate/{field}` (onde `field ∈ titles | description | whatsapp_message`) mas retornam **`501 Not Implemented`**. As colunas `generated_titles` (JSONB), `generated_description` e `generated_whatsapp_message` já estão persistidas em `clips`. O frontend apresenta placeholder *"Geração IA em desenvolvimento"*.
+>
+> **V1 (planejada, não implementada):** O design original previa LLM local (Ollama). Decidiu-se pular essa fase dada a complexidade e qualidade insuficiente observadas na detecção com IA local (vide QS-58). As issues [KAI-59](https://linear.app/) (títulos), [KAI-60](https://linear.app/) (descrição) e [KAI-61](https://linear.app/) (WhatsApp) vão direto para LLM na nuvem.
+>
+> **V1.1 (planejado):** LLMs na nuvem (Gemini / OpenAI) com `OPENAI_API_KEY` já configurado em `app/core/config.py`.
 
 **Critérios de Aceitação:**
 
@@ -355,14 +408,28 @@ Cada requisito inclui: descrição, critérios de aceitação (AC) e comportamen
 
 ### RF-07 — Interface de Revisão e Publicação
 
-**Descrição:** O editor deve conseguir revisar todo o conteúdo gerado e publicar o vídeo em uma única tela.
+**Descrição:** O editor/admin deve conseguir revisar todo o conteúdo gerado e publicar o clip em uma única tela. Implementação concluída em KAI-55 e refinada em QS-72 (integração em abas).
+
+**Arquitetura de UI (QS-72):**
+A tela de detalhes do clip fica em `/videos/[videoId]/clip/[clipId]?tab=edicao|processamento|revisao` com 3 abas:
+
+| Aba | Conteúdo | Quando usar |
+|---|---|---|
+| **Edição** | Informações read-only do clip (criar novo clip = nova entidade) | Sempre disponível |
+| **Processamento** | Pipeline stages (Download · Trim · Upload) com timestamps e retry inline | Enquanto `status ∈ {DOWNLOADING, TRIMMING, UPLOADING, ERROR}` |
+| **Revisão** | Player YouTube embed + editor de título/descrição/WhatsApp + botões publicar/descartar | Default quando `status ∈ {AWAITING_REVIEW, PUBLISHED, DISCARDED}` |
 
 **Critérios de Aceitação:**
-- AC-08.1: A página de revisão exibe: player do YouTube embutido, seletor de título, editor de descrição, preview de legendas e mensagem de WhatsApp.
-- AC-08.2: O botão "Publicar" só fica habilitado após o editor selecionar um título.
-- AC-08.3: Ao clicar "Publicar", o sistema exibe confirmação *"Tem certeza? O vídeo será tornado público."* antes de executar.
-- AC-08.4: Após publicação bem-sucedida, o sistema exibe link público e botão de cópia.
-- AC-08.5: O editor pode salvar o estado da revisão e retomar depois sem perder alterações.
+- AC-08.1: A aba **Revisão** exibe: player do YouTube embed (quando `youtube_video_id` existe) ou player local (fallback via `stream-url`), seletor de título (radio group de 5 opções IA + opção manual), editor de descrição plain-text (textarea com contador ≤ 5000 chars), editor da mensagem de WhatsApp.
+- AC-08.2: O botão "Publicar" só fica habilitado após o editor selecionar um título E a descrição estar preenchida.
+- AC-08.3: Ao clicar "Publicar", o sistema exibe `AlertDialog` de confirmação com preview (título + 2 linhas da descrição) antes de executar. Executa **flush síncrono** do último rascunho antes do publish.
+- AC-08.4: Após publicação bem-sucedida, a mesma URL vira read-only, exibe banner *"✓ Publicado"* com link público, botões de copiar link e copiar mensagem WhatsApp (este último passa a ficar habilitado).
+- AC-08.5: **Rascunho com auto-save**: campos editáveis (`selected_title`, `description`, `whatsapp_message`) persistem automaticamente via `PATCH /clips/{id}/draft` com debounce de ~1s (hook `use-clip-autosave`). Editor pode retomar depois sem perder alterações.
+- AC-08.6: **Permissões** (enforcement no backend via `require_role`):
+  - `editor` — pode abrir tela, editar conteúdo, disparar "Enviar pra revisão" (upload).
+  - `admin` — tudo do editor + publicar + descartar.
+- AC-08.7: Estados `PUBLISHED` e `DISCARDED` renderizam a aba Revisão em modo read-only.
+- AC-08.8: Botão "Regenerar" (títulos/descrição/WhatsApp) chama `POST /clips/{id}/regenerate/{field}` e, enquanto KAI-59/60/61 retornam 501, exibe placeholder *"Geração IA em desenvolvimento"* sem bloquear o fluxo manual.
 
 ---
 
@@ -383,12 +450,55 @@ Cada requisito inclui: descrição, critérios de aceitação (AC) e comportamen
 
 **Descrição:** O sistema deve oferecer visibilidade do pipeline de produção.
 
+> **Redesign v2 (PR #11, 2026-04-22):** dashboard foi remodelado com tema dark (`stone-950` + `amber-500`) e componentes primitivos próprios. Sidebar fixa 220px (sem hover-expand), topbar por página, NotificationsDrawer acessível pelo sino.
+
 **Critérios de Aceitação:**
-- AC-10.1: O dashboard exibe lista de vídeos com: título, status atual, data de submissão, editor responsável.
-- AC-10.2: Os status possíveis são: `aguardando`, `detectando`, `processando`, `aguardando revisão`, `publicado`, `erro`.
-- AC-10.3: O status é atualizado em tempo real (sem necessidade de recarregar a página).
-- AC-10.4: Vídeos com status `erro` exibem descrição do erro e ação recomendada.
-- AC-10.5: O dashboard tem filtro por status e busca por título/pregador.
+- AC-10.1: O dashboard exibe: hero greeting dinâmico + 3 MetricTiles (vídeos, clips publicados, visualizações totais) com sparklines de 30 dias + FeaturedCard (clip com mais views) + PipelineCard (stages do clip mais recente em processamento) + ActivityCard + QuotaCard radial.
+- AC-10.2: Os status possíveis para **clips** são: `pending`, `downloading`, `trimming`, `ready`, `uploading`, `awaiting_review`, `published`, `discarded`, `error`. Os status agregados exibidos para **videos** são derivados das detections e dos clips filhos.
+- AC-10.3: O status é atualizado via polling do React Query com `refetchInterval` condicional (3s quando há job ativo, 15s caso contrário) — sem necessidade de recarregar a página. SSE/WebSocket fica em KAI-63.
+- AC-10.4: Clips com status `error` exibem `error_code` e descrição, com botão **"Tentar novamente"** (`POST /clips/{id}/retry`).
+- AC-10.5: A listagem de vídeos (`/videos`) tem paginação; filtros de clip (`ClipsMap` + FilterChips) estão na aba Clipes de cada vídeo.
+- AC-10.6: A listagem `GET /clips` aplica cap de `page_size=100`; contagens agregadas usam paginação em lotes.
+
+---
+
+### RF-10 — Ciclo de Vida do Clip (KAI-55 / QS-72)
+
+**Descrição:** Um clip passa por estados bem definidos entre a criação e a publicação/descarte. Este RF define os estados, transições e regras.
+
+**Máquina de estados do Clip:**
+
+```
+PENDING ──► DOWNLOADING ──► TRIMMING ──► READY ──► UPLOADING ──► AWAITING_REVIEW ──► PUBLISHED
+   │             │              │           │           │                │
+   └── ERROR ◄───┴──────────────┴───────────┴───────────┴────────────────┘
+                                                                          │
+                                                        DISCARDED ◄───────┘  (admin only, pré-publish)
+```
+
+**Regras:**
+- AC-11.1: Todo clip nasce em `PENDING` e dispara o `DownloadAndTrimWorkflow` (Temporal).
+- AC-11.2: O workflow persiste progresso a cada 5% via heartbeat; timeout do download é 2h, do trim é 10min.
+- AC-11.3: Em `READY`, o clip já tem `file_path`, `duration`, `resolution` e pode ser streamado localmente (HTTP range requests via `GET /clips/{id}/stream`) e baixado pelo editor.
+- AC-11.4: O upload para YouTube é **manual** — disparado pelo botão "Enviar pra revisão". Após o upload, clip entra em `AWAITING_REVIEW` (não `PUBLISHED`).
+- AC-11.5: Erros em qualquer stage transicionam para `ERROR` com `error_code` (um de: `DOWNLOAD_FAILED`, `DOWNLOAD_TIMEOUT`, `TRIM_FAILED`, `TRIM_CORRUPTED`, `INVALID_TIMESTAMPS`, `VIDEO_UNAVAILABLE`). Retry inline via `POST /clips/{id}/retry`.
+- AC-11.6: **Descartar clip**: permitido em qualquer status exceto `PUBLISHED`. Só `admin`. Durante pipeline ativo, cancela o workflow Temporal antes do soft delete. Se já havia upload, chama `videos.delete` no YouTube.
+- AC-11.7: Deletar o `Video` pai remove em cascata todos os clips filhos (cascade no FK), limpando arquivos em `/data/clips/` e `/data/videos/`.
+- AC-11.8: Edição pós-publicação **não** é suportada na V1 (clip `PUBLISHED` é read-only na UI e imutável no backend).
+
+---
+
+### RF-11 — Integração OAuth com YouTube
+
+**Descrição:** O sistema deve gerenciar a conexão OAuth 2.0 com o canal do YouTube da igreja de forma resiliente.
+
+**Critérios de Aceitação:**
+- AC-12.1: O fluxo OAuth usa o escopo `https://www.googleapis.com/auth/youtube.force-ssl` (inclui `upload`, `videos.update` para mudança de privacy e `videos.delete` para descarte).
+- AC-12.2: A conexão é armazenada em `youtube_connections` com `access_token` e `refresh_token` criptografados (AES-256).
+- AC-12.3: O sistema atualiza `access_token` automaticamente quando expira, usando o `refresh_token`. Falha de refresh transiciona para estado que pede reconexão ao admin.
+- AC-12.4: O contador `daily_quota_used` é incrementado por chamada que consome quota (upload = 1600, update = 50, delete = 50). `quota_reset_date` zera diariamente.
+- AC-12.5: A UI exibe QuotaCard radial no dashboard e em `/settings` (seção Canais Conectados).
+- AC-12.6: Desconectar o canal (`DELETE /connection`) apaga a connection mas mantém os uploads históricos (`youtube_uploads`).
 
 ---
 
@@ -428,8 +538,9 @@ Cada requisito inclui: descrição, critérios de aceitação (AC) e comportamen
 ### RNF-05 — Custo Operacional
 
 - Custo total de APIs e infraestrutura < $50/mês
-- Processar vídeos com modelos de IA locais (Whisper, LLM local) para evitar custo por chamada
-- Monitorar consumo de quota da YouTube API; alertar antes de atingir limite
+- V1 opera **sem chamadas pagas de LLM** (detecção MVP sem IA; geração IA ainda não implementada em KAI-59/60/61)
+- Quando KAI-59/60/61 forem implementados em LLM na nuvem, definir limite de tokens por vídeo e monitorar custo
+- Monitorar consumo de quota da YouTube API (upload = 1600, update = 50, delete = 50); alertar em ≥ 80% dos 10.000 units/dia
 
 ---
 
@@ -585,48 +696,63 @@ Cada requisito inclui: descrição, critérios de aceitação (AC) e comportamen
 
 | Dependência | Uso | Risco | Alternativa |
 |---|---|---|---|
-| YouTube Data API v3 | Upload, publicação | Mudança de quota/ToS | Upload manual como fallback de último recurso |
-| yt-dlp | Download de vídeos | Bloqueio pelo YouTube | Atualização frequente; comunidade ativa |
-| FFmpeg | Corte de vídeo | Estável, baixo risco | — |
-| LLM local (ex: Ollama) | Geração de conteúdo — **V1** | Recursos de hardware | Fallback para campos manuais |
-| LLMs na nuvem (Gemini, ChatGPT) | Geração de conteúdo — **V2** | Custo por chamada; dependência de API externa | Fallback para LLM local |
-| Whisper (OpenAI, local) | Geração de legendas — **V2** | Recursos de hardware | Versão menor do modelo em hardware fraco |
+| YouTube Data API v3 (scope `youtube.force-ssl`) | Upload, `videos.update` (publish), `videos.delete` (discard), fetch de stats | Mudança de quota/ToS; `insufficientPermissions` se scope reduzido | Upload manual como fallback de último recurso; reconexão OAuth |
+| yt-dlp + yt-dlp-ejs (Node.js runtime) | Download de vídeos, metadados, chapters, captions VTT | Bloqueio pelo YouTube; necessidade de atualizar runtime JS | Atualização frequente; comunidade ativa |
+| FFmpeg 6+ | Corte de vídeo (stream copy) | Estável, baixo risco | — |
+| Temporal | Orquestração de workflows (download/trim/upload/detection) | Dependência operacional (Temporal server + DB) | Fallback impossível no curto prazo — core do pipeline |
+| LLMs na nuvem (OpenAI, Gemini) | Geração de conteúdo — **V1.1** (KAI-59/60/61) | Custo por chamada | Fallback para campos manuais (já implementado) |
+| Whisper (OpenAI API ou local) | Refinamento de detecção de timestamps — **V2** (QS-75) | Custo / recursos de hardware | MVP sem IA já em produção (QS-58) |
 
 ---
 
 ## 10. Roadmap
 
-### Fase 1 — MVP (Semanas 1–6)
+### Fase 1 — MVP (Concluída / em validação — 2026-04)
 **Objetivo:** Fluxo completo funcional, mesmo que parcialmente manual
 
-- [ ] Infraestrutura base (auth, banco, deploy)
-- [ ] Submissão de URL e validação
-- [ ] Download via yt-dlp + corte com FFmpeg
-- [ ] Upload para YouTube via API
-- [ ] Interface de revisão e publicação
-- [ ] Dashboard básico de status
+- [x] Infraestrutura base — PostgreSQL + Temporal + Docker Compose
+- [x] Autenticação e roles (KAI-57)
+- [x] Submissão de URL e validação (KAI-51)
+- [x] Download via yt-dlp + corte com FFmpeg (KAI-52, otimização 6x em KAI-71)
+- [x] Upload para YouTube via API com scope `youtube.force-ssl` (KAI-54)
+- [x] Interface de revisão e publicação (KAI-55)
+- [x] Remodelagem da página de detalhes do clip com abas (QS-72)
+- [x] Dashboard redesign v2 (PR #11)
+- [x] Detecção automática de timestamps — MVP sem IA (QS-58)
 
-**Critério de conclusão:** Editor consegue processar um vídeo do início ao fim sem assistência técnica.
-
----
-
-### Fase 2 — Automação com IA (Semanas 7–10)
-**Objetivo:** Eliminar intervenção manual no pipeline
-
-- [ ] Detecção automática de timestamps
-- [ ] Geração de conteúdo com LLM local
-- [ ] Editor manual de timestamps (fallback)
-- [ ] Notificações em tempo real
-
-**Critério de conclusão:** 80%+ dos vídeos processados sem ajuste manual de timestamps.
+**Critério de conclusão:** Editor consegue processar um vídeo do início ao fim sem assistência técnica. ✅ **Atingido.**
 
 ---
 
-### Fase 3 — Qualidade e Polimento (Semanas 11–15)
+### Fase 1.1 — Geração de conteúdo com IA (Em aberto)
+**Objetivo:** Reduzir o trabalho manual de título/descrição/WhatsApp
+
+- [ ] KAI-59 — Geração de 5 títulos com LLM na nuvem
+- [ ] KAI-60 — Geração de descrição estruturada (≤ 5000 chars)
+- [ ] KAI-61 — Geração de mensagem WhatsApp (100–150 palavras)
+
+**Critério de conclusão:** ≥ 50% dos clips publicados sem edição manual de título/descrição.
+
+---
+
+### Fase 2 — Melhorias de detecção e tempo real (Q3 2026)
+**Objetivo:** Elevar a qualidade da detecção e reduzir fricção operacional
+
+- [ ] QS-75 — Refinamento de detecção com Whisper + LLM (viabilidade e integração)
+- [ ] KAI-63 — Notificações em tempo real via SSE/WebSocket
+- [ ] UI de gestão de usuários (backend já existe)
+- [ ] Endpoint de `videos.update` pós-publicação (editar título/descrição já público)
+
+**Critério de conclusão:** Precisão de detecção de ±2 min em ≥ 85% do dataset; notificações ao vivo funcionando.
+
+---
+
+### Fase 3 — Qualidade e Polimento
 **Objetivo:** Sistema estável e pronto para uso contínuo
 
 - [ ] Processamento em lote (fila)
-- [ ] Relatório básico de uso
+- [ ] Analytics agregadas (views totais, performance por período)
+- [ ] Cleanup automático de arquivos locais pós-upload
 - [ ] Testes de carga e otimização
 - [ ] Documentação de usuário
 
@@ -642,17 +768,52 @@ Cada requisito inclui: descrição, critérios de aceitação (AC) e comportamen
 | Louvor | Momento de adoração musical no culto, geralmente antes da pregação |
 | Live | Transmissão ao vivo no YouTube |
 | Timestamp | Marcador de tempo em vídeo no formato HH:MM:SS |
-| Clip | Vídeo curto extraído de um trecho maior |
+| Video | Entidade que representa a live original submetida pelo editor. Agrupa clips. |
+| Clip | Segmento da pregação extraído da live (tem `start_time`, `end_time` e ciclo de vida próprio) |
+| VideoDetection | Registro do resultado da detecção automática de timestamps (tabela separada, com status próprio e fases em JSONB) |
 | Versículo | Referência a texto bíblico (ex: João 3:16) |
-| Pipeline | Sequência de etapas automatizadas de processamento |
-| yt-dlp | Ferramenta open-source de download de vídeos do YouTube |
-| Whisper | Modelo de reconhecimento de voz da OpenAI, usado localmente |
-| OAuth | Protocolo de autorização usado para integrar com o YouTube |
-| Quota | Limite de chamadas à YouTube Data API (10.000 unidades/dia por padrão) |
-| Não-listado | Visibilidade de vídeo no YouTube: acessível por link, não aparece em buscas |
-| LLM | Large Language Model — modelo de linguagem usado para gerar títulos e descrições; local na V1 (Ollama), nuvem na V2 (Gemini, ChatGPT) |
+| Pipeline | Sequência de etapas automatizadas de processamento (Download · Trim · Upload) |
+| Temporal | Framework de durable execution usado para orquestrar os workflows do pipeline |
+| Workflow | Orquestração Temporal (ex.: `DownloadAndTrimWorkflow`, `DetectSermonTimestampsWorkflow`, `UploadToYouTubeWorkflow`) |
+| Activity | Operação síncrona/assíncrona executada dentro de um workflow Temporal (ex.: `detect_chapters_activity`) |
+| yt-dlp | Ferramenta open-source de download de vídeos do YouTube. V1 usa também `yt-dlp-ejs` (runtime Node.js) |
+| Whisper | Modelo de reconhecimento de voz da OpenAI — **reservado para V2 (QS-75)**, não usado na V1 |
+| OAuth | Protocolo de autorização usado para integrar com o YouTube; scope V1 = `youtube.force-ssl` |
+| Quota | Limite de chamadas à YouTube Data API (10.000 unidades/dia) — upload = 1600, update = 50, delete = 50 |
+| Unlisted | Visibilidade de vídeo no YouTube: acessível por link, não aparece em buscas — padrão pós-upload |
+| Public | Visibilidade final após publish — acessível e pesquisável |
+| Private | Visibilidade que **bloqueia embed** — não usado pelo sistema (embed depende de unlisted ou public) |
+| LLM | Large Language Model — usado para gerar títulos/descrições (KAI-59/60/61, V1.1, na nuvem) |
+| Rascunho (draft) | Edições feitas pelo usuário na tela de revisão, persistidas com auto-save debounce ~1s |
+
+---
+
+## Apêndice A — Changelog (2026-04)
+
+Mudanças aplicadas a este PRD em 2026-04-24 para refletir o estado real da implementação:
+
+| Seção | Mudança principal |
+|---|---|
+| Topo | Versão 2.0 → **2.1**; status passou de "Em Revisão" para "MVP em implementação avançada" |
+| 4.1 Escopo V1 | Adicionada coluna de **Status** (✅ / 🔄 / ⏳) e referência à issue/PR de cada item |
+| 4.3 Roadmap | Geração IA movida para **V1.1** (decisão: pular LLM local e ir direto para cloud); QS-75 para V2 |
+| 5.0 (nova) | Seção de **Modelo de Domínio** introduzindo `Video`/`VideoDetection`/`Clip` como entidades separadas; nota sobre `video.status` ser dead state |
+| 5.1 Fluxo principal | Diagrama atualizado: separação Video → Detection → Clip → Upload → Review; upload como passo manual ("Enviar pra revisão"); publicação só pelo admin |
+| RF-02 | Reescrito para **MVP QS-58** (chapters + captions density + gap híbrido 5s/10s + SKIPPED). Cap de confiança em 82% explicitado. Baseline esperado 3–5/10. IA movida para QS-75 na V2 |
+| RF-05 | Upload como `unlisted` + **scope `youtube.force-ssl`** (antes era `youtube.upload`). Quota por tipo de chamada explicitada. AES-256 para tokens |
+| RF-06 | Marcado como ⏳ Pendente (endpoints retornam 501). V1 **sem** LLM local — KAI-59/60/61 vão direto para cloud (V1.1) |
+| RF-07 | Reescrito com arquitetura de 3 abas (QS-72), auto-save debounce 1s, permissões editor vs admin, `AlertDialog` de confirmação com flush síncrono |
+| RF-09 | Dashboard atualizado com redesign v2 (PR #11): MetricTiles, PipelineCard, sidebar 220px fixa, polling condicional |
+| **RF-10 (novo)** | Ciclo de vida do clip com máquina de estados (9 estados + ERROR + DISCARDED) e regras de retry/discard |
+| **RF-11 (novo)** | Integração OAuth com YouTube: scope, armazenamento criptografado, refresh automático, quota tracking |
+| RNF-05 | Removida menção a "LLM local" como economia — V1 opera **sem** chamadas pagas de LLM |
+| 9.2 Dependências | Ollama/LLM local removidos do V1; Temporal explicitado como dependência core; yt-dlp-ejs adicionado |
+| 10 Roadmap | Fase 1 marcada como concluída; Fase 1.1 criada para IA generation; Fase 2 traz QS-75 e KAI-63 |
+| 11 Glossário | Adicionados termos Temporal, Workflow, Activity, Video, Clip, VideoDetection, Unlisted, Public, Private, Rascunho |
+
+> Essas mudanças **não** alteram a visão de produto nem os objetivos de negócio (seções 1 e 2). Refletem escolhas de execução tomadas durante a implementação (especialmente QS-58, KAI-54, KAI-55, QS-72 e PR #11).
 
 ---
 
 **PRD — Sistema de Clips de Pregações**
-**Versão:** 2.0 | **Público:** Time de Desenvolvimento | **Status:** Em Revisão
+**Versão:** 2.1 | **Público:** Time de Desenvolvimento | **Status:** MVP em implementação avançada
