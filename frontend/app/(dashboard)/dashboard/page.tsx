@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import {
   getClipPipeline,
+  getClipReview,
   listClips,
 } from "@/lib/api/clips";
 import { listVideos } from "@/lib/api/videos";
@@ -200,13 +201,11 @@ export default function DashboardPage() {
               summary?.total_views != null ? formatViews(summary.total_views) : "—"
             }
             unit={summary?.total_views != null ? "views" : "em breve"}
-            sparkline={[8, 10, 6, 12, 10, 18, 14, 24]}
           />
           <MetricTile
             label="Duração processada"
             value={formatDuration(totalDurationSec).replace(/[a-z]$/i, "")}
             unit="h:m:s"
-            sparkline={[3, 4, 4, 5, 6, 7, 7, 8]}
           />
         </section>
 
@@ -293,6 +292,12 @@ function FeaturedCard({
   video?: Video;
   views?: number | null;
 }) {
+  const { data: review } = useQuery({
+    queryKey: ["clip-review", clip?.id],
+    queryFn: () => getClipReview(clip!.id),
+    enabled: !!clip,
+  });
+
   if (!clip) {
     return (
       <CardShell
@@ -315,9 +320,10 @@ function FeaturedCard({
   }
 
   const duration = clip.duration ?? clip.end_time - clip.start_time;
+  const youtubeUrl = review?.youtube_url ?? null;
+  const canCopyLink = clip.status === "published" && !!youtubeUrl;
   const copyLink = () => {
-    const url = clip.file_path ?? "";
-    if (url) navigator.clipboard.writeText(url);
+    if (youtubeUrl) navigator.clipboard.writeText(youtubeUrl);
   };
 
   return (
@@ -367,6 +373,8 @@ function FeaturedCard({
               size="sm"
               variant="outline"
               icon={<Youtube className="h-3 w-3 text-[#ff0033]" />}
+              disabled
+              title="Em breve"
             >
               Ver no YouTube
             </Btn>
@@ -375,6 +383,8 @@ function FeaturedCard({
               variant="ghost"
               icon={<Copy className="h-3 w-3" />}
               onClick={copyLink}
+              disabled={!canCopyLink}
+              title={canCopyLink ? undefined : "Disponível após Publicar"}
             >
               Copiar link
             </Btn>
@@ -653,7 +663,7 @@ function QuotaCard({
                 ? "Atenção: quota acima de 80% hoje."
                 : "Conecte o YouTube em Configurações."}
           </div>
-          <Btn size="sm" variant="secondary">
+          <Btn size="sm" variant="secondary" disabled title="Em breve">
             Ver histórico
           </Btn>
         </div>
