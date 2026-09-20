@@ -1,4 +1,4 @@
-# PRD — KAI-51: Submissao de URL e Validacao
+# PRD — QS-51: Submissao de URL e Validacao
 
 ## Milestone: Fase 1 — MVP | Prioridade: Urgente
 
@@ -6,12 +6,12 @@
 
 ## 1. Contexto
 
-A submissao de URL e o ponto de entrada de todo o pipeline de processamento de videos. Sem ela, nenhuma outra etapa (download, corte, upload, geracao de conteudo) pode funcionar. Esta task implementa o RF-01 do PRD principal e cria a base do modulo de videos que sera usado por todas as tasks subsequentes (KAI-52, KAI-53, KAI-54).
+A submissao de URL e o ponto de entrada de todo o pipeline de processamento de videos. Sem ela, nenhuma outra etapa (download, corte, upload, geracao de conteudo) pode funcionar. Esta task implementa o RF-01 do PRD principal e cria a base do modulo de videos que sera usado por todas as tasks subsequentes (QS-52, QS-53, QS-54).
 
 ### Dependencias
 
-- **Depende de (Done):** KAI-50 (Infraestrutura base), KAI-57 (Autenticacao e roles)
-- **Bloqueia:** KAI-52 (Download via yt-dlp), KAI-58 (Deteccao de timestamps)
+- **Depende de (Done):** QS-50 (Infraestrutura base), QS-57 (Autenticacao e roles)
+- **Bloqueia:** QS-52 (Download via yt-dlp), QS-58 (Deteccao de timestamps)
 
 ---
 
@@ -40,11 +40,11 @@ Permitir que o editor submeta uma URL do YouTube e receba feedback imediato sobr
 
 ### Fora do Escopo
 
-- Download do video (KAI-52)
-- Deteccao de timestamps (KAI-58)
-- Corte de video (KAI-53)
-- Upload para YouTube (KAI-54)
-- Processamento em lote (KAI-64)
+- Download do video (QS-52)
+- Deteccao de timestamps (QS-58)
+- Corte de video (QS-53)
+- Upload para YouTube (QS-54)
+- Processamento em lote (QS-64)
 - Verificacao se video e live (ao vivo vs finalizada) — sera tratado na V2 com integracao YouTube Data API
 
 ---
@@ -132,4 +132,4 @@ Permitir que o editor submeta uma URL do YouTube e receba feedback imediato sobr
 
 - **yt-dlp** para extracaco de metadados (ja no Docker)
 - **PostgreSQL** para persistencia (ja configurado)
-- **Auth system** para protecao de rotas (KAI-57, Done)
+- **Auth system** para protecao de rotas (QS-57, Done)

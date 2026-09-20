@@ -58,3 +58,10 @@ secrets/*
 
 # Git worktrees
 .worktrees/
+
+# Agent tooling
+.claude/
+.maestri/
+
+# Build artifacts
+*.tsbuildinfo

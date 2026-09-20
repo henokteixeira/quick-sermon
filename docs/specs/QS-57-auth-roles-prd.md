@@ -1,4 +1,4 @@
-# PRD — KAI-57: Autenticacao e Controle de Acesso (Roles)
+# PRD — QS-57: Autenticacao e Controle de Acesso (Roles)
 
 ## Milestone: Fase 1 — MVP | Prioridade: Urgente
 

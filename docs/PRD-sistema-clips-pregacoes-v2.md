@@ -1,7 +1,7 @@
 # PRD — Sistema de Clips de Pregações
 ## Versão 2.1 | Atualizado em 2026-04-24 | Status: MVP (V1) em implementação avançada
 
-> **Nota de versão:** este documento foi atualizado para refletir o estado real da implementação em abril de 2026. Mudanças arquiteturais e de regra de negócio realizadas durante a execução (KAI-51/52/54/55, QS-58, QS-72 e redesign v2) estão incorporadas nas seções correspondentes. Ver [Apêndice A — Changelog](#apêndice-a--changelog-2026-04) para o detalhamento por seção.
+> **Nota de versão:** este documento foi atualizado para refletir o estado real da implementação em abril de 2026. Mudanças arquiteturais e de regra de negócio realizadas durante a execução (QS-51/52/54/55, QS-58, QS-72 e redesign v2) estão incorporadas nas seções correspondentes. Ver [Apêndice A — Changelog](#apêndice-a--changelog-2026-04) para o detalhamento por seção.
 
 ---
 
@@ -139,22 +139,22 @@ Status (2026-04-24): ✅ entregue · 🔄 parcial · ⏳ pendente
 
 | Funcionalidade | Prioridade | Status | Referências |
 |---|---|---|---|
-| Submissão e validação de URL de live | Must Have | ✅ | KAI-51 |
+| Submissão e validação de URL de live | Must Have | ✅ | QS-51 |
 | Detecção automática de timestamps (MVP: chapters + captions density) | Must Have | ✅ | QS-58 |
-| Ajuste manual de timestamps (fallback) | Must Have | ✅ | Clip editor (KAI-52) |
-| Download otimizado do segmento via yt-dlp | Must Have | ✅ | KAI-52, KAI-71 |
-| Corte automático de vídeo (FFmpeg stream copy) | Must Have | ✅ | KAI-52 |
-| Upload para YouTube como `unlisted` + OAuth 2.0 | Must Have | ✅ | KAI-54 |
-| Interface de revisão com preview do YouTube | Must Have | ✅ | KAI-55 |
-| Publicação com um clique (muda privacy → `public`) | Must Have | ✅ | KAI-55 |
-| Descartar clip (soft delete + remoção do YouTube) | Must Have | ✅ | KAI-55 |
-| Autenticação e controle de acesso por roles | Must Have | ✅ | KAI-57 |
+| Ajuste manual de timestamps (fallback) | Must Have | ✅ | Clip editor (QS-52) |
+| Download otimizado do segmento via yt-dlp | Must Have | ✅ | QS-52, QS-71 |
+| Corte automático de vídeo (FFmpeg stream copy) | Must Have | ✅ | QS-52 |
+| Upload para YouTube como `unlisted` + OAuth 2.0 | Must Have | ✅ | QS-54 |
+| Interface de revisão com preview do YouTube | Must Have | ✅ | QS-55 |
+| Publicação com um clique (muda privacy → `public`) | Must Have | ✅ | QS-55 |
+| Descartar clip (soft delete + remoção do YouTube) | Must Have | ✅ | QS-55 |
+| Autenticação e controle de acesso por roles | Must Have | ✅ | QS-57 |
 | Página de detalhes do clip com abas | Must Have | ✅ | QS-72 |
 | Dashboard com status em tempo real (polling React Query) | Should Have | ✅ | Redesign v2 (PR #11) |
-| Geração de 5 opções de título (IA) | Must Have | ⏳ | KAI-59 — endpoint retorna 501 |
-| Geração de descrição estruturada (IA) | Must Have | ⏳ | KAI-60 — endpoint retorna 501 |
-| Geração de mensagem para WhatsApp (IA) | Must Have | ⏳ | KAI-61 — endpoint retorna 501 |
-| Notificações em tempo real | Should Have | 🔄 | Drawer/página mockados; backend SSE fica em KAI-63 |
+| Geração de 5 opções de título (IA) | Must Have | ⏳ | QS-59 — endpoint retorna 501 |
+| Geração de descrição estruturada (IA) | Must Have | ⏳ | QS-60 — endpoint retorna 501 |
+| Geração de mensagem para WhatsApp (IA) | Must Have | ⏳ | QS-61 — endpoint retorna 501 |
+| Notificações em tempo real | Should Have | 🔄 | Drawer/página mockados; backend SSE fica em QS-63 |
 | Gestão de usuários (admin) | Should Have | 🔄 | Backend completo; UI usa dados mockados |
 | Detecção de versículos citados | Could Have | ⏳ | Fora do MVP; candidato a V2 |
 
@@ -174,8 +174,8 @@ Status (2026-04-24): ✅ entregue · 🔄 parcial · ⏳ pendente
 | Versão | Funcionalidades |
 |---|---|
 | V1 (em curso) | Pipeline end-to-end manual + detecção MVP (chapters + captions density) sem IA |
-| V1.1 | Geração de conteúdo com LLM na nuvem (KAI-59/60/61) — ativar endpoints 501 |
-| V2 | Refinamento de detecção de timestamps com Whisper/LLM (QS-75), legendas automáticas completas, clips curtos para Reels/Shorts, notificações reais via SSE/WebSocket (KAI-63) |
+| V1.1 | Geração de conteúdo com LLM na nuvem (QS-59/60/61) — ativar endpoints 501 |
+| V2 | Refinamento de detecção de timestamps com Whisper/LLM (QS-75), legendas automáticas completas, clips curtos para Reels/Shorts, notificações reais via SSE/WebSocket (QS-63) |
 | V3 | Thumbnails com IA, publicação multiplataforma, analytics avançado |
 | V4 | Multi-tenant, aplicativo mobile |
 
@@ -322,7 +322,7 @@ Cada requisito inclui: descrição, critérios de aceitação (AC) e comportamen
 
 **Fixtures e dataset de validação:**
 - `backend/app/modules/videos/tests/fixtures/reference_videos.json` — 10 vídeos com ground truth.
-- `backend/scripts/test_detection_dataset.py` — script batch para rodar e comparar baseline.
+- `backend/scripts/detection_dataset.py` — script batch para rodar e comparar baseline.
 
 **Falha:** Ver [EC-02](#ec-02--detecção-com-baixa-confiança-ou-falha-total).
 
@@ -380,7 +380,7 @@ Cada requisito inclui: descrição, critérios de aceitação (AC) e comportamen
 
 > **Status (2026-04-24):** ⏳ **Pendente**. Endpoints existem em `POST /clips/{id}/regenerate/{field}` (onde `field ∈ titles | description | whatsapp_message`) mas retornam **`501 Not Implemented`**. As colunas `generated_titles` (JSONB), `generated_description` e `generated_whatsapp_message` já estão persistidas em `clips`. O frontend apresenta placeholder *"Geração IA em desenvolvimento"*.
 >
-> **V1 (planejada, não implementada):** O design original previa LLM local (Ollama). Decidiu-se pular essa fase dada a complexidade e qualidade insuficiente observadas na detecção com IA local (vide QS-58). As issues [KAI-59](https://linear.app/) (títulos), [KAI-60](https://linear.app/) (descrição) e [KAI-61](https://linear.app/) (WhatsApp) vão direto para LLM na nuvem.
+> **V1 (planejada, não implementada):** O design original previa LLM local (Ollama). Decidiu-se pular essa fase dada a complexidade e qualidade insuficiente observadas na detecção com IA local (vide QS-58). As issues [QS-59](https://linear.app/) (títulos), [QS-60](https://linear.app/) (descrição) e [QS-61](https://linear.app/) (WhatsApp) vão direto para LLM na nuvem.
 >
 > **V1.1 (planejado):** LLMs na nuvem (Gemini / OpenAI) com `OPENAI_API_KEY` já configurado em `app/core/config.py`.
 
@@ -408,7 +408,7 @@ Cada requisito inclui: descrição, critérios de aceitação (AC) e comportamen
 
 ### RF-07 — Interface de Revisão e Publicação
 
-**Descrição:** O editor/admin deve conseguir revisar todo o conteúdo gerado e publicar o clip em uma única tela. Implementação concluída em KAI-55 e refinada em QS-72 (integração em abas).
+**Descrição:** O editor/admin deve conseguir revisar todo o conteúdo gerado e publicar o clip em uma única tela. Implementação concluída em QS-55 e refinada em QS-72 (integração em abas).
 
 **Arquitetura de UI (QS-72):**
 A tela de detalhes do clip fica em `/videos/[videoId]/clip/[clipId]?tab=edicao|processamento|revisao` com 3 abas:
@@ -429,7 +429,7 @@ A tela de detalhes do clip fica em `/videos/[videoId]/clip/[clipId]?tab=edicao|p
   - `editor` — pode abrir tela, editar conteúdo, disparar "Enviar pra revisão" (upload).
   - `admin` — tudo do editor + publicar + descartar.
 - AC-08.7: Estados `PUBLISHED` e `DISCARDED` renderizam a aba Revisão em modo read-only.
-- AC-08.8: Botão "Regenerar" (títulos/descrição/WhatsApp) chama `POST /clips/{id}/regenerate/{field}` e, enquanto KAI-59/60/61 retornam 501, exibe placeholder *"Geração IA em desenvolvimento"* sem bloquear o fluxo manual.
+- AC-08.8: Botão "Regenerar" (títulos/descrição/WhatsApp) chama `POST /clips/{id}/regenerate/{field}` e, enquanto QS-59/60/61 retornam 501, exibe placeholder *"Geração IA em desenvolvimento"* sem bloquear o fluxo manual.
 
 ---
 
@@ -455,14 +455,14 @@ A tela de detalhes do clip fica em `/videos/[videoId]/clip/[clipId]?tab=edicao|p
 **Critérios de Aceitação:**
 - AC-10.1: O dashboard exibe: hero greeting dinâmico + 3 MetricTiles (vídeos, clips publicados, visualizações totais) com sparklines de 30 dias + FeaturedCard (clip com mais views) + PipelineCard (stages do clip mais recente em processamento) + ActivityCard + QuotaCard radial.
 - AC-10.2: Os status possíveis para **clips** são: `pending`, `downloading`, `trimming`, `ready`, `uploading`, `awaiting_review`, `published`, `discarded`, `error`. Os status agregados exibidos para **videos** são derivados das detections e dos clips filhos.
-- AC-10.3: O status é atualizado via polling do React Query com `refetchInterval` condicional (3s quando há job ativo, 15s caso contrário) — sem necessidade de recarregar a página. SSE/WebSocket fica em KAI-63.
+- AC-10.3: O status é atualizado via polling do React Query com `refetchInterval` condicional (3s quando há job ativo, 15s caso contrário) — sem necessidade de recarregar a página. SSE/WebSocket fica em QS-63.
 - AC-10.4: Clips com status `error` exibem `error_code` e descrição, com botão **"Tentar novamente"** (`POST /clips/{id}/retry`).
 - AC-10.5: A listagem de vídeos (`/videos`) tem paginação; filtros de clip (`ClipsMap` + FilterChips) estão na aba Clipes de cada vídeo.
 - AC-10.6: A listagem `GET /clips` aplica cap de `page_size=100`; contagens agregadas usam paginação em lotes.
 
 ---
 
-### RF-10 — Ciclo de Vida do Clip (KAI-55 / QS-72)
+### RF-10 — Ciclo de Vida do Clip (QS-55 / QS-72)
 
 **Descrição:** Um clip passa por estados bem definidos entre a criação e a publicação/descarte. Este RF define os estados, transições e regras.
 
@@ -538,8 +538,8 @@ PENDING ──► DOWNLOADING ──► TRIMMING ──► READY ──► UPLOA
 ### RNF-05 — Custo Operacional
 
 - Custo total de APIs e infraestrutura < $50/mês
-- V1 opera **sem chamadas pagas de LLM** (detecção MVP sem IA; geração IA ainda não implementada em KAI-59/60/61)
-- Quando KAI-59/60/61 forem implementados em LLM na nuvem, definir limite de tokens por vídeo e monitorar custo
+- V1 opera **sem chamadas pagas de LLM** (detecção MVP sem IA; geração IA ainda não implementada em QS-59/60/61)
+- Quando QS-59/60/61 forem implementados em LLM na nuvem, definir limite de tokens por vídeo e monitorar custo
 - Monitorar consumo de quota da YouTube API (upload = 1600, update = 50, delete = 50); alertar em ≥ 80% dos 10.000 units/dia
 
 ---
@@ -700,7 +700,7 @@ PENDING ──► DOWNLOADING ──► TRIMMING ──► READY ──► UPLOA
 | yt-dlp + yt-dlp-ejs (Node.js runtime) | Download de vídeos, metadados, chapters, captions VTT | Bloqueio pelo YouTube; necessidade de atualizar runtime JS | Atualização frequente; comunidade ativa |
 | FFmpeg 6+ | Corte de vídeo (stream copy) | Estável, baixo risco | — |
 | Temporal | Orquestração de workflows (download/trim/upload/detection) | Dependência operacional (Temporal server + DB) | Fallback impossível no curto prazo — core do pipeline |
-| LLMs na nuvem (OpenAI, Gemini) | Geração de conteúdo — **V1.1** (KAI-59/60/61) | Custo por chamada | Fallback para campos manuais (já implementado) |
+| LLMs na nuvem (OpenAI, Gemini) | Geração de conteúdo — **V1.1** (QS-59/60/61) | Custo por chamada | Fallback para campos manuais (já implementado) |
 | Whisper (OpenAI API ou local) | Refinamento de detecção de timestamps — **V2** (QS-75) | Custo / recursos de hardware | MVP sem IA já em produção (QS-58) |
 
 ---
@@ -711,11 +711,11 @@ PENDING ──► DOWNLOADING ──► TRIMMING ──► READY ──► UPLOA
 **Objetivo:** Fluxo completo funcional, mesmo que parcialmente manual
 
 - [x] Infraestrutura base — PostgreSQL + Temporal + Docker Compose
-- [x] Autenticação e roles (KAI-57)
-- [x] Submissão de URL e validação (KAI-51)
-- [x] Download via yt-dlp + corte com FFmpeg (KAI-52, otimização 6x em KAI-71)
-- [x] Upload para YouTube via API com scope `youtube.force-ssl` (KAI-54)
-- [x] Interface de revisão e publicação (KAI-55)
+- [x] Autenticação e roles (QS-57)
+- [x] Submissão de URL e validação (QS-51)
+- [x] Download via yt-dlp + corte com FFmpeg (QS-52, otimização 6x em QS-71)
+- [x] Upload para YouTube via API com scope `youtube.force-ssl` (QS-54)
+- [x] Interface de revisão e publicação (QS-55)
 - [x] Remodelagem da página de detalhes do clip com abas (QS-72)
 - [x] Dashboard redesign v2 (PR #11)
 - [x] Detecção automática de timestamps — MVP sem IA (QS-58)
@@ -727,9 +727,9 @@ PENDING ──► DOWNLOADING ──► TRIMMING ──► READY ──► UPLOA
 ### Fase 1.1 — Geração de conteúdo com IA (Em aberto)
 **Objetivo:** Reduzir o trabalho manual de título/descrição/WhatsApp
 
-- [ ] KAI-59 — Geração de 5 títulos com LLM na nuvem
-- [ ] KAI-60 — Geração de descrição estruturada (≤ 5000 chars)
-- [ ] KAI-61 — Geração de mensagem WhatsApp (100–150 palavras)
+- [ ] QS-59 — Geração de 5 títulos com LLM na nuvem
+- [ ] QS-60 — Geração de descrição estruturada (≤ 5000 chars)
+- [ ] QS-61 — Geração de mensagem WhatsApp (100–150 palavras)
 
 **Critério de conclusão:** ≥ 50% dos clips publicados sem edição manual de título/descrição.
 
@@ -739,7 +739,7 @@ PENDING ──► DOWNLOADING ──► TRIMMING ──► READY ──► UPLOA
 **Objetivo:** Elevar a qualidade da detecção e reduzir fricção operacional
 
 - [ ] QS-75 — Refinamento de detecção com Whisper + LLM (viabilidade e integração)
-- [ ] KAI-63 — Notificações em tempo real via SSE/WebSocket
+- [ ] QS-63 — Notificações em tempo real via SSE/WebSocket
 - [ ] UI de gestão de usuários (backend já existe)
 - [ ] Endpoint de `videos.update` pós-publicação (editar título/descrição já público)
 
@@ -783,7 +783,7 @@ PENDING ──► DOWNLOADING ──► TRIMMING ──► READY ──► UPLOA
 | Unlisted | Visibilidade de vídeo no YouTube: acessível por link, não aparece em buscas — padrão pós-upload |
 | Public | Visibilidade final após publish — acessível e pesquisável |
 | Private | Visibilidade que **bloqueia embed** — não usado pelo sistema (embed depende de unlisted ou public) |
-| LLM | Large Language Model — usado para gerar títulos/descrições (KAI-59/60/61, V1.1, na nuvem) |
+| LLM | Large Language Model — usado para gerar títulos/descrições (QS-59/60/61, V1.1, na nuvem) |
 | Rascunho (draft) | Edições feitas pelo usuário na tela de revisão, persistidas com auto-save debounce ~1s |
 
 ---
@@ -801,17 +801,17 @@ Mudanças aplicadas a este PRD em 2026-04-24 para refletir o estado real da impl
 | 5.1 Fluxo principal | Diagrama atualizado: separação Video → Detection → Clip → Upload → Review; upload como passo manual ("Enviar pra revisão"); publicação só pelo admin |
 | RF-02 | Reescrito para **MVP QS-58** (chapters + captions density + gap híbrido 5s/10s + SKIPPED). Cap de confiança em 82% explicitado. Baseline esperado 3–5/10. IA movida para QS-75 na V2 |
 | RF-05 | Upload como `unlisted` + **scope `youtube.force-ssl`** (antes era `youtube.upload`). Quota por tipo de chamada explicitada. AES-256 para tokens |
-| RF-06 | Marcado como ⏳ Pendente (endpoints retornam 501). V1 **sem** LLM local — KAI-59/60/61 vão direto para cloud (V1.1) |
+| RF-06 | Marcado como ⏳ Pendente (endpoints retornam 501). V1 **sem** LLM local — QS-59/60/61 vão direto para cloud (V1.1) |
 | RF-07 | Reescrito com arquitetura de 3 abas (QS-72), auto-save debounce 1s, permissões editor vs admin, `AlertDialog` de confirmação com flush síncrono |
 | RF-09 | Dashboard atualizado com redesign v2 (PR #11): MetricTiles, PipelineCard, sidebar 220px fixa, polling condicional |
 | **RF-10 (novo)** | Ciclo de vida do clip com máquina de estados (9 estados + ERROR + DISCARDED) e regras de retry/discard |
 | **RF-11 (novo)** | Integração OAuth com YouTube: scope, armazenamento criptografado, refresh automático, quota tracking |
 | RNF-05 | Removida menção a "LLM local" como economia — V1 opera **sem** chamadas pagas de LLM |
 | 9.2 Dependências | Ollama/LLM local removidos do V1; Temporal explicitado como dependência core; yt-dlp-ejs adicionado |
-| 10 Roadmap | Fase 1 marcada como concluída; Fase 1.1 criada para IA generation; Fase 2 traz QS-75 e KAI-63 |
+| 10 Roadmap | Fase 1 marcada como concluída; Fase 1.1 criada para IA generation; Fase 2 traz QS-75 e QS-63 |
 | 11 Glossário | Adicionados termos Temporal, Workflow, Activity, Video, Clip, VideoDetection, Unlisted, Public, Private, Rascunho |
 
-> Essas mudanças **não** alteram a visão de produto nem os objetivos de negócio (seções 1 e 2). Refletem escolhas de execução tomadas durante a implementação (especialmente QS-58, KAI-54, KAI-55, QS-72 e PR #11).
+> Essas mudanças **não** alteram a visão de produto nem os objetivos de negócio (seções 1 e 2). Refletem escolhas de execução tomadas durante a implementação (especialmente QS-58, QS-54, QS-55, QS-72 e PR #11).
 
 ---
 

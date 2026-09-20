@@ -1,4 +1,4 @@
-.PHONY: up down build migrate migration test-backend test-frontend seed logs setup test-setup
+.PHONY: up down build migrate migration test-backend seed logs setup test-setup check-hygiene
 
 up:
 	docker compose up -d
@@ -21,9 +21,6 @@ migration:
 test-backend:
 	docker compose exec backend pytest -v
 
-test-frontend:
-	cd frontend && npm test
-
 seed:
 	docker compose exec backend python seed.py
 
@@ -38,3 +35,6 @@ setup:
 
 test-setup:
 	./scripts/test-setup-env.sh
+
+check-hygiene:
+	bash scripts/check-repo-hygiene.sh
