@@ -1,17 +1,21 @@
-import pytest
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy import text
-from sqlalchemy.engine import make_url
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+import os
 
-from app.core.app import create_app
-from app.core.config import settings
-from app.core.database import engine as app_engine
-from app.core.models import Base
-from app.modules.clips import models as clips_models  # noqa: F401
-from app.modules.users import models as users_models  # noqa: F401
-from app.modules.videos import models as videos_models  # noqa: F401
-from app.modules.youtube import models as youtube_models  # noqa: F401
+os.environ.setdefault("SECRET_KEY", "chave-de-teste-sem-valor-em-producao")
+
+import pytest  # noqa: E402
+from httpx import ASGITransport, AsyncClient  # noqa: E402
+from sqlalchemy import text  # noqa: E402
+from sqlalchemy.engine import make_url  # noqa: E402
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine  # noqa: E402
+
+from app.core.app import create_app  # noqa: E402
+from app.core.config import settings  # noqa: E402
+from app.core.database import engine as app_engine  # noqa: E402
+from app.core.models import Base  # noqa: E402
+from app.modules.clips import models as clips_models  # noqa: E402, F401
+from app.modules.users import models as users_models  # noqa: E402, F401
+from app.modules.videos import models as videos_models  # noqa: E402, F401
+from app.modules.youtube import models as youtube_models  # noqa: E402, F401
 
 
 @pytest.fixture
@@ -51,6 +55,7 @@ async def _create_test_database(url):
 async def db_session():
     url = make_url(settings.DATABASE_URL)
     url = url.set(database=f"{url.database}_test")
+    assert url.database.endswith("_test")
 
     await _create_test_database(url)
 

@@ -3,7 +3,6 @@ from httpx import ASGITransport, AsyncClient
 
 from app.core.app import create_app
 from app.core.config import settings
-from app.core.database import engine as app_engine
 
 ORIGEM_DO_FRONTEND = "https://clips.igreja.test"
 
@@ -16,7 +15,6 @@ async def client(monkeypatch):
         base_url="http://test",
     ) as ac:
         yield ac
-    await app_engine.dispose()
 
 
 async def test_origem_desconhecida_nao_recebe_permissao_de_cors(client):
