@@ -163,7 +163,9 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
         try:
             line = line_queue.get(timeout=10)
         except queue.Empty:
-            _report_progress(input.clip_id, "downloading", last_percent, last_speed, download_started_at)
+            _report_progress(
+                input.clip_id, "downloading", last_percent, last_speed, download_started_at
+            )
             continue
 
         if line is None:
@@ -186,7 +188,9 @@ def download_video_segment(input: DownloadInput) -> DownloadResult:
             updated = True
 
         if updated:
-            _report_progress(input.clip_id, "downloading", last_percent, last_speed, download_started_at)
+            _report_progress(
+                input.clip_id, "downloading", last_percent, last_speed, download_started_at
+            )
 
     process.wait()
 
