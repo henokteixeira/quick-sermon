@@ -14,18 +14,14 @@ Plataforma web que automatiza o pipeline de processamento de videos de pregacoes
 ## Quick Start
 
 ```bash
-# Copy env file
-cp .env.example .env
+# Generate .env with random secrets
+make setup
 
-# Start all services
+# Start all services (migrations and seed run automatically)
 make up
-
-# Run database migrations
-make migrate
-
-# Seed initial data
-make seed
 ```
+
+`make migrate` and `make seed` still exist for manual use, but are no longer required steps.
 
 ## Development
 

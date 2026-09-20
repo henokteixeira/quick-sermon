@@ -55,6 +55,7 @@ temp/
 # Secrets (yt-dlp cookies, etc.)
 secrets/*
 !secrets/.gitkeep
+!secrets/README.md
 
 # Git worktrees
 .worktrees/

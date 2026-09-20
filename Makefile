@@ -1,4 +1,4 @@
-.PHONY: up down build migrate migration test-backend seed logs setup test-setup check-hygiene
+.PHONY: up up-dev down build migrate migration test-backend seed logs logs-backend setup test-setup smoke lint help check-hygiene
 
 up:
 	docker compose up -d
@@ -35,6 +35,32 @@ setup:
 
 test-setup:
 	./scripts/test-setup-env.sh
+
+smoke:
+	./scripts/smoke.sh
+
+lint:
+	docker compose run --rm --no-deps --entrypoint ruff backend check .
+	docker build -f frontend/Dockerfile.dev -t quick-sermon-lint-frontend frontend
+	docker run --rm quick-sermon-lint-frontend npm run lint
+
+help:
+	@echo "up            sobe o stack em segundo plano"
+	@echo "up-dev        sobe o stack com --reload e volumes de código"
+	@echo "down          derruba o stack"
+	@echo "build         builda as imagens"
+	@echo "migrate       roda as migrations do backend à mão"
+	@echo "migration     cria uma migration nova (msg=\"...\")"
+	@echo "test-backend  roda os testes do backend"
+	@echo "seed          roda o seed do Admin à mão"
+	@echo "logs          segue os logs de todos os serviços"
+	@echo "logs-backend  segue os logs de backend e worker"
+	@echo "setup         cria o .env a partir do .env.example"
+	@echo "test-setup    testa o script de setup do .env"
+	@echo "smoke         sobe um clone limpo e prova a subida com dois comandos"
+	@echo "lint          roda ruff e eslint, ambos dentro do container"
+	@echo "help          lista os alvos deste Makefile"
+	@echo "check-hygiene verifica a higiene do repositório"
 
 check-hygiene:
 	bash scripts/check-repo-hygiene.sh

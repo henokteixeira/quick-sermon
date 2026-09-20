@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+node_modules/
+.next/
+.env
+.env.*
+secrets/
+.git/
+.worktrees/
+.maestri/
