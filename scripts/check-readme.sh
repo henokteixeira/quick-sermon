@@ -15,6 +15,15 @@ if [ ! -f "$readme" ]; then
 fi
 
 # (a) toda porta citada no README existe em `docker compose config`
+# Os serviços declaram `env_file: .env`; num clone limpo, antes de `make setup`,
+# esse arquivo não existe. Usa um `.env` temporário nesse caso, sem tocar num já existente.
+env_temporario=""
+if [ ! -f "$root/.env" ]; then
+  env_temporario="$root/.env"
+  cp "$root/.env.example" "$env_temporario"
+  trap 'rm -f "$env_temporario"' EXIT
+fi
+
 compose_config=$(docker compose config 2>/dev/null) || falhar "docker compose config falhou"
 
 portas_readme=$(
@@ -22,11 +31,15 @@ portas_readme=$(
     grep -oE 'localhost:[0-9]+' "$readme" | cut -d: -f2
     grep -oE '\*\*[0-9, ]+\*\*' "$readme" | grep -oE '[0-9]+'
   } | sort -u
-)
+) || true
+
+if [ -z "$portas_readme" ]; then
+  falhar "nenhuma porta encontrada no README para verificar (formato mudou?)"
+fi
 
 while IFS= read -r porta; do
   [ -z "$porta" ] && continue
-  if ! echo "$compose_config" | grep -qE "published: \"?$porta\"?"; then
+  if ! echo "$compose_config" | grep -qE "published: \"$porta\""; then
     falhar "porta $porta citada no README não existe em docker compose config"
   fi
 done <<< "$portas_readme"
@@ -55,8 +68,9 @@ secoes=(
   "O que não está no MVP"
   "Problemas comuns"
 )
+titulos=$(grep -E '^#{1,6} ' "$readme" | sed -E 's/^#{1,6} //')
 for secao in "${secoes[@]}"; do
-  if ! grep -qF "$secao" "$readme"; then
+  if ! grep -qxF "$secao" <<< "$titulos"; then
     falhar "seção obrigatória ausente: $secao"
   fi
 done
