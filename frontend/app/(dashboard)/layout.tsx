@@ -21,7 +21,6 @@ type NavItem = {
   key: "dashboard" | "videos" | "pipeline" | "settings";
   label: string;
   Icon: typeof LayoutGrid;
-  adminOnly?: boolean;
   disabled?: boolean;
 };
 
@@ -61,10 +60,6 @@ export default function DashboardLayout({
     },
   ];
 
-  const visible = items.filter(
-    (item) => !item.adminOnly || user?.role === "admin",
-  );
-
   function handleLogout() {
     clearAuth();
     localStorage.removeItem("access_token");
@@ -90,7 +85,7 @@ export default function DashboardLayout({
 
           {/* Nav */}
           <nav className="flex flex-1 flex-col gap-0.5 overflow-hidden px-2.5 py-2">
-            {visible.map((item) => {
+            {items.map((item) => {
               const isActive =
                 item.href !== "#" && pathname.startsWith(item.href);
               const Inner = (
@@ -188,7 +183,7 @@ export default function DashboardLayout({
 
         {/* Mobile bottom nav */}
         <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-qs-line bg-[#0a0807] px-2 py-2 md:hidden">
-          {visible.map((item) => {
+          {items.map((item) => {
             const isActive =
               item.href !== "#" && pathname.startsWith(item.href);
             if (item.disabled) {

@@ -295,7 +295,7 @@ function FeaturedCard({
   const { data: review } = useQuery({
     queryKey: ["clip-review", clip?.id],
     queryFn: () => getClipReview(clip!.id),
-    enabled: !!clip,
+    enabled: clip?.status === "published",
   });
 
   if (!clip) {
