@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     TEMPORAL_TASK_QUEUE: str = "video-processing"
 
     # JWT
-    SECRET_KEY: str = "change-me-in-production"
+    SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
@@ -44,6 +44,10 @@ class Settings(BaseSettings):
 
     # YouTube OAuth redirect (external URL where the backend is reachable)
     YOUTUBE_REDIRECT_BASE_URL: str = "http://localhost"
+
+    # Seed do Admin
+    SEED_ADMIN_EMAIL: str = "admin@quicksermon.com"
+    SEED_ADMIN_PASSWORD: str = ""
 
     # Frontend
     FRONTEND_URL: str = "http://localhost:3000"
