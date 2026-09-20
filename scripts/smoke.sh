@@ -17,6 +17,9 @@ limpar() {
 }
 trap limpar EXIT
 
+echo "smoke: make setup"
+make setup >/dev/null || falhar "make setup falhou"
+
 echo "smoke: verificando portas publicadas"
 if ! command -v lsof >/dev/null 2>&1; then
   echo "smoke: lsof não encontrado; checagem de portas ocupadas foi pulada" >&2
@@ -28,9 +31,6 @@ else
     fi
   done
 fi
-
-echo "smoke: make setup"
-make setup >/dev/null || falhar "make setup falhou"
 
 echo "smoke: make up"
 subiu=1
