@@ -1,4 +1,4 @@
-.PHONY: up up-dev down build migrate migration test-backend seed logs logs-backend setup test-setup smoke lint help check-hygiene
+.PHONY: up up-dev down build migrate migration test-backend seed logs logs-backend setup test-setup smoke lint help check-hygiene check-readme
 
 up:
 	docker compose up -d
@@ -61,6 +61,10 @@ help:
 	@echo "lint          roda ruff e eslint, ambos dentro do container"
 	@echo "help          lista os alvos deste Makefile"
 	@echo "check-hygiene verifica a higiene do repositório"
+	@echo "check-readme  verifica que o README não promete o que não existe"
 
 check-hygiene:
 	bash scripts/check-repo-hygiene.sh
+
+check-readme:
+	bash scripts/check-readme.sh

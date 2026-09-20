@@ -81,7 +81,7 @@ check_no_filename_match() {
 check_no_filename_match "KAI-" "nenhum arquivo rastreado com KAI- no nome"
 check_no_filename_match "test_detection_dataset\.py" "test_detection_dataset.py não existe em nenhum arquivo rastreado"
 
-if git check-ignore -q .claude; then
+if git check-ignore -q .claude/settings.json; then
   report ".claude/ ignorado pelo git" ""
 else
   report ".claude/ ignorado pelo git" ".claude não está no .gitignore"
