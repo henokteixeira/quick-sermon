@@ -13,7 +13,6 @@ import {
   Edit3,
   Eye,
   Loader2,
-  Play,
   RefreshCw,
   Scissors,
   Sparkles,
@@ -241,6 +240,8 @@ export default function VideoDetailPage({
                 size="sm"
                 variant="ghost"
                 icon={<Download className="h-3 w-3" />}
+                disabled
+                title="Em breve"
               >
                 Baixar tudo
               </Btn>
@@ -248,6 +249,8 @@ export default function VideoDetailPage({
                 size="sm"
                 variant="ghost"
                 icon={<Sparkles className="h-3 w-3" />}
+                disabled
+                title="Em breve"
               >
                 Detectar novamente
               </Btn>
@@ -286,7 +289,7 @@ export default function VideoDetailPage({
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr]">
             <VideoPlayer video={video} />
-            <DetectionBlock videoId={id} />
+            <DetectionBlock videoId={id} videoDuration={video.duration} />
           </div>
 
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
@@ -371,6 +374,8 @@ function VideoPlayer({ video }: { video: Video }) {
     );
   }
 
+  const status = video.aggregated_status ?? video.status;
+
   return (
     <div className="relative aspect-video overflow-hidden rounded-xl border border-qs-line bg-black">
       <div
@@ -380,24 +385,30 @@ function VideoPlayer({ video }: { video: Video }) {
             "repeating-linear-gradient(135deg, #1a1a1a 0 6px, #0a0a0a 6px 12px)",
         }}
       >
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-[10px]">
-          <Play className="ml-0.5 h-[22px] w-[22px] text-qs-fg" fill="currentColor" />
-        </div>
-      </div>
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3.5 py-3.5">
-        <div className="h-[3px] overflow-hidden rounded-[2px] bg-white/20">
-          <div className="h-full w-[24%] bg-qs-amber" />
-        </div>
-        <div className="mt-1.5 flex justify-between font-mono text-[10px] text-white/80">
-          <span>00:00</span>
-          <span>{formatDuration(video.duration)}</span>
-        </div>
+        <span className="rounded-lg bg-white/10 px-3 py-1.5 text-[12px] font-medium text-qs-fg backdrop-blur-[10px]">
+          {labelForVideoStatus(status)}
+        </span>
       </div>
     </div>
   );
 }
 
-function DetectionBlock({ videoId }: { videoId: string }) {
+function skippedReasonKey(
+  errorMessage: string | null,
+): "skippedTooShort" | "skippedIsLive" | "skippedNoCaptions" | "skipped" {
+  if (errorMessage === "skipped:too_short") return "skippedTooShort";
+  if (errorMessage === "skipped:is_live") return "skippedIsLive";
+  if (errorMessage === "sem_legendas_disponiveis") return "skippedNoCaptions";
+  return "skipped";
+}
+
+function DetectionBlock({
+  videoId,
+  videoDuration,
+}: {
+  videoId: string;
+  videoDuration: number | null;
+}) {
   const t = useTranslations("videos.detection");
   const queryClient = useQueryClient();
 
@@ -443,7 +454,9 @@ function DetectionBlock({ videoId }: { videoId: string }) {
   if (detection.status === "skipped") {
     return (
       <div className="flex h-full items-center justify-center rounded-xl border border-qs-line bg-qs-bg-elev p-[18px] text-center">
-        <p className="text-[12px] text-qs-fg-subtle">{t("skipped")}</p>
+        <p className="text-[12px] text-qs-fg-subtle">
+          {t(skippedReasonKey(detection.error_message))}
+        </p>
       </div>
     );
   }
@@ -475,21 +488,33 @@ function DetectionBlock({ videoId }: { videoId: string }) {
     );
   }
 
-  return <DetectionCompleted videoId={videoId} detection={detection} />;
+  return (
+    <DetectionCompleted
+      videoId={videoId}
+      detection={detection}
+      videoDuration={videoDuration}
+    />
+  );
 }
 
 function DetectionCompleted({
   videoId,
   detection,
+  videoDuration,
 }: {
   videoId: string;
   detection: Detection;
+  videoDuration: number | null;
 }) {
   const start = detection.start_seconds ?? 0;
   const end = detection.end_seconds ?? 0;
   const confidence = detection.confidence ?? 0;
   const duration = end - start;
   const clipUrl = `/videos/${videoId}/clip/new?suggested_start=${start}&suggested_end=${end}`;
+  const selection: [number, number] | null =
+    videoDuration && videoDuration > 0
+      ? [start / videoDuration, end / videoDuration]
+      : null;
 
   return (
     <div className="rounded-xl border border-qs-line bg-qs-bg-elev p-[18px]">
@@ -523,7 +548,7 @@ function DetectionCompleted({
             {formatDurationShort(duration)}
           </span>
         </div>
-        <WaveformMini selection={[0.13, 0.67]} />
+        {selection && <WaveformMini selection={selection} />}
       </div>
 
       <div className="flex gap-1.5">
