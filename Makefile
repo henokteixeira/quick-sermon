@@ -1,4 +1,4 @@
-.PHONY: up down build migrate migration test-backend test-frontend seed logs
+.PHONY: up down build migrate migration test-backend seed logs
 
 up:
 	docker compose up -d
@@ -20,9 +20,6 @@ migration:
 
 test-backend:
 	docker compose exec backend pytest -v
-
-test-frontend:
-	cd frontend && npm test
 
 seed:
 	docker compose exec backend python seed.py

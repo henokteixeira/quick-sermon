@@ -1,7 +1,7 @@
 # Quick Sermon — Agent Instructions
 
 ## Project Overview
-Web platform that automates sermon video processing: YouTube live URL -> timestamp detection -> download -> cut -> upload -> AI content generation -> review -> publish.
+Web platform that automates sermon video processing: YouTube live URL -> timestamp detection -> download -> cut -> upload -> review -> publish. AI content generation does not exist yet; it is tracked in QS-59/60/61.
 
 ## Architecture
 
@@ -51,7 +51,6 @@ make migration msg="..."  # Create new migration
 make seed                # Seed database
 
 # Frontend
-make test-frontend       # Run tests
 cd frontend && npm run dev  # Dev server (standalone)
 ```
 
