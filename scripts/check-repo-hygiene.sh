@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(git rev-parse --show-toplevel)"
+root=$(git rev-parse --show-toplevel)
+cd "$root"
 
 status=0
 
@@ -16,6 +17,21 @@ report() {
   fi
 }
 
+check_untracked() {
+  local path="$1"
+  local name="$2"
+  local output
+  if ! output=$(git ls-files "$path" 2>&1); then
+    report "$name" "git ls-files falhou: $output"
+    return
+  fi
+  if [ -n "$output" ]; then
+    report "$name" "ainda tem arquivos rastreados"
+  else
+    report "$name" ""
+  fi
+}
+
 untracked_paths=(
   ".claude|.claude sem arquivos rastreados"
   "frontend/redesing|frontend/redesing não existe no índice"
@@ -24,20 +40,46 @@ untracked_paths=(
 )
 
 for entry in "${untracked_paths[@]}"; do
-  path="${entry%%|*}"
-  name="${entry#*|}"
-  if [ -n "$(git ls-files "$path")" ]; then
-    report "$name" "ainda tem arquivos rastreados"
+  check_untracked "${entry%%|*}" "${entry#*|}"
+done
+
+check_no_content_match() {
+  local pattern="$1"
+  local name="$2"
+  local output rc
+  if output=$(git grep -l "$pattern" -- docs README.md CLAUDE.md 2>&1); then
+    rc=0
+  else
+    rc=$?
+  fi
+  if [ "$rc" -eq 0 ]; then
+    report "$name" "referência encontrada em: $output"
+  elif [ "$rc" -eq 1 ]; then
+    report "$name" ""
+  else
+    report "$name" "git grep falhou (código $rc): $output"
+  fi
+}
+
+check_no_content_match "KAI-" "nenhuma referência a KAI- no conteúdo"
+
+check_no_filename_match() {
+  local pattern="$1"
+  local name="$2"
+  local all_files matched
+  if ! all_files=$(git ls-files 2>&1); then
+    report "$name" "git ls-files falhou: $all_files"
+    return
+  fi
+  if matched=$(printf '%s\n' "$all_files" | grep -i "$pattern"); then
+    report "$name" "arquivo rastreado com nome suspeito: $matched"
   else
     report "$name" ""
   fi
-done
+}
 
-if git grep -l "KAI-" -- docs README.md CLAUDE.md > /dev/null 2>&1; then
-  report "nenhuma referência a KAI-" "referência encontrada em docs, README.md ou CLAUDE.md"
-else
-  report "nenhuma referência a KAI-" ""
-fi
+check_no_filename_match "KAI-" "nenhum arquivo rastreado com KAI- no nome"
+check_no_filename_match "test_detection_dataset\.py" "test_detection_dataset.py não existe em nenhum arquivo rastreado"
 
 if git check-ignore -q .claude; then
   report ".claude/ ignorado pelo git" ""
