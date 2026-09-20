@@ -1,4 +1,4 @@
-.PHONY: up down build migrate migration test-backend seed logs setup test-setup smoke lint help check-hygiene
+.PHONY: up up-dev down build migrate migration test-backend seed logs logs-backend setup test-setup smoke lint help check-hygiene
 
 up:
 	docker compose up -d
@@ -41,7 +41,8 @@ smoke:
 
 lint:
 	docker compose run --rm --no-deps --entrypoint ruff backend check .
-	cd frontend && npm run lint
+	docker build -f frontend/Dockerfile.dev -t qs81-lint-frontend frontend
+	docker run --rm qs81-lint-frontend npm run lint
 
 help:
 	@echo "up            sobe o stack em segundo plano"
@@ -57,7 +58,7 @@ help:
 	@echo "setup         cria o .env a partir do .env.example"
 	@echo "test-setup    testa o script de setup do .env"
 	@echo "smoke         sobe um clone limpo e prova a subida com dois comandos"
-	@echo "lint          roda ruff no backend e eslint no frontend"
+	@echo "lint          roda ruff e eslint, ambos dentro do container"
 	@echo "help          lista os alvos deste Makefile"
 	@echo "check-hygiene verifica a higiene do repositório"
 
