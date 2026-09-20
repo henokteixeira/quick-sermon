@@ -41,8 +41,8 @@ smoke:
 
 lint:
 	docker compose run --rm --no-deps --entrypoint ruff backend check .
-	docker build -f frontend/Dockerfile.dev -t qs81-lint-frontend frontend
-	docker run --rm qs81-lint-frontend npm run lint
+	docker build -f frontend/Dockerfile.dev -t quick-sermon-lint-frontend frontend
+	docker run --rm quick-sermon-lint-frontend npm run lint
 
 help:
 	@echo "up            sobe o stack em segundo plano"
