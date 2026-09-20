@@ -1,4 +1,3 @@
-
 import pytest
 
 from app.modules.youtube.services.token_encryption_service import decrypt_token, encrypt_token
