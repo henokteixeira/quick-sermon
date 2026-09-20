@@ -341,7 +341,6 @@
         "views": "{views, plural, =0 {Sem views} one {# view} other {# views}}"
       },
       "tabs": {
-        "edicao": "Edição",
         "processamento": "Processamento",
         "revisao": "Revisão"
       },
@@ -355,23 +354,6 @@
         "retry": "Tentar novamente",
         "viewOnYoutube": "Ver no YouTube",
         "editOnYoutube": "Editar no YouTube"
-      },
-      "edicao": {
-        "heading": "Configuração do clip",
-        "readOnlyHint": "Essa configuração é fixa. Para ajustar, crie um novo clip a partir do vídeo.",
-        "sourceCardTitle": "Vídeo de origem",
-        "sourceOpenYoutube": "Abrir no YouTube",
-        "segmentCardTitle": "Trecho",
-        "segmentStart": "Início",
-        "segmentEnd": "Fim",
-        "segmentDuration": "Duração",
-        "qualityCardTitle": "Qualidade",
-        "qualityLabel": "Resolução solicitada",
-        "resolutionLabel": "Resolução final",
-        "fileCardTitle": "Arquivo gerado",
-        "fileSize": "Tamanho",
-        "fileDownload": "Baixar arquivo",
-        "fileEmpty": "O arquivo ainda não foi gerado."
       },
       "processamento": {
         "heading": "Pipeline de processamento",
