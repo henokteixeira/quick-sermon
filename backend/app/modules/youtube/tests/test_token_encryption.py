@@ -1,4 +1,3 @@
-import os
 
 import pytest
 
@@ -14,7 +13,9 @@ def _set_encryption_key(monkeypatch):
     # Force settings reload
     from app.core.config import Settings
 
-    monkeypatch.setattr("app.modules.youtube.services.token_encryption_service.settings", Settings())
+    monkeypatch.setattr(
+        "app.modules.youtube.services.token_encryption_service.settings", Settings()
+    )
 
 
 def test_encrypt_decrypt_roundtrip():
