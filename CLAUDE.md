@@ -39,16 +39,17 @@ module/
 ## Commands
 ```bash
 # Docker
-make up                  # Start all services
+make setup               # Generate .env with random secrets
+make up                  # Start all services (migrations and seed run automatically)
 make up-dev              # Start with hot reload
 make down                # Stop services
 make logs                # View logs
 
 # Backend
 make test-backend        # Run pytest
-make migrate             # Run Alembic migrations
+make migrate             # Run Alembic migrations manually (make up already does this)
 make migration msg="..."  # Create new migration
-make seed                # Seed database
+make seed                # Seed database manually (make up already does this)
 
 # Frontend
 cd frontend && npm run dev  # Dev server (standalone)
