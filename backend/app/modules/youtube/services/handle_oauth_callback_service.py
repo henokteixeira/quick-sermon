@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import timezone
 
 import structlog
 from google_auth_oauthlib.flow import Flow
@@ -57,7 +57,9 @@ class HandleOAuthCallbackService:
             response = youtube.channels().list(part="snippet", mine=True).execute()
             channels = response.get("items", [])
             if not channels:
-                raise YouTubeAuthFailedException("Nenhum canal YouTube encontrado para esta conta.")
+                raise YouTubeAuthFailedException(
+                    "Nenhum canal YouTube encontrado para esta conta."
+                )
             channel = channels[0]
             channel_id = channel["id"]
             channel_title = channel["snippet"]["title"]

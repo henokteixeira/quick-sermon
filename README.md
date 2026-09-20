@@ -1,5 +1,7 @@
 # Quick Sermon — Sistema de Clips de Pregacoes
 
+![CI](https://github.com/henokteixeira/quick-sermon/actions/workflows/ci.yml/badge.svg)
+
 Plataforma web que automatiza o pipeline de processamento de videos de pregacoes: da URL da live ate o video publicado no YouTube.
 
 ## Tech Stack

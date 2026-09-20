@@ -160,7 +160,8 @@ async def process_entry(
 
 def render_markdown(results: list[dict]) -> str:
     lines = [
-        "| # | Label | GT start | GT end | Det start | Det end | Δstart | Δend | Conf | Method | Hit (±2min) |",
+        "| # | Label | GT start | GT end | Det start | Det end | Δstart | Δend | Conf | Method"
+        " | Hit (±2min) |",
         "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for i, r in enumerate(results, 1):
