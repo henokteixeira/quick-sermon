@@ -83,7 +83,6 @@
     "nav": {
       "dashboard": "Dashboard",
       "videos": "Vídeos",
-      "users": "Usuários",
       "settings": "Configurações",
       "logout": "Sair"
     }
@@ -159,7 +158,10 @@
       "editManually": "Editar manualmente",
       "retry": "Tentar novamente",
       "failed": "Não conseguimos detectar a pregação automaticamente.",
-      "skipped": "Detecção pulada (vídeo curto ou ao vivo)."
+      "skipped": "Detecção pulada (vídeo curto ou ao vivo).",
+      "skippedTooShort": "Detecção pulada: a Live é curta demais.",
+      "skippedIsLive": "Detecção pulada: a Live ainda está ao vivo.",
+      "skippedNoCaptions": "Detecção pulada: sem Legendas disponíveis."
     }
   },
   "clips": {
@@ -298,11 +300,6 @@
       "savingNow": "Salvando rascunho...",
       "saveError": "Falha ao salvar rascunho.",
       "aiPlaceholder": "Aguardando geração pela IA. Escreva manualmente ou clique em Regenerar.",
-      "aiNotAvailable": "Geração por IA ainda não está disponível.",
-      "regenerateConfirmTitle": "Regenerar vai sobrescrever sua edição",
-      "regenerateConfirmDescription": "O conteúdo atual será substituído pela nova geração. Continuar?",
-      "regenerateConfirmConfirm": "Regenerar",
-      "regenerateConfirmCancel": "Cancelar",
       "publishConfirmTitle": "Publicar este clip?",
       "publishConfirmDescription": "Ao confirmar, o vídeo ficará público no YouTube. Esta ação é irreversível.",
       "publishConfirmConfirm": "Sim, publicar",

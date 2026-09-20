@@ -7,7 +7,6 @@ import {
   LayoutGrid,
   LogOut,
   Settings as SettingsIcon,
-  Users as UsersIcon,
   Video,
   Workflow,
 } from "lucide-react";
@@ -16,11 +15,10 @@ import { useAuthStore } from "@/lib/stores/auth-store";
 import { cn } from "@/lib/utils";
 import { AmberGlow } from "@/components/features/ui/amber-glow";
 import { Logomark } from "@/components/features/ui/logomark";
-import { NotificationsDrawer } from "@/components/features/notifications/notifications-drawer";
 
 type NavItem = {
   href: string;
-  key: "dashboard" | "videos" | "pipeline" | "users" | "settings";
+  key: "dashboard" | "videos" | "pipeline" | "settings";
   label: string;
   Icon: typeof LayoutGrid;
   adminOnly?: boolean;
@@ -54,13 +52,6 @@ export default function DashboardLayout({
       label: "Pipeline",
       Icon: Workflow,
       disabled: true,
-    },
-    {
-      href: "/users",
-      key: "users",
-      label: t("users"),
-      Icon: UsersIcon,
-      adminOnly: true,
     },
     {
       href: "/settings",
@@ -226,8 +217,6 @@ export default function DashboardLayout({
             );
           })}
         </nav>
-
-        <NotificationsDrawer />
       </div>
     </AuthGuard>
   );
