@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     # YouTube OAuth redirect (external URL where the backend is reachable)
     YOUTUBE_REDIRECT_BASE_URL: str = "http://localhost"
 
-    # Seed do Admin
+    # Admin seed
     SEED_ADMIN_EMAIL: str = "admin@quicksermon.com"
     SEED_ADMIN_PASSWORD: str = ""
 
