@@ -1,4 +1,4 @@
-.PHONY: up down build migrate migration test-backend test-frontend seed logs setup test-setup
+.PHONY: up down build migrate migration test-backend test-frontend seed logs setup test-setup smoke lint help
 
 up:
 	docker compose up -d
@@ -38,3 +38,28 @@ setup:
 
 test-setup:
 	./scripts/test-setup-env.sh
+
+smoke:
+	./scripts/smoke.sh
+
+lint:
+	docker compose run --rm --no-deps --entrypoint ruff backend check .
+	cd frontend && npm run lint
+
+help:
+	@echo "up            sobe o stack em segundo plano"
+	@echo "up-dev        sobe o stack com --reload e volumes de código"
+	@echo "down          derruba o stack"
+	@echo "build         builda as imagens"
+	@echo "migrate       roda as migrations do backend à mão"
+	@echo "migration     cria uma migration nova (msg=\"...\")"
+	@echo "test-backend  roda os testes do backend"
+	@echo "test-frontend roda os testes do frontend"
+	@echo "seed          roda o seed do Admin à mão"
+	@echo "logs          segue os logs de todos os serviços"
+	@echo "logs-backend  segue os logs de backend e worker"
+	@echo "setup         cria o .env a partir do .env.example"
+	@echo "test-setup    testa o script de setup do .env"
+	@echo "smoke         sobe um clone limpo e prova a subida com dois comandos"
+	@echo "lint          roda ruff no backend e eslint no frontend"
+	@echo "help          lista os alvos deste Makefile"
