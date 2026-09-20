@@ -1,4 +1,4 @@
-.PHONY: up down build migrate migration test-backend test-frontend seed logs
+.PHONY: up down build migrate migration test-backend test-frontend seed logs setup test-setup
 
 up:
 	docker compose up -d
@@ -32,3 +32,9 @@ logs:
 
 logs-backend:
 	docker compose logs -f backend worker
+
+setup:
+	./scripts/setup-env.sh
+
+test-setup:
+	./scripts/test-setup-env.sh
