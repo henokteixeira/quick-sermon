@@ -322,7 +322,7 @@ Cada requisito inclui: descrição, critérios de aceitação (AC) e comportamen
 
 **Fixtures e dataset de validação:**
 - `backend/app/modules/videos/tests/fixtures/reference_videos.json` — 10 vídeos com ground truth.
-- `backend/scripts/test_detection_dataset.py` — script batch para rodar e comparar baseline.
+- `backend/scripts/detection_dataset.py` — script batch para rodar e comparar baseline.
 
 **Falha:** Ver [EC-02](#ec-02--detecção-com-baixa-confiança-ou-falha-total).
 
