@@ -12,8 +12,6 @@ interface TitleSelectorProps {
   generated: string[] | null;
   value: string;
   onChange: (value: string) => void;
-  onRegenerate: () => void;
-  disabled?: boolean;
   readOnly?: boolean;
 }
 
@@ -21,8 +19,6 @@ export function TitleSelector({
   generated,
   value,
   onChange,
-  onRegenerate,
-  disabled,
   readOnly,
 }: TitleSelectorProps) {
   const t = useTranslations("clips.review_page");
@@ -61,12 +57,15 @@ export function TitleSelector({
           {chars}/{MAX_LEN}
         </span>
         <div className="flex-1" />
+        <span className="text-[10px] text-qs-fg-faint">
+          Geração por IA em breve
+        </span>
         <Btn
           size="sm"
           variant="ghost"
           icon={<RefreshCw className="h-[11px] w-[11px]" />}
-          onClick={onRegenerate}
-          disabled={disabled || readOnly}
+          disabled
+          title="Geração por IA em breve"
         >
           Regenerar
         </Btn>

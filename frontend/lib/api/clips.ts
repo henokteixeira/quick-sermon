@@ -8,7 +8,6 @@ import {
   ClipPublishResponse,
   ClipReviewData,
   ClipYouTubeStats,
-  RegenerateField,
   VideoFormatsResponse,
 } from "../types/clip";
 
@@ -96,13 +95,6 @@ export async function publishClip(id: string): Promise<ClipPublishResponse> {
 export async function discardClip(id: string): Promise<Clip> {
   const response = await apiClient.post<Clip>(`/clips/${id}/discard`);
   return response.data;
-}
-
-export async function regenerateField(
-  id: string,
-  field: RegenerateField
-): Promise<void> {
-  await apiClient.post(`/clips/${id}/regenerate/${field}`);
 }
 
 export async function getClipPipeline(id: string): Promise<ClipPipeline> {

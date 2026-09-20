@@ -81,8 +81,6 @@ export interface ClipPublishResponse {
   youtube_url: string | null;
 }
 
-export type RegenerateField = "titles" | "description" | "whatsapp_message";
-
 export interface ClipListResponse {
   items: Clip[];
   total: number;

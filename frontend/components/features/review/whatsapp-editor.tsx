@@ -8,18 +8,14 @@ import { Btn } from "@/components/features/ui/btn";
 interface WhatsappEditorProps {
   value: string;
   onChange: (value: string) => void;
-  onRegenerate: () => void;
   copyEnabled: boolean;
-  disabled?: boolean;
   readOnly?: boolean;
 }
 
 export function WhatsappEditor({
   value,
   onChange,
-  onRegenerate,
   copyEnabled,
-  disabled,
   readOnly,
 }: WhatsappEditorProps) {
   const t = useTranslations("clips.review_page");
@@ -42,13 +38,16 @@ export function WhatsappEditor({
           {t("whatsappSection")}
         </span>
         <div className="flex-1" />
+        <span className="text-[10px] text-qs-fg-faint">
+          Geração por IA em breve
+        </span>
         <div className="flex gap-1">
           <Btn
             size="sm"
             variant="ghost"
             icon={<RefreshCw className="h-[11px] w-[11px]" />}
-            onClick={onRegenerate}
-            disabled={disabled || readOnly}
+            disabled
+            title="Geração por IA em breve"
           >
             Regenerar
           </Btn>
