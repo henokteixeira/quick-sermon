@@ -158,10 +158,10 @@
       "editManually": "Editar manualmente",
       "retry": "Tentar novamente",
       "failed": "Não conseguimos detectar a pregação automaticamente.",
-      "skipped": "Detecção pulada (vídeo curto ou ao vivo).",
+      "skipped": "Detecção pulada.",
       "skippedTooShort": "Detecção pulada: a Live é curta demais.",
       "skippedIsLive": "Detecção pulada: a Live ainda está ao vivo.",
-      "skippedNoCaptions": "Detecção pulada: sem Legendas disponíveis."
+      "skippedNoCaptions": "Detecção pulada: sem Capítulos nem Legendas disponíveis."
     }
   },
   "clips": {
