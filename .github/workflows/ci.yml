@@ -5,6 +5,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -31,7 +34,7 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/quick_sermon
-      SECRET_KEY: ci-only-secret-key
+      SECRET_KEY: ci-only-secret-key-with-at-least-32-chars
       FRONTEND_URL: http://localhost:3000
       SEED_ADMIN_PASSWORD: ci-only-admin-password
     steps:
