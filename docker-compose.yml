@@ -3,7 +3,7 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: quick_sermon
     ports:
       - "5435:5432"
@@ -19,7 +19,7 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: temporal
-      POSTGRES_PASSWORD: temporal
+      POSTGRES_PASSWORD: ${TEMPORAL_POSTGRES_PASSWORD:-temporal}
       POSTGRES_DB: temporal
     ports:
       - "5436:5432"
@@ -37,7 +37,7 @@ services:
       DB: postgres12
       DB_PORT: 5432
       POSTGRES_USER: temporal
-      POSTGRES_PWD: temporal
+      POSTGRES_PWD: ${TEMPORAL_POSTGRES_PASSWORD:-temporal}
       POSTGRES_SEEDS: temporal-db
       SKIP_DYNAMIC_CONFIG: "true"
     ports:
@@ -60,19 +60,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/quick_sermon
-      TEMPORAL_HOST: temporal:7233
-      TEMPORAL_NAMESPACE: default
-      TEMPORAL_TASK_QUEUE: video-processing
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      SECRET_KEY: change-me-in-production
-      DEBUG: "true"
-      YOUTUBE_CLIENT_ID: ${YOUTUBE_CLIENT_ID:-}
-      YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET:-}
-      YOUTUBE_OAUTH_ENCRYPTION_KEY: ${YOUTUBE_OAUTH_ENCRYPTION_KEY:-}
-      YTDLP_COOKIES_FILE: /secrets/youtube-cookies.txt
-      FRONTEND_URL: http://localhost:3000
+    env_file: .env
     ports:
       - "8000:8000"
     volumes:
@@ -89,17 +77,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.worker
-    environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/quick_sermon
-      TEMPORAL_HOST: temporal:7233
-      TEMPORAL_NAMESPACE: default
-      TEMPORAL_TASK_QUEUE: video-processing
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      SECRET_KEY: change-me-in-production
-      YOUTUBE_CLIENT_ID: ${YOUTUBE_CLIENT_ID:-}
-      YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET:-}
-      YOUTUBE_OAUTH_ENCRYPTION_KEY: ${YOUTUBE_OAUTH_ENCRYPTION_KEY:-}
-      YTDLP_COOKIES_FILE: /secrets/youtube-cookies.txt
+    env_file: .env
     volumes:
       - clips_data:/data/clips
       - videos_data:/data/videos
