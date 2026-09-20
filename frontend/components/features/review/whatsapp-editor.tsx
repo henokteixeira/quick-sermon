@@ -4,6 +4,10 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Copy, MessageCircle, RefreshCw } from "lucide-react";
 import { Btn } from "@/components/features/ui/btn";
+import {
+  ComingSoonNote,
+  AI_GENERATION_COMING_SOON,
+} from "@/components/features/ui/coming-soon";
 
 interface WhatsappEditorProps {
   value: string;
@@ -38,16 +42,16 @@ export function WhatsappEditor({
           {t("whatsappSection")}
         </span>
         <div className="flex-1" />
-        <span className="text-[10px] text-qs-fg-faint">
-          Geração por IA em breve
-        </span>
+        <ComingSoonNote className="text-[10px]">
+          {AI_GENERATION_COMING_SOON}
+        </ComingSoonNote>
         <div className="flex gap-1">
           <Btn
             size="sm"
             variant="ghost"
             icon={<RefreshCw className="h-[11px] w-[11px]" />}
             disabled
-            title="Geração por IA em breve"
+            title={AI_GENERATION_COMING_SOON}
           >
             Regenerar
           </Btn>

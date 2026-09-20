@@ -5,6 +5,10 @@ import { useTranslations } from "next-intl";
 import { RefreshCw, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Btn } from "@/components/features/ui/btn";
+import {
+  ComingSoonNote,
+  AI_GENERATION_COMING_SOON,
+} from "@/components/features/ui/coming-soon";
 
 const MAX_LEN = 100;
 
@@ -57,15 +61,15 @@ export function TitleSelector({
           {chars}/{MAX_LEN}
         </span>
         <div className="flex-1" />
-        <span className="text-[10px] text-qs-fg-faint">
-          Geração por IA em breve
-        </span>
+        <ComingSoonNote className="text-[10px]">
+          {AI_GENERATION_COMING_SOON}
+        </ComingSoonNote>
         <Btn
           size="sm"
           variant="ghost"
           icon={<RefreshCw className="h-[11px] w-[11px]" />}
           disabled
-          title="Geração por IA em breve"
+          title={AI_GENERATION_COMING_SOON}
         >
           Regenerar
         </Btn>

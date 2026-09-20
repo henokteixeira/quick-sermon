@@ -2,6 +2,7 @@
 
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { COMING_SOON } from "./coming-soon";
 
 interface PageTopbarProps {
   title: string;
@@ -40,8 +41,8 @@ export function PageTopbar({
         <input
           type="search"
           disabled
-          placeholder="Buscar vídeos, clips…"
-          title="Em breve"
+          placeholder={`Buscar vídeos, clips… (${COMING_SOON.toLowerCase()})`}
+          title={COMING_SOON}
           className="w-full truncate bg-transparent text-[12px] text-qs-fg-faint placeholder:text-qs-fg-faint focus:outline-none disabled:cursor-not-allowed"
         />
       </div>

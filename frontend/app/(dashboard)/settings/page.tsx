@@ -17,6 +17,7 @@ import { useAuthStore } from "@/lib/stores/auth-store";
 import { YouTubeConnectionCard } from "@/components/features/youtube/youtube-connection-card";
 import { YouTubeQuotaCard } from "@/components/features/youtube/youtube-quota-card";
 import { AuthField } from "@/components/features/ui/auth-field";
+import { ComingSoonNote, COMING_SOON } from "@/components/features/ui/coming-soon";
 import { PageTopbar } from "@/components/features/ui/page-topbar";
 import { cn } from "@/lib/utils";
 
@@ -211,12 +212,12 @@ function ProfileSection({
           <button
             type="button"
             disabled
-            title="Em breve"
+            title={COMING_SOON}
             className="inline-flex h-9 items-center rounded-lg border border-qs-line bg-qs-bg-elev-2 px-3 text-[12px] font-medium text-qs-fg-muted disabled:cursor-not-allowed disabled:opacity-50"
           >
             Alterar foto
           </button>
-          <span className="text-[11px] text-qs-fg-faint">Em breve</span>
+          <ComingSoonNote />
         </div>
       </div>
 

@@ -30,6 +30,7 @@ import { listClips } from "@/lib/api/clips";
 import { ClipList } from "@/components/features/clips/clip-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Btn } from "@/components/features/ui/btn";
+import { ComingSoonNote, COMING_SOON } from "@/components/features/ui/coming-soon";
 import { Tab } from "@/components/features/ui/tab";
 import { StatusBadge } from "@/components/features/ui/status-badge";
 import { InfoTile } from "@/components/features/ui/info-tile";
@@ -241,7 +242,7 @@ export default function VideoDetailPage({
                 variant="ghost"
                 icon={<Download className="h-3 w-3" />}
                 disabled
-                title="Em breve"
+                title={COMING_SOON}
               >
                 Baixar tudo
               </Btn>
@@ -250,10 +251,11 @@ export default function VideoDetailPage({
                 variant="ghost"
                 icon={<Sparkles className="h-3 w-3" />}
                 disabled
-                title="Em breve"
+                title={COMING_SOON}
               >
                 Detectar novamente
               </Btn>
+              <ComingSoonNote />
             </>
           )}
         </div>
