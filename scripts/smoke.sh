@@ -18,12 +18,16 @@ limpar() {
 trap limpar EXIT
 
 echo "smoke: verificando portas publicadas"
-portas="$(docker compose config 2>/dev/null | awk '/published:/ {gsub(/[^0-9]/, "", $2); print $2}' | sort -un)"
-for porta in $portas; do
-  if command -v lsof >/dev/null 2>&1 && lsof -i ":$porta" -sTCP:LISTEN >/dev/null 2>&1; then
-    falhar "porta $porta já está em uso; libere-a e rode 'make smoke' de novo"
-  fi
-done
+if ! command -v lsof >/dev/null 2>&1; then
+  echo "smoke: lsof não encontrado; checagem de portas ocupadas foi pulada" >&2
+else
+  portas="$(docker compose config 2>/dev/null | awk '/published:/ {gsub(/[^0-9]/, "", $2); print $2}' | sort -un)"
+  for porta in $portas; do
+    if lsof -i ":$porta" -sTCP:LISTEN >/dev/null 2>&1; then
+      falhar "porta $porta já está em uso; libere-a e rode 'make smoke' de novo"
+    fi
+  done
+fi
 
 echo "smoke: make setup"
 make setup >/dev/null || falhar "make setup falhou"
@@ -48,6 +52,8 @@ done
 echo "smoke: login do Admin gerado por make setup"
 email_admin="$(sed -n 's/^SEED_ADMIN_EMAIL=//p' .env)"
 senha_admin="$(sed -n 's/^SEED_ADMIN_PASSWORD=//p' .env)"
+[ -n "$email_admin" ] || falhar "SEED_ADMIN_EMAIL não está definido no .env"
+[ -n "$senha_admin" ] || falhar "SEED_ADMIN_PASSWORD não está definido no .env"
 resposta_login="$(curl -sS -X POST http://localhost/api/auth/login \
   -H 'Content-Type: application/json' \
   -d "{\"email\":\"$email_admin\",\"password\":\"$senha_admin\"}" 2>/dev/null || true)"
@@ -60,7 +66,7 @@ estado_backend="$(docker compose ps backend --format '{{.State}}' 2>/dev/null ||
 estado_worker="$(docker compose ps worker --format '{{.State}}' 2>/dev/null || true)"
 [ "$estado_worker" = "running" ] || falhar "worker não está running (estado: ${estado_worker:-<ausente>})"
 
-docker compose logs worker 2>/dev/null | grep -qi temporal || falhar "log do worker não menciona conexão com o Temporal"
+docker compose logs worker 2>/dev/null | grep -q 'starting_worker' || falhar "log do worker não mostra starting_worker (esse log só aparece depois que Client.connect ao Temporal tem sucesso)"
 
 echo "smoke: verificando ausência de bind mount de arquivo para os Cookies"
 if docker compose config 2>/dev/null | grep -q 'target: /secrets/youtube-cookies\.txt'; then
