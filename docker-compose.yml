@@ -49,7 +49,7 @@ services:
       temporal-db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "temporal operator cluster health --address $$(hostname -i):7233 | grep -q SERVING"]
+      test: ["CMD-SHELL", "temporal operator cluster health --address $$(hostname -i):7233 | grep -qw SERVING"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -121,7 +121,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 15s
+      start_period: 60s
 
   nginx:
     image: nginx:alpine
