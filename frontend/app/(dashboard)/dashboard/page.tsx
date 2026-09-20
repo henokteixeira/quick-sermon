@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import {
   getClipPipeline,
+  getClipReview,
   listClips,
 } from "@/lib/api/clips";
 import { listVideos } from "@/lib/api/videos";
@@ -33,6 +34,7 @@ import {
 } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import { Btn } from "@/components/features/ui/btn";
+import { ComingSoonNote, COMING_SOON } from "@/components/features/ui/coming-soon";
 import { MetricTile } from "@/components/features/ui/metric-tile";
 import { PageTopbar } from "@/components/features/ui/page-topbar";
 import { ThumbPlaceholder } from "@/components/features/ui/thumb-placeholder";
@@ -200,13 +202,11 @@ export default function DashboardPage() {
               summary?.total_views != null ? formatViews(summary.total_views) : "—"
             }
             unit={summary?.total_views != null ? "views" : "em breve"}
-            sparkline={[8, 10, 6, 12, 10, 18, 14, 24]}
           />
           <MetricTile
             label="Duração processada"
             value={formatDuration(totalDurationSec).replace(/[a-z]$/i, "")}
             unit="h:m:s"
-            sparkline={[3, 4, 4, 5, 6, 7, 7, 8]}
           />
         </section>
 
@@ -293,6 +293,12 @@ function FeaturedCard({
   video?: Video;
   views?: number | null;
 }) {
+  const { data: review, isLoading: isReviewLoading } = useQuery({
+    queryKey: ["clip-review", clip?.id],
+    queryFn: () => getClipReview(clip!.id),
+    enabled: clip?.status === "published",
+  });
+
   if (!clip) {
     return (
       <CardShell
@@ -315,9 +321,16 @@ function FeaturedCard({
   }
 
   const duration = clip.duration ?? clip.end_time - clip.start_time;
+  const isPublished = clip.status === "published";
+  const youtubeUrl = review?.youtube_url ?? null;
+  const canCopyLink = isPublished && !!youtubeUrl;
+  const copyLinkTitle = canCopyLink
+    ? undefined
+    : isPublished && isReviewLoading
+      ? "Carregando…"
+      : "Disponível após Publicar";
   const copyLink = () => {
-    const url = clip.file_path ?? "";
-    if (url) navigator.clipboard.writeText(url);
+    if (youtubeUrl) navigator.clipboard.writeText(youtubeUrl);
   };
 
   return (
@@ -362,19 +375,24 @@ function FeaturedCard({
               </span>
             )}
           </div>
-          <div className="mt-3.5 flex gap-2">
+          <div className="mt-3.5 flex flex-wrap items-center gap-2">
             <Btn
               size="sm"
               variant="outline"
               icon={<Youtube className="h-3 w-3 text-[#ff0033]" />}
+              disabled
+              title={COMING_SOON}
             >
               Ver no YouTube
             </Btn>
+            <ComingSoonNote />
             <Btn
               size="sm"
               variant="ghost"
               icon={<Copy className="h-3 w-3" />}
               onClick={copyLink}
+              disabled={!canCopyLink}
+              title={copyLinkTitle}
             >
               Copiar link
             </Btn>
@@ -653,9 +671,12 @@ function QuotaCard({
                 ? "Atenção: quota acima de 80% hoje."
                 : "Conecte o YouTube em Configurações."}
           </div>
-          <Btn size="sm" variant="secondary">
-            Ver histórico
-          </Btn>
+          <div className="flex items-center gap-2">
+            <Btn size="sm" variant="secondary" disabled title={COMING_SOON}>
+              Ver histórico
+            </Btn>
+            <ComingSoonNote />
+          </div>
         </div>
       </div>
     </CardShell>

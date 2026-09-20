@@ -1,17 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import { Eye } from "lucide-react";
-import { regenerateField } from "@/lib/api/clips";
 import { getVideo } from "@/lib/api/videos";
-import {
-  Clip,
-  ClipDraftUpdate,
-  ClipReviewData,
-  RegenerateField,
-} from "@/lib/types/clip";
+import { Clip, ClipDraftUpdate, ClipReviewData } from "@/lib/types/clip";
 import { SaveStatus } from "@/lib/hooks/use-clip-autosave";
 import { TitleSelector } from "@/components/features/review/title-selector";
 import { DescriptionEditor } from "@/components/features/review/description-editor";
@@ -45,16 +38,6 @@ export function RevisaoTab({
   isAdmin,
 }: RevisaoTabProps) {
   const t = useTranslations("clips.review_page");
-
-  const regenerateMutation = useMutation({
-    mutationFn: (field: RegenerateField) => regenerateField(clip.id, field),
-    onError: (err) => {
-      const status = (err as { response?: { status?: number } })?.response
-        ?.status;
-      if (status === 501) toast.error(t("aiNotAvailable"));
-      else toast.error(t("publishError.unknown"));
-    },
-  });
 
   const isReadOnly = clip.status === "published" || clip.status === "discarded";
   const isAwaitingReview = clip.status === "awaiting_review";
@@ -111,24 +94,18 @@ export function RevisaoTab({
             generated={review?.generated_titles ?? null}
             value={titleValue}
             onChange={(v) => onDraftChange("selected_title", v)}
-            onRegenerate={() => regenerateMutation.mutate("titles")}
-            disabled={regenerateMutation.isPending}
             readOnly={isReadOnly}
           />
           <DescriptionEditor
             generated={review?.generated_description ?? null}
             value={descriptionValue}
             onChange={(v) => onDraftChange("description", v)}
-            onRegenerate={() => regenerateMutation.mutate("description")}
-            disabled={regenerateMutation.isPending}
             readOnly={isReadOnly}
           />
           <WhatsappEditor
             value={whatsappValue}
             onChange={(v) => onDraftChange("whatsapp_message", v)}
-            onRegenerate={() => regenerateMutation.mutate("whatsapp_message")}
             copyEnabled={clip.status === "published"}
-            disabled={regenerateMutation.isPending}
             readOnly={isReadOnly}
           />
         </div>
@@ -138,7 +115,6 @@ export function RevisaoTab({
 }
 
 function PreviewPlaceholder({ clip }: { clip: Clip }) {
-  const duration = clip.duration ?? clip.end_time - clip.start_time;
   return (
     <div className="relative aspect-video overflow-hidden rounded-xl border border-qs-line bg-black">
       <div
@@ -148,24 +124,9 @@ function PreviewPlaceholder({ clip }: { clip: Clip }) {
             "repeating-linear-gradient(135deg, #1a1a1a 0 6px, #0a0a0a 6px 12px)",
         }}
       >
-        <div className="flex h-[52px] w-[52px] items-center justify-center rounded-full bg-white/10 backdrop-blur-[10px]">
-          <svg
-            className="ml-0.5 h-[18px] w-[18px] text-qs-fg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
-            <polygon points="5 3 19 12 5 21 5 3" />
-          </svg>
-        </div>
-      </div>
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-3">
-        <div className="h-[2px] overflow-hidden rounded-[2px] bg-white/20">
-          <div className="h-full w-[34%] bg-qs-amber" />
-        </div>
-        <div className="mt-1.5 flex justify-between font-mono text-[9px] text-white/80">
-          <span>{formatTime(Math.floor(duration * 0.34))}</span>
-          <span>{formatTime(duration)}</span>
-        </div>
+        <span className="rounded-lg bg-white/10 px-3 py-1.5 text-[12px] font-medium text-qs-fg backdrop-blur-[10px]">
+          {labelForClipStatus(clip.status)}
+        </span>
       </div>
     </div>
   );

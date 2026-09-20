@@ -1,19 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { RefreshCw, Sparkles } from "lucide-react";
 import { Btn } from "@/components/features/ui/btn";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  ComingSoonNote,
+  AI_GENERATION_COMING_SOON,
+} from "@/components/features/ui/coming-soon";
 
 const MAX_LEN = 5000;
 
@@ -21,8 +14,6 @@ interface DescriptionEditorProps {
   generated: string | null;
   value: string;
   onChange: (value: string) => void;
-  onRegenerate: () => void;
-  disabled?: boolean;
   readOnly?: boolean;
 }
 
@@ -30,26 +21,12 @@ export function DescriptionEditor({
   generated,
   value,
   onChange,
-  onRegenerate,
-  disabled,
   readOnly,
 }: DescriptionEditorProps) {
   const t = useTranslations("clips.review_page");
-  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const chars = value.length;
   const overLimit = chars > MAX_LEN;
-  const userEdited = !!value && value !== (generated ?? "");
-
-  function handleRegenerateClick() {
-    if (userEdited) setConfirmOpen(true);
-    else onRegenerate();
-  }
-
-  function handleConfirmRegenerate() {
-    setConfirmOpen(false);
-    onRegenerate();
-  }
 
   return (
     <section className="overflow-hidden rounded-xl border border-qs-line bg-qs-bg-elev">
@@ -62,12 +39,15 @@ export function DescriptionEditor({
           {chars}/{MAX_LEN}
         </span>
         <div className="flex-1" />
+        <ComingSoonNote className="text-[10px]">
+          {AI_GENERATION_COMING_SOON}
+        </ComingSoonNote>
         <Btn
           size="sm"
           variant="ghost"
           icon={<RefreshCw className="h-[11px] w-[11px]" />}
-          onClick={handleRegenerateClick}
-          disabled={disabled || readOnly}
+          disabled
+          title={AI_GENERATION_COMING_SOON}
         >
           Regenerar
         </Btn>
@@ -96,23 +76,6 @@ export function DescriptionEditor({
           </p>
         )}
       </div>
-
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("regenerateConfirmTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("regenerateConfirmDescription")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("regenerateConfirmCancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmRegenerate}>
-              {t("regenerateConfirmConfirm")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </section>
   );
 }
