@@ -10,14 +10,13 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from sqlalchemy import create_engine, select, update
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session
 from temporalio import activity
 
 from app.core.config import settings
 from app.modules.clips.enums import ClipStatus
 from app.modules.clips.models import Clip
-from app.modules.youtube.enums import YouTubeUploadErrorCode, YouTubeUploadStatus
+from app.modules.youtube.enums import YouTubeUploadStatus
 from app.modules.youtube.models import YouTubeConnection, YouTubeUpload
 from app.modules.youtube.services.get_quota_service import UPLOAD_COST
 from app.modules.youtube.services.token_encryption_service import decrypt_token
