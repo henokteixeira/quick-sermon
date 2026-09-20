@@ -11,23 +11,17 @@ import {
   Shield,
   Sparkles,
   User as UserIcon,
-  Users as UsersIcon,
   Youtube,
 } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { YouTubeConnectionCard } from "@/components/features/youtube/youtube-connection-card";
 import { YouTubeQuotaCard } from "@/components/features/youtube/youtube-quota-card";
 import { AuthField } from "@/components/features/ui/auth-field";
+import { ComingSoonNote, COMING_SOON } from "@/components/features/ui/coming-soon";
 import { PageTopbar } from "@/components/features/ui/page-topbar";
 import { cn } from "@/lib/utils";
 
-type Section =
-  | "profile"
-  | "channels"
-  | "ai"
-  | "notifications"
-  | "billing"
-  | "team";
+type Section = "profile" | "channels" | "ai" | "notifications" | "billing";
 
 const SECTIONS: { key: Section; label: string; Icon: typeof UserIcon }[] = [
   { key: "profile", label: "Perfil", Icon: UserIcon },
@@ -35,7 +29,6 @@ const SECTIONS: { key: Section; label: string; Icon: typeof UserIcon }[] = [
   { key: "ai", label: "Preferências de IA", Icon: Sparkles },
   { key: "notifications", label: "Notificações", Icon: Bell },
   { key: "billing", label: "Plano & faturamento", Icon: CreditCard },
-  { key: "team", label: "Equipe", Icon: UsersIcon },
 ];
 
 export default function SettingsPage() {
@@ -160,22 +153,6 @@ export default function SettingsPage() {
             </section>
           )}
 
-          {section === "team" && (
-            <section className="flex flex-col gap-4">
-              <SectionTitle
-                title="Equipe"
-                description="Convide membros e defina papéis."
-              />
-              <a
-                href="/users"
-                className="inline-flex h-10 w-fit items-center gap-2 rounded-lg bg-qs-amber px-4 text-[13px] font-semibold text-[#0c0a09] shadow-[0_4px_14px_rgba(245,158,11,0.25)] hover:bg-qs-amber-bright"
-              >
-                <UsersIcon className="h-4 w-4" />
-                Gerenciar equipe
-              </a>
-            </section>
-          )}
-
           <DangerZone onLogout={handleLogout} />
         </div>
         </div>
@@ -231,12 +208,17 @@ function ProfileSection({
           </p>
           <p className="truncate text-[12px] text-qs-fg-faint">{user?.email}</p>
         </div>
-        <button
-          type="button"
-          className="inline-flex h-9 items-center rounded-lg border border-qs-line bg-qs-bg-elev-2 px-3 text-[12px] font-medium text-qs-fg-muted hover:border-qs-line-strong"
-        >
-          Alterar foto
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled
+            title={COMING_SOON}
+            className="inline-flex h-9 items-center rounded-lg border border-qs-line bg-qs-bg-elev-2 px-3 text-[12px] font-medium text-qs-fg-muted disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Alterar foto
+          </button>
+          <ComingSoonNote />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 rounded-xl border border-qs-line bg-qs-bg-elev p-5 md:grid-cols-2">

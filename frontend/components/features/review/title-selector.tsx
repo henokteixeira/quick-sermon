@@ -5,6 +5,10 @@ import { useTranslations } from "next-intl";
 import { RefreshCw, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Btn } from "@/components/features/ui/btn";
+import {
+  ComingSoonNote,
+  AI_GENERATION_COMING_SOON,
+} from "@/components/features/ui/coming-soon";
 
 const MAX_LEN = 100;
 
@@ -12,8 +16,6 @@ interface TitleSelectorProps {
   generated: string[] | null;
   value: string;
   onChange: (value: string) => void;
-  onRegenerate: () => void;
-  disabled?: boolean;
   readOnly?: boolean;
 }
 
@@ -21,8 +23,6 @@ export function TitleSelector({
   generated,
   value,
   onChange,
-  onRegenerate,
-  disabled,
   readOnly,
 }: TitleSelectorProps) {
   const t = useTranslations("clips.review_page");
@@ -61,12 +61,15 @@ export function TitleSelector({
           {chars}/{MAX_LEN}
         </span>
         <div className="flex-1" />
+        <ComingSoonNote className="text-[10px]">
+          {AI_GENERATION_COMING_SOON}
+        </ComingSoonNote>
         <Btn
           size="sm"
           variant="ghost"
           icon={<RefreshCw className="h-[11px] w-[11px]" />}
-          onClick={onRegenerate}
-          disabled={disabled || readOnly}
+          disabled
+          title={AI_GENERATION_COMING_SOON}
         >
           Regenerar
         </Btn>

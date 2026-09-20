@@ -1,3 +1,4 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,7 +18,7 @@ class Settings(BaseSettings):
     TEMPORAL_TASK_QUEUE: str = "video-processing"
 
     # JWT
-    SECRET_KEY: str = "change-me-in-production"
+    SECRET_KEY: str = Field(min_length=32)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
@@ -40,10 +41,14 @@ class Settings(BaseSettings):
     YOUTUBE_OAUTH_ENCRYPTION_KEY: str = ""
 
     # yt-dlp authentication (optional cookies.txt to bypass YouTube bot check)
-    YTDLP_COOKIES_FILE: str = ""
+    YTDLP_COOKIES_FILE: str = "/secrets/youtube-cookies.txt"
 
     # YouTube OAuth redirect (external URL where the backend is reachable)
     YOUTUBE_REDIRECT_BASE_URL: str = "http://localhost"
+
+    # Admin seed
+    SEED_ADMIN_EMAIL: str = "admin@quicksermon.com"
+    SEED_ADMIN_PASSWORD: str = ""
 
     # Frontend
     FRONTEND_URL: str = "http://localhost:3000"

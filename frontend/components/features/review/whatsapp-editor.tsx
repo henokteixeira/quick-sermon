@@ -4,22 +4,22 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Copy, MessageCircle, RefreshCw } from "lucide-react";
 import { Btn } from "@/components/features/ui/btn";
+import {
+  ComingSoonNote,
+  AI_GENERATION_COMING_SOON,
+} from "@/components/features/ui/coming-soon";
 
 interface WhatsappEditorProps {
   value: string;
   onChange: (value: string) => void;
-  onRegenerate: () => void;
   copyEnabled: boolean;
-  disabled?: boolean;
   readOnly?: boolean;
 }
 
 export function WhatsappEditor({
   value,
   onChange,
-  onRegenerate,
   copyEnabled,
-  disabled,
   readOnly,
 }: WhatsappEditorProps) {
   const t = useTranslations("clips.review_page");
@@ -42,13 +42,16 @@ export function WhatsappEditor({
           {t("whatsappSection")}
         </span>
         <div className="flex-1" />
+        <ComingSoonNote className="text-[10px]">
+          {AI_GENERATION_COMING_SOON}
+        </ComingSoonNote>
         <div className="flex gap-1">
           <Btn
             size="sm"
             variant="ghost"
             icon={<RefreshCw className="h-[11px] w-[11px]" />}
-            onClick={onRegenerate}
-            disabled={disabled || readOnly}
+            disabled
+            title={AI_GENERATION_COMING_SOON}
           >
             Regenerar
           </Btn>

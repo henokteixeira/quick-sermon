@@ -1,4 +1,4 @@
-.PHONY: up down build migrate migration test-backend seed logs check-hygiene
+.PHONY: up down build migrate migration test-backend seed logs setup test-setup check-hygiene
 
 up:
 	docker compose up -d
@@ -29,6 +29,12 @@ logs:
 
 logs-backend:
 	docker compose logs -f backend worker
+
+setup:
+	./scripts/setup-env.sh
+
+test-setup:
+	./scripts/test-setup-env.sh
 
 check-hygiene:
 	bash scripts/check-repo-hygiene.sh

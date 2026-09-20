@@ -7,7 +7,6 @@ import {
   LayoutGrid,
   LogOut,
   Settings as SettingsIcon,
-  Users as UsersIcon,
   Video,
   Workflow,
 } from "lucide-react";
@@ -16,14 +15,12 @@ import { useAuthStore } from "@/lib/stores/auth-store";
 import { cn } from "@/lib/utils";
 import { AmberGlow } from "@/components/features/ui/amber-glow";
 import { Logomark } from "@/components/features/ui/logomark";
-import { NotificationsDrawer } from "@/components/features/notifications/notifications-drawer";
 
 type NavItem = {
   href: string;
-  key: "dashboard" | "videos" | "pipeline" | "users" | "settings";
+  key: "dashboard" | "videos" | "pipeline" | "settings";
   label: string;
   Icon: typeof LayoutGrid;
-  adminOnly?: boolean;
   disabled?: boolean;
 };
 
@@ -56,23 +53,12 @@ export default function DashboardLayout({
       disabled: true,
     },
     {
-      href: "/users",
-      key: "users",
-      label: t("users"),
-      Icon: UsersIcon,
-      adminOnly: true,
-    },
-    {
       href: "/settings",
       key: "settings",
       label: t("settings"),
       Icon: SettingsIcon,
     },
   ];
-
-  const visible = items.filter(
-    (item) => !item.adminOnly || user?.role === "admin",
-  );
 
   function handleLogout() {
     clearAuth();
@@ -99,7 +85,7 @@ export default function DashboardLayout({
 
           {/* Nav */}
           <nav className="flex flex-1 flex-col gap-0.5 overflow-hidden px-2.5 py-2">
-            {visible.map((item) => {
+            {items.map((item) => {
               const isActive =
                 item.href !== "#" && pathname.startsWith(item.href);
               const Inner = (
@@ -197,7 +183,7 @@ export default function DashboardLayout({
 
         {/* Mobile bottom nav */}
         <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-qs-line bg-[#0a0807] px-2 py-2 md:hidden">
-          {visible.map((item) => {
+          {items.map((item) => {
             const isActive =
               item.href !== "#" && pathname.startsWith(item.href);
             if (item.disabled) {
@@ -226,8 +212,6 @@ export default function DashboardLayout({
             );
           })}
         </nav>
-
-        <NotificationsDrawer />
       </div>
     </AuthGuard>
   );
