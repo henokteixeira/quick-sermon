@@ -1,6 +1,6 @@
-# Tech Spec — KAI-57: Autenticacao e Controle de Acesso (Roles)
+# Tech Spec — QS-57: Autenticacao e Controle de Acesso (Roles)
 
-## PRD: [KAI-57-auth-roles-prd.md](./KAI-57-auth-roles-prd.md)
+## PRD: [QS-57-auth-roles-prd.md](./QS-57-auth-roles-prd.md)
 
 ---
 

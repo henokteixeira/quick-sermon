@@ -1,6 +1,6 @@
-# Tech Spec — KAI-51: Submissao de URL e Validacao
+# Tech Spec — QS-51: Submissao de URL e Validacao
 
-## PRD: [KAI-51-submissao-url-validacao-prd.md](./KAI-51-submissao-url-validacao-prd.md)
+## PRD: [QS-51-submissao-url-validacao-prd.md](./QS-51-submissao-url-validacao-prd.md)
 
 ---
 
@@ -53,7 +53,7 @@
 
 ### 2.1 Migration: Create Videos Table
 
-Apenas os campos necessarios para KAI-51. Campos de timestamps, conteudo gerado e workflow serao adicionados em migrations futuras (KAI-58, KAI-59/60/61).
+Apenas os campos necessarios para QS-51. Campos de timestamps, conteudo gerado e workflow serao adicionados em migrations futuras (QS-58, QS-59/60/61).
 
 ```sql
 CREATE TABLE videos (

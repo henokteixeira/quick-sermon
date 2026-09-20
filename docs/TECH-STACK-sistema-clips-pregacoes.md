@@ -97,7 +97,7 @@
 | Tecnologia | Uso previsto | Issue |
 |---|---|---|
 | Whisper (local ou OpenAI API) | Refinamento de detecção de timestamps via transcrição amostrada | QS-75 |
-| LLMs (OpenAI, Gemini) | Geração de títulos, descrições e mensagens WhatsApp | KAI-59 / KAI-60 / KAI-61 |
+| LLMs (OpenAI, Gemini) | Geração de títulos, descrições e mensagens WhatsApp | QS-59 / QS-60 / QS-61 |
 | silero-vad | VAD para fases de detecção | QS-75 (se viável) |
 | faster-whisper | Legendas automáticas completas | V2 |
 

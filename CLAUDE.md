@@ -59,7 +59,7 @@ cd frontend && npm run dev  # Dev server (standalone)
 - Python: ruff for linting, line length 99, target Python 3.12
 - TypeScript: ESLint + Prettier
 - Commit messages: conventional commits (feat, fix, chore, docs, test, refactor)
-- Branch naming: feature/KAI-XX-description, fix/KAI-XX-description
+- Branch naming: feature/QS-XX-description, fix/QS-XX-description
 - All backend tests use pytest with async mode
 - Error handling: AppException base class, global handler returns structured JSON
 - Errors never block the user flow — always provide manual fallback
