@@ -40,8 +40,17 @@ if grep -q "change-me-in-production" <<<"$configuracao"; then
 fi
 
 segredo="$(valor_de SECRET_KEY .env)"
-ocorrencias="$(grep -c -- "$segredo" <<<"$configuracao" || true)"
-[ "$ocorrencias" -ge 2 ] || falhar "a SECRET_KEY gerada aparece $ocorrencias vez(es) no compose, esperado backend e worker"
+docker compose config --format json |
+  SEGREDO="$segredo" python3 -c '
+import json, os, sys
+
+servicos = json.load(sys.stdin)["services"]
+esperado = os.environ["SEGREDO"]
+for nome in ("backend", "worker"):
+    lido = servicos[nome].get("environment", {}).get("SECRET_KEY")
+    if lido != esperado:
+        sys.exit(f"{nome} recebeu SECRET_KEY diferente da gerada no .env")
+' || falhar "a SECRET_KEY gerada não chegou ao backend e ao worker"
 
 antes="$(shasum .env | cut -d' ' -f1)"
 make setup >/dev/null || falhar "segundo make setup saiu com erro"

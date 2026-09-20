@@ -1,4 +1,22 @@
+import pytest
+from httpx import ASGITransport, AsyncClient
+
+from app.core.app import create_app
 from app.core.config import settings
+from app.core.database import engine as app_engine
+
+ORIGEM_DO_FRONTEND = "https://clips.igreja.test"
+
+
+@pytest.fixture
+async def client(monkeypatch):
+    monkeypatch.setattr(settings, "FRONTEND_URL", ORIGEM_DO_FRONTEND)
+    async with AsyncClient(
+        transport=ASGITransport(app=create_app()),
+        base_url="http://test",
+    ) as ac:
+        yield ac
+    await app_engine.dispose()
 
 
 async def test_origem_desconhecida_nao_recebe_permissao_de_cors(client):
@@ -8,19 +26,18 @@ async def test_origem_desconhecida_nao_recebe_permissao_de_cors(client):
 
 
 async def test_origem_do_frontend_recebe_permissao_de_cors(client):
-    response = await client.get("/health", headers={"Origin": settings.FRONTEND_URL})
+    response = await client.get("/health", headers={"Origin": ORIGEM_DO_FRONTEND})
 
-    assert response.headers["access-control-allow-origin"] == settings.FRONTEND_URL
+    assert response.headers["access-control-allow-origin"] == ORIGEM_DO_FRONTEND
 
 
-async def test_preflight_da_origem_do_frontend_e_aceito(client):
+async def test_preflight_de_origem_desconhecida_e_recusado(client):
     response = await client.options(
         "/health",
         headers={
-            "Origin": settings.FRONTEND_URL,
+            "Origin": "http://outra-pagina.test",
             "Access-Control-Request-Method": "POST",
         },
     )
 
-    assert response.status_code == 200
-    assert response.headers["access-control-allow-origin"] == settings.FRONTEND_URL
+    assert "access-control-allow-origin" not in response.headers

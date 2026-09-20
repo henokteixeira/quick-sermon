@@ -23,6 +23,7 @@ definir() {
 }
 
 cp "$exemplo" "$destino"
+chmod 600 "$destino"
 
 senha_admin="$(openssl rand -hex 12)"
 definir SECRET_KEY "$(openssl rand -hex 32)"

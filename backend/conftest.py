@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from app.core.app import create_app
 from app.core.config import settings
-from app.core.database import engine
+from app.core.database import engine as app_engine
 from app.core.models import Base
 from app.modules.clips import models as clips_models  # noqa: F401
 from app.modules.users import models as users_models  # noqa: F401
@@ -26,7 +26,7 @@ async def client(app):
         base_url="http://test",
     ) as ac:
         yield ac
-    await engine.dispose()
+    await app_engine.dispose()
 
 
 async def _create_test_database(url):
