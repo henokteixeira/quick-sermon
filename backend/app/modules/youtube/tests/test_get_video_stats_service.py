@@ -7,8 +7,8 @@ from app.modules.youtube.models import YouTubeConnection, YouTubeUpload
 from app.modules.youtube.services.get_video_stats_service import (
     GetVideoStatsService,
     VideoStats,
+    _cache,
 )
-from app.modules.youtube.services.get_video_stats_service import _cache
 
 
 @pytest.fixture(autouse=True)

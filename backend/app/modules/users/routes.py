@@ -10,7 +10,10 @@ from app.modules.users.repositories.user_repository import UserRepository
 from app.modules.users.schemas import UserResponse, UserUpdateSelf
 from app.modules.users.services.get_profile_service import GetProfileService
 from app.modules.users.services.list_users_service import ListUsersService
-from app.modules.users.services.update_profile_service import UpdateProfileRequest, UpdateProfileService
+from app.modules.users.services.update_profile_service import (
+    UpdateProfileRequest,
+    UpdateProfileService,
+)
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -29,7 +32,9 @@ async def update_me(
     db: AsyncSession = Depends(get_db),
 ):
     service = UpdateProfileService(user_repo)
-    result = await service.execute(user, UpdateProfileRequest(name=data.name, password=data.password))
+    result = await service.execute(
+        user, UpdateProfileRequest(name=data.name, password=data.password)
+    )
     await db.commit()
     return result
 

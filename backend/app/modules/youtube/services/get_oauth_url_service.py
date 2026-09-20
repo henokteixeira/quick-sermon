@@ -46,7 +46,7 @@ class GetOAuthUrlService:
         )
 
         # Replace the state param in the URL with our JWT that includes the code_verifier
-        from urllib.parse import urlencode, urlparse, parse_qs
+        from urllib.parse import parse_qs, urlencode, urlparse
 
         parsed = urlparse(authorization_url)
         params = parse_qs(parsed.query, keep_blank_values=True)

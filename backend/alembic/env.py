@@ -1,15 +1,15 @@
 import asyncio
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from app.core.config import settings
-from app.core.models import Base
+import app.modules.clips.models  # noqa: F401
 import app.modules.users.models  # noqa: F401
 import app.modules.videos.models  # noqa: F401
-import app.modules.clips.models  # noqa: F401
 import app.modules.youtube.models  # noqa: F401
+from alembic import context
+from app.core.config import settings
+from app.core.models import Base
 
 config = context.config
 if config.config_file_name is not None:
