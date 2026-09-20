@@ -2,9 +2,9 @@
 
 ![CI](https://github.com/henokteixeira/quick-sermon/actions/workflows/ci.yml/badge.svg)
 
-Plataforma web que automatiza o pipeline de processamento de vídeos de pregações: da URL da Live até o vídeo publicado no YouTube. A Detecção de Trechos Sugeridos usa Capítulos e Legendas do próprio vídeo, sem IA (ver `docs/adr/`).
+Plataforma web que automatiza o Pipeline de um Clip — Download, Corte e Upload — a partir de uma Pregação: da URL da Live até o Clip Publicado no YouTube. A Detecção de Trechos Sugeridos usa Capítulos e Legendas do próprio Vídeo, sem IA (ver `docs/adr/`).
 
-## Tech Stack
+## Pilha técnica
 
 - **Backend:** Python 3.12, FastAPI, SQLAlchemy 2.0 (async), Alembic, PostgreSQL 16
 - **Pipeline:** Temporal, yt-dlp, FFmpeg
@@ -15,7 +15,16 @@ Plataforma web que automatiza o pipeline de processamento de vídeos de pregaç�
 
 - Docker e Docker Compose v2 (comando `docker compose`, não `docker-compose`).
 - `openssl` disponível no PATH (usado por `make setup` para gerar segredos).
-- Estas portas do host livres: **80, 3000, 8000, 8081, 5435, 5436, 7234**. Se alguma estiver ocupada, o serviço correspondente não sobe e o erro ("port is already allocated") aparece no output de `make up`; descubra o processo com `lsof -i :<porta>` (ou `sudo lsof -i :<porta>`) e pare-o antes de repetir `make up`.
+- Estas portas do host livres:
+  - **80** (Nginx, entrada única do sistema)
+  - **3000** (Frontend, direto)
+  - **8000** (Backend, direto)
+  - **8081** (Temporal UI)
+  - **5435** (Postgres da aplicação)
+  - **5436** (Postgres do Temporal)
+  - **7234** (Temporal)
+
+  Se alguma estiver ocupada, o serviço correspondente não sobe e o erro ("port is already allocated") aparece no output de `make up`; descubra o processo com `lsof -i :<porta>` (ou `sudo lsof -i :<porta>`) e pare-o antes de repetir `make up`.
 
 ## Subindo
 
@@ -29,11 +38,11 @@ make up
 
 `make migrate` e `make seed` continuam existindo para uso manual, mas não são passos obrigatórios.
 
-Para saber se a subida terminou, `http://localhost/health` responde `{"status": "ok"}` quando há conexão com o banco, ou `{"status": "degraded"}` quando não há. Responder `ok` não prova que as migrations já rodaram — só que o backend está de pé e fala com o Postgres.
+Para saber se a subida terminou, `http://localhost/health` responde `{"status": "ok", "database": "healthy"}` quando há conexão com o banco, ou `{"status": "degraded", "database": "unhealthy"}` quando não há. Responder `ok` não prova que as migrations já rodaram — só que o backend está de pé e fala com o Postgres.
 
 ## Entrando
 
-O `make setup` imprime, uma única vez, o email e a senha do usuário Admin criado pelo seed (também ficam em `SEED_ADMIN_EMAIL` e `SEED_ADMIN_PASSWORD` no `.env`, se precisar consultar depois). Entre em `http://localhost` com essas credenciais; a chamada por trás é `POST /api/auth/login`.
+O `make setup` imprime, uma única vez, o email e a senha do Admin criado pelo seed (também ficam em `SEED_ADMIN_EMAIL` e `SEED_ADMIN_PASSWORD` no `.env`, se precisar consultar depois). Entre em `http://localhost` com essas credenciais; a chamada por trás é `POST /api/auth/login`.
 
 Cadastro aberto (`POST /api/auth/register`) sempre cria um **Editor**. Só o **Admin** Publica e Descarta Clips e conecta ou desconecta um Canal; o Editor cria, edita e faz a Revisão dos Clips.
 
@@ -67,9 +76,10 @@ Sem isso, tudo até o Download do Clip funciona; só Upload, Publicar e Descarta
 
 ## Problemas comuns
 
-- **`make up` sobe mas o backend nunca fica saudável:** alguma das portas do host (veja Pré-requisitos) está ocupada por outro processo ou projeto; `make down`, libere a porta e repita `make up`.
+- **`make up` sobe, mas o backend fica reiniciando em loop e o Nginx nunca sobe:** normalmente é `SEED_ADMIN_PASSWORD` vazia no `.env` — sintoma de quem copiou `.env.example` à mão em vez de rodar `make setup`. O próprio entrypoint do backend imprime, nos logs (`make logs-backend`), uma mensagem dizendo para rodar `make setup` e tentar de novo.
 - **Login falha com credenciais inválidas:** a senha do Admin só é impressa uma vez por `make setup`; confira `SEED_ADMIN_EMAIL` e `SEED_ADMIN_PASSWORD` no `.env`.
-- **Vídeo trava no Download com erro de bot:** exporte os Cookies do YouTube (seção acima).
+- **Download do Clip trava com erro de bot:** exporte os Cookies do YouTube (seção acima).
+- **Publicar falha com erro de limite da API:** a Cota diária do YouTube (o limite de unidades que Upload, Publicar e Descartar consomem) acabou; espere a renovação diária da Cota do projeto no Google Cloud.
 - **`make setup` diz que o `.env` já existe e não muda nada:** é proposital — apague o `.env` manualmente se quiser gerar segredos novos.
 
 ## Comandos do dia a dia

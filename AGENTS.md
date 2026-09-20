@@ -1,10 +1,10 @@
 # Quick Sermon
 
-Plataforma web que automatiza o pipeline de processamento de vídeos de pregações, da URL da Live ao vídeo publicado no YouTube.
+Plataforma web que automatiza o Pipeline de um Clip, da URL da Live ao Clip Publicado no YouTube.
 
 ## Rodando comandos
 
-Backend e testes do backend rodam **dentro do Docker**, nunca no host: use os alvos do `Makefile`, não `python`/`pytest` diretamente.
+No desenvolvimento local, backend e seus testes rodam **dentro do Docker**: use os alvos do `Makefile` (ex.: `make test-backend`), não `python`/`pytest` diretamente no host. No CI, os mesmos testes rodam com `pip`/`pytest` direto no runner do GitHub Actions, contra um Postgres de serviço — não em container Docker.
 
 - Backend: `pip` (`requirements.txt`, `requirements-dev.txt`).
 - Frontend: `npm` (`package-lock.json`).
