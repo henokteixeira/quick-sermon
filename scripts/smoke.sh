@@ -63,7 +63,7 @@ estado_worker="$(docker compose ps worker --format '{{.State}}' 2>/dev/null || t
 docker compose logs worker 2>/dev/null | grep -qi temporal || falhar "log do worker não menciona conexão com o Temporal"
 
 echo "smoke: verificando ausência de bind mount de arquivo para os Cookies"
-if docker compose config 2>/dev/null | grep -q 'youtube-cookies\.txt:/secrets/youtube-cookies\.txt'; then
+if docker compose config 2>/dev/null | grep -q 'target: /secrets/youtube-cookies\.txt'; then
   falhar "docker compose config ainda contém bind mount de arquivo para os Cookies do YouTube"
 fi
 
