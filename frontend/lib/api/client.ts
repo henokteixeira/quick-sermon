@@ -68,11 +68,3 @@ export function getApiErrorCode(error: unknown): string {
       ?.response?.data?.error?.code || "unknown"
   );
 }
-
-/** Extract human-readable error message from an Axios error response */
-export function getApiErrorMessage(error: unknown): string | null {
-  return (
-    (error as { response?: { data?: { error?: { message?: string } } } })
-      ?.response?.data?.error?.message || null
-  );
-}

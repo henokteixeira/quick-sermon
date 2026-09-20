@@ -31,13 +31,6 @@ export async function triggerUpload(data: {
   return response.data;
 }
 
-export async function getUploadByClip(clipId: string): Promise<YouTubeUpload | null> {
-  const response = await apiClient.get<YouTubeUpload | null>(
-    `/youtube/uploads/clip/${clipId}`
-  );
-  return response.data;
-}
-
 export async function getYouTubeQuota(): Promise<YouTubeQuota> {
   const response = await apiClient.get<YouTubeQuota>("/youtube/quota");
   return response.data;

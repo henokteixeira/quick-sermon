@@ -24,22 +24,6 @@ export async function getVideo(id: string): Promise<Video> {
   return response.data;
 }
 
-export async function updateTimestamps(
-  id: string,
-  data: { sermon_start: number; sermon_end: number }
-): Promise<Video> {
-  const response = await apiClient.patch<Video>(
-    `/videos/${id}/timestamps`,
-    data
-  );
-  return response.data;
-}
-
-export async function publishVideo(id: string): Promise<Video> {
-  const response = await apiClient.post<Video>(`/videos/${id}/publish`);
-  return response.data;
-}
-
 export async function updateVideo(
   id: string,
   data: { title?: string }
