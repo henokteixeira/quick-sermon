@@ -52,9 +52,8 @@ for nome in ("backend", "worker"):
         sys.exit(f"{nome} recebeu SECRET_KEY diferente da gerada no .env")
 ' || falhar "a SECRET_KEY gerada não chegou ao backend e ao worker"
 
-antes="$(shasum .env | cut -d' ' -f1)"
+cp .env .env.antes
 make setup >/dev/null || falhar "segundo make setup saiu com erro"
-depois="$(shasum .env | cut -d' ' -f1)"
-[ "$antes" = "$depois" ] || falhar "o segundo make setup alterou o .env existente"
+cmp -s .env .env.antes || falhar "o segundo make setup alterou o .env existente"
 
 echo "test-setup-env: todas as asserções passaram"

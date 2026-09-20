@@ -16,9 +16,12 @@ if [ -f "$destino" ]; then
 fi
 
 definir() {
-  local variavel="$1" valor="$2" temporario
+  local temporario
   temporario="$(mktemp)"
-  sed "s|^$variavel=.*|$variavel=$valor|" "$destino" >"$temporario"
+  VARIAVEL="$1" VALOR="$2" awk '
+    index($0, ENVIRON["VARIAVEL"] "=") == 1 { print ENVIRON["VARIAVEL"] "=" ENVIRON["VALOR"]; next }
+    { print }
+  ' "$destino" >"$temporario"
   mv "$temporario" "$destino"
 }
 

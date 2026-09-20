@@ -19,6 +19,12 @@ def app():
     return create_app()
 
 
+@pytest.fixture(autouse=True)
+async def _descarta_conexoes_da_aplicacao():
+    yield
+    await app_engine.dispose()
+
+
 @pytest.fixture
 async def client(app):
     async with AsyncClient(
@@ -26,7 +32,6 @@ async def client(app):
         base_url="http://test",
     ) as ac:
         yield ac
-    await app_engine.dispose()
 
 
 async def _create_test_database(url):
@@ -51,6 +56,7 @@ async def db_session():
 
     engine = create_async_engine(url)
     async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.drop_all)
         await connection.run_sync(Base.metadata.create_all)
 
     async with engine.connect() as connection:

@@ -11,6 +11,7 @@ EMAIL = "editor-chefe@igreja.test"
 
 
 async def _admins_com_email(session, email):
+    session.expunge_all()
     result = await session.execute(select(User).where(User.email == email))
     return result.scalars().all()
 
