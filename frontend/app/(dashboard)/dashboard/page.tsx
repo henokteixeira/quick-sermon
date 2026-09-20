@@ -34,6 +34,7 @@ import {
 } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import { Btn } from "@/components/features/ui/btn";
+import { ComingSoonNote, COMING_SOON } from "@/components/features/ui/coming-soon";
 import { MetricTile } from "@/components/features/ui/metric-tile";
 import { PageTopbar } from "@/components/features/ui/page-topbar";
 import { ThumbPlaceholder } from "@/components/features/ui/thumb-placeholder";
@@ -292,7 +293,7 @@ function FeaturedCard({
   video?: Video;
   views?: number | null;
 }) {
-  const { data: review } = useQuery({
+  const { data: review, isLoading: isReviewLoading } = useQuery({
     queryKey: ["clip-review", clip?.id],
     queryFn: () => getClipReview(clip!.id),
     enabled: clip?.status === "published",
@@ -320,8 +321,14 @@ function FeaturedCard({
   }
 
   const duration = clip.duration ?? clip.end_time - clip.start_time;
+  const isPublished = clip.status === "published";
   const youtubeUrl = review?.youtube_url ?? null;
-  const canCopyLink = clip.status === "published" && !!youtubeUrl;
+  const canCopyLink = isPublished && !!youtubeUrl;
+  const copyLinkTitle = canCopyLink
+    ? undefined
+    : isPublished && isReviewLoading
+      ? "Carregando…"
+      : "Disponível após Publicar";
   const copyLink = () => {
     if (youtubeUrl) navigator.clipboard.writeText(youtubeUrl);
   };
@@ -368,23 +375,24 @@ function FeaturedCard({
               </span>
             )}
           </div>
-          <div className="mt-3.5 flex gap-2">
+          <div className="mt-3.5 flex flex-wrap items-center gap-2">
             <Btn
               size="sm"
               variant="outline"
               icon={<Youtube className="h-3 w-3 text-[#ff0033]" />}
               disabled
-              title="Em breve"
+              title={COMING_SOON}
             >
               Ver no YouTube
             </Btn>
+            <ComingSoonNote />
             <Btn
               size="sm"
               variant="ghost"
               icon={<Copy className="h-3 w-3" />}
               onClick={copyLink}
               disabled={!canCopyLink}
-              title={canCopyLink ? undefined : "Disponível após Publicar"}
+              title={copyLinkTitle}
             >
               Copiar link
             </Btn>
@@ -663,9 +671,12 @@ function QuotaCard({
                 ? "Atenção: quota acima de 80% hoje."
                 : "Conecte o YouTube em Configurações."}
           </div>
-          <Btn size="sm" variant="secondary" disabled title="Em breve">
-            Ver histórico
-          </Btn>
+          <div className="flex items-center gap-2">
+            <Btn size="sm" variant="secondary" disabled title={COMING_SOON}>
+              Ver histórico
+            </Btn>
+            <ComingSoonNote />
+          </div>
         </div>
       </div>
     </CardShell>
