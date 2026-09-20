@@ -1,7 +1,7 @@
 """Run sermon detection across the reference dataset and compare against ground truth.
 
 Usage (inside the backend container):
-    python scripts/test_detection_dataset.py
+    python scripts/detection_dataset.py
 """
 import asyncio
 import json

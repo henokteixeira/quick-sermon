@@ -36,9 +36,6 @@ make up-dev
 # Run backend tests
 make test-backend
 
-# Run frontend tests
-make test-frontend
-
 # View logs
 make logs
 ```
@@ -64,7 +61,6 @@ backend/
       auth/        # Login, register, JWT
       users/       # User CRUD + roles
       videos/      # Video processing pipeline (main domain)
-      content/     # AI content generation (titles, descriptions, WhatsApp)
 
 frontend/
   app/             # Next.js App Router pages

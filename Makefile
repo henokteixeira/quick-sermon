@@ -1,4 +1,4 @@
-.PHONY: up down build migrate migration test-backend test-frontend seed logs setup test-setup smoke lint help
+.PHONY: up down build migrate migration test-backend seed logs setup test-setup smoke lint help check-hygiene
 
 up:
 	docker compose up -d
@@ -20,9 +20,6 @@ migration:
 
 test-backend:
 	docker compose exec backend pytest -v
-
-test-frontend:
-	cd frontend && npm test
 
 seed:
 	docker compose exec backend python seed.py
@@ -54,7 +51,6 @@ help:
 	@echo "migrate       roda as migrations do backend à mão"
 	@echo "migration     cria uma migration nova (msg=\"...\")"
 	@echo "test-backend  roda os testes do backend"
-	@echo "test-frontend roda os testes do frontend"
 	@echo "seed          roda o seed do Admin à mão"
 	@echo "logs          segue os logs de todos os serviços"
 	@echo "logs-backend  segue os logs de backend e worker"
@@ -63,3 +59,7 @@ help:
 	@echo "smoke         sobe um clone limpo e prova a subida com dois comandos"
 	@echo "lint          roda ruff no backend e eslint no frontend"
 	@echo "help          lista os alvos deste Makefile"
+	@echo "check-hygiene verifica a higiene do repositório"
+
+check-hygiene:
+	bash scripts/check-repo-hygiene.sh

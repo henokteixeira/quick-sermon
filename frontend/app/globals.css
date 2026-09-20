@@ -34,7 +34,7 @@
   }
 
   .dark {
-    /* Values mirror frontend/redesing/project/components/tokens.jsx */
+    /* Values mirror docs/design/components/tokens.jsx */
     --background: 24 12% 4%;                   /* #0c0a09 stone-950 warm */
     --foreground: 60 9% 98%;                   /* #fafaf9 stone-50 */
     --card: 24 14% 8%;                         /* #171412 bgElev */
