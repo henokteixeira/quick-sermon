@@ -2,6 +2,8 @@
 
 ![CI](https://github.com/henokteixeira/quick-sermon/actions/workflows/ci.yml/badge.svg)
 
+Site: [henokteixeira.github.io/quick-sermon](https://henokteixeira.github.io/quick-sermon/) · [Política de Privacidade](https://henokteixeira.github.io/quick-sermon/privacidade.html)
+
 Plataforma web que automatiza o Pipeline de um Clip — Download, Corte e Upload — a partir de uma Pregação: da URL da Live até o Clip Publicado no YouTube. A Detecção de Trechos Sugeridos usa Capítulos e Legendas do próprio Vídeo, sem IA (ver `docs/adr/`).
 
 ## Pilha técnica
