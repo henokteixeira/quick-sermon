@@ -81,7 +81,7 @@ Sem isso, tudo até o Download do Clip funciona; só Upload, Publicar e Descarta
 - **`make up` sobe, mas o backend fica reiniciando em loop e o Nginx nunca sobe:** normalmente é `SEED_ADMIN_PASSWORD` vazia no `.env` — sintoma de quem copiou `.env.example` à mão em vez de rodar `make setup`. O próprio entrypoint do backend imprime, nos logs (`make logs-backend`), uma mensagem dizendo para rodar `make setup` e tentar de novo.
 - **Login falha com credenciais inválidas:** a senha do Admin só é impressa uma vez por `make setup`; confira `SEED_ADMIN_EMAIL` e `SEED_ADMIN_PASSWORD` no `.env`.
 - **Download do Clip trava com erro de bot:** exporte os Cookies do YouTube (seção acima).
-- **Publicar falha com erro de limite da API:** a Cota diária do YouTube (o limite de unidades que Upload, Publicar e Descartar consomem) acabou; espere a renovação diária da Cota do projeto no Google Cloud.
+- **Upload, Publicar ou Descartar falha com erro de limite do YouTube:** o erro vem da própria API do YouTube, que limita as chamadas diárias do projeto no Google Cloud; o Quick Sermon não conta nem recusa nada antes. Espere a renovação diária do limite e tente de novo.
 - **`make setup` diz que o `.env` já existe e não muda nada:** é proposital — apague o `.env` manualmente se quiser gerar segredos novos.
 
 ## Comandos do dia a dia
