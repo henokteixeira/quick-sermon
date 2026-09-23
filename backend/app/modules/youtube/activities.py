@@ -18,7 +18,6 @@ from app.modules.clips.enums import ClipStatus
 from app.modules.clips.models import Clip
 from app.modules.youtube.enums import YouTubeUploadStatus
 from app.modules.youtube.models import YouTubeConnection, YouTubeUpload
-from app.modules.youtube.services.get_quota_service import UPLOAD_COST
 from app.modules.youtube.services.token_encryption_service import decrypt_token
 
 logger = structlog.get_logger()
@@ -185,37 +184,6 @@ def update_upload_status(input: UploadStatusInput) -> None:
             .values(**clip_values)
         )
         session.commit()
-
-
-@activity.defn
-def increment_quota() -> None:
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    with _sync_engine.connect() as conn:
-        # Get the latest connection's current quota
-        row = conn.execute(
-            select(
-                YouTubeConnection.id,
-                YouTubeConnection.daily_quota_used,
-                YouTubeConnection.quota_reset_date,
-            )
-            .order_by(YouTubeConnection.created_at.desc())
-            .limit(1)
-        ).first()
-        if not row:
-            return
-
-        conn_id, current_used, reset_date = row
-        if reset_date != today:
-            new_used = UPLOAD_COST
-        else:
-            new_used = current_used + UPLOAD_COST
-
-        conn.execute(
-            update(YouTubeConnection)
-            .where(YouTubeConnection.id == conn_id)
-            .values(daily_quota_used=new_used, quota_reset_date=today)
-        )
-        conn.commit()
 
 
 def update_youtube_privacy(video_id: str, privacy_status: str) -> None:

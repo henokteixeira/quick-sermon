@@ -1,5 +1,4 @@
 import uuid
-from datetime import datetime, timezone
 
 from temporalio.client import Client
 
@@ -10,7 +9,6 @@ from app.modules.clips.repositories.clip_repository import ClipRepository
 from app.modules.videos.repositories.video_repository import VideoRepository
 from app.modules.youtube.exceptions import (
     ClipNotReadyException,
-    QuotaExceededException,
     YouTubeConnectionNotFoundException,
 )
 from app.modules.youtube.models import YouTubeUpload
@@ -20,7 +18,6 @@ from app.modules.youtube.repositories.youtube_connection_repository import (
 from app.modules.youtube.repositories.youtube_upload_repository import (
     YouTubeUploadRepository,
 )
-from app.modules.youtube.services.get_quota_service import DAILY_LIMIT, UPLOAD_COST
 
 
 class TriggerUploadService:
@@ -46,14 +43,6 @@ class TriggerUploadService:
         connection = await self.connection_repo.get_active()
         if not connection:
             raise YouTubeConnectionNotFoundException()
-
-        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        if connection.quota_reset_date != today:
-            connection.daily_quota_used = 0
-            connection.quota_reset_date = today
-
-        if connection.daily_quota_used + UPLOAD_COST > DAILY_LIMIT:
-            raise QuotaExceededException()
 
         clip = await self.clip_repo.get_by_id(clip_id)
         if not clip:

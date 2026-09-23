@@ -9,7 +9,6 @@ with workflow.unsafe.imports_passed_through():
         UploadInput,
         UploadResult,
         UploadStatusInput,
-        increment_quota,
         update_upload_status,
         upload_to_youtube,
     )
@@ -92,13 +91,6 @@ class UploadToYouTubeWorkflow:
                 status=YouTubeUploadStatus.COMPLETED,
                 clip_status=ClipStatus.AWAITING_REVIEW,
             ),
-            start_to_close_timeout=STATUS_TIMEOUT,
-            retry_policy=STATUS_RETRY,
-        )
-
-        # Increment quota counter
-        await workflow.execute_activity(
-            increment_quota,
             start_to_close_timeout=STATUS_TIMEOUT,
             retry_policy=STATUS_RETRY,
         )
