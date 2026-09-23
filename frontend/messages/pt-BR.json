@@ -414,14 +414,7 @@
       "disconnectDescription": "Tem certeza que deseja desconectar o canal do YouTube? Os uploads futuros serão desabilitados até uma nova conexão.",
       "cancel": "Cancelar",
       "confirmDisconnect": "Desconectar",
-      "disconnecting": "Desconectando...",
-      "quota": {
-        "title": "Quota diária",
-        "description": "Limite de uploads por dia (YouTube Data API v3).",
-        "used": "{used} / {limit} unidades usadas",
-        "warning": "Atenção: quota acima de 80%. Considere adiar uploads não urgentes.",
-        "blocked": "Quota excedida. Novos uploads bloqueados até amanhã."
-      }
+      "disconnecting": "Desconectando..."
     }
   }
 }

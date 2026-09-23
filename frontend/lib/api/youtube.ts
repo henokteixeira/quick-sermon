@@ -2,7 +2,6 @@ import apiClient from "./client";
 import {
   YouTubeConnection,
   YouTubeUpload,
-  YouTubeQuota,
   OAuthAuthorizeResponse,
 } from "../types/youtube";
 
@@ -28,10 +27,5 @@ export async function triggerUpload(data: {
   clip_id: string;
 }): Promise<YouTubeUpload> {
   const response = await apiClient.post<YouTubeUpload>("/youtube/uploads", data);
-  return response.data;
-}
-
-export async function getYouTubeQuota(): Promise<YouTubeQuota> {
-  const response = await apiClient.get<YouTubeQuota>("/youtube/quota");
   return response.data;
 }
