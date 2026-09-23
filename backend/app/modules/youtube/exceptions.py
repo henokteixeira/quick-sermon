@@ -16,18 +16,6 @@ class YouTubeUploadNotFoundException(NotFoundException):
         super().__init__("YouTubeUpload", identifier)
 
 
-class QuotaExceededException(ValidationException):
-    def __init__(self):
-        super().__init__("Quota diaria do YouTube excedida. Tente novamente amanha.")
-
-
-class QuotaWarningException(ValidationException):
-    def __init__(self, percent_used: int):
-        super().__init__(
-            f"Atencao: {percent_used}% da quota diaria do YouTube utilizada."
-        )
-
-
 class YouTubeAuthFailedException(AppException):
     def __init__(self, message: str = "Falha na autenticacao com o YouTube."):
         super().__init__(

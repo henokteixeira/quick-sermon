@@ -37,15 +37,6 @@ const INITIAL_NOTIFICATIONS: AppNotification[] = [
     unread: true,
   },
   {
-    id: "n-4",
-    type: "error",
-    category: "system",
-    title: "Falha no upload para YouTube",
-    body: "Cota diária atingiu 92%. Retry automático às 23:00.",
-    createdAt: hours(18),
-    unread: false,
-  },
-  {
     id: "n-5",
     type: "member",
     category: "team",

@@ -39,11 +39,3 @@ class YouTubeUploadResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
-
-class QuotaResponse(BaseModel):
-    daily_limit: int = 10000
-    used: int
-    remaining: int
-    percent_used: float
-    warning: bool
-    blocked: bool

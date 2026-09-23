@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { YouTubeConnectionCard } from "@/components/features/youtube/youtube-connection-card";
-import { YouTubeQuotaCard } from "@/components/features/youtube/youtube-quota-card";
 import { AuthField } from "@/components/features/ui/auth-field";
 import { ComingSoonNote, COMING_SOON } from "@/components/features/ui/coming-soon";
 import { PageTopbar } from "@/components/features/ui/page-topbar";
@@ -109,10 +108,7 @@ export default function SettingsPage() {
                 </div>
               )}
               {isAdmin ? (
-                <div className="flex flex-col gap-4">
-                  <YouTubeConnectionCard />
-                  <YouTubeQuotaCard />
-                </div>
+                <YouTubeConnectionCard />
               ) : (
                 <PlaceholderEmpty
                   icon={Shield}

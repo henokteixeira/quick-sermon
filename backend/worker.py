@@ -21,7 +21,6 @@ from app.modules.videos.activities import (
 )
 from app.modules.videos.workflows import DetectSermonTimestampsWorkflow
 from app.modules.youtube.activities import (
-    increment_quota,
     update_upload_status,
     upload_to_youtube,
 )
@@ -56,7 +55,6 @@ async def main() -> None:
         update_clip_status_activity,
         upload_to_youtube,
         update_upload_status,
-        increment_quota,
         detect_chapters_activity,
         fetch_captions_activity,
         persist_detection_result_activity,

@@ -23,7 +23,6 @@ import {
 } from "@/lib/api/clips";
 import { listVideos } from "@/lib/api/videos";
 import { getAnalyticsSummary, getClipsStats } from "@/lib/api/analytics";
-import { getYouTubeQuota } from "@/lib/api/youtube";
 import { useTranslations } from "next-intl";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import {
@@ -34,7 +33,6 @@ import {
 } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import { Btn } from "@/components/features/ui/btn";
-import { ComingSoonNote, COMING_SOON } from "@/components/features/ui/coming-soon";
 import { MetricTile } from "@/components/features/ui/metric-tile";
 import { PageTopbar } from "@/components/features/ui/page-topbar";
 import { ThumbPlaceholder } from "@/components/features/ui/thumb-placeholder";
@@ -76,11 +74,6 @@ export default function DashboardPage() {
     queryKey: ["dashboard", "videos", "processing"],
     queryFn: () => listVideos({ page_size: 5, status: "processing" }),
     refetchInterval: 15_000,
-  });
-  const { data: quota } = useQuery({
-    queryKey: ["dashboard", "quota"],
-    queryFn: () => getYouTubeQuota(),
-    retry: false,
   });
   const { data: summary } = useQuery({
     queryKey: ["dashboard", "summary"],
@@ -220,13 +213,12 @@ export default function DashboardPage() {
           <PipelineCard clip={activeClip} video={activeClipVideo} />
         </section>
 
-        {/* Activity + Quota */}
-        <section className="grid grid-cols-1 gap-3.5 lg:grid-cols-[1.5fr_1fr]">
+        {/* Activity */}
+        <section>
           <ActivityCard
             clips={readyClips?.items ?? []}
             videos={videos?.items ?? []}
           />
-          <QuotaCard quota={quota} />
         </section>
       </div>
     </>
@@ -607,85 +599,6 @@ function ActivityCard({ clips, videos }: { clips: Clip[]; videos: Video[] }) {
             </div>
           ))
         )}
-      </div>
-    </CardShell>
-  );
-}
-
-function QuotaCard({
-  quota,
-}: {
-  quota?: { used: number; daily_limit: number; percent_used: number };
-}) {
-  const pct = quota?.percent_used ?? 0;
-  const r = 52;
-  const c = 2 * Math.PI * r;
-  const offset = c * (1 - pct / 100);
-
-  return (
-    <CardShell
-      title="Quota diária · YouTube"
-      headerLeft={<Youtube className="h-3.5 w-3.5 text-[#ff0033]" />}
-    >
-      <div className="flex items-center gap-[18px] p-[18px]">
-        <div className="relative h-[120px] w-[120px] shrink-0">
-          <svg
-            width="120"
-            height="120"
-            viewBox="0 0 120 120"
-            style={{ transform: "rotate(-90deg)" }}
-          >
-            <circle
-              cx="60"
-              cy="60"
-              r={r}
-              fill="none"
-              stroke="#2a2522"
-              strokeWidth="8"
-            />
-            <circle
-              cx="60"
-              cy="60"
-              r={r}
-              fill="none"
-              stroke="#f59e0b"
-              strokeWidth="8"
-              strokeLinecap="round"
-              strokeDasharray={c}
-              strokeDashoffset={offset}
-              style={{ filter: "drop-shadow(0 0 6px rgba(245,158,11,0.4))" }}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="font-serif text-[26px] leading-none tracking-[-0.5px] text-qs-fg">
-              {Math.round(pct)}
-              <span className="text-[14px] text-qs-fg-faint">%</span>
-            </div>
-            <div className="mt-0.5 text-[9px] uppercase tracking-[1px] text-qs-fg-faint">
-              usado
-            </div>
-          </div>
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="mb-1 font-mono text-[11px] text-qs-fg-subtle">
-            {quota
-              ? `${quota.used.toLocaleString("pt-BR")} / ${quota.daily_limit.toLocaleString("pt-BR")} un.`
-              : "aguardando dados"}
-          </div>
-          <div className="mb-3 text-[11px] leading-[1.5] text-qs-fg-faint">
-            {quota && quota.percent_used < 80
-              ? `Estimamos ~${Math.floor((quota.daily_limit - quota.used) / 1600)} uploads restantes hoje.`
-              : quota
-                ? "Atenção: quota acima de 80% hoje."
-                : "Conecte o YouTube em Configurações."}
-          </div>
-          <div className="flex items-center gap-2">
-            <Btn size="sm" variant="secondary" disabled title={COMING_SOON}>
-              Ver histórico
-            </Btn>
-            <ComingSoonNote />
-          </div>
-        </div>
       </div>
     </CardShell>
   );

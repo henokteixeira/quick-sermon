@@ -39,7 +39,6 @@ export function YouTubeConnectionCard() {
     mutationFn: disconnectYouTube,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["youtube-connection"] });
-      queryClient.invalidateQueries({ queryKey: ["youtube-quota"] });
       setDisconnectOpen(false);
     },
   });

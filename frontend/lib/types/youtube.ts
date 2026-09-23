@@ -29,15 +29,6 @@ export interface YouTubeUpload {
   created_at: string;
 }
 
-export interface YouTubeQuota {
-  daily_limit: number;
-  used: number;
-  remaining: number;
-  percent_used: number;
-  warning: boolean;
-  blocked: boolean;
-}
-
 export interface OAuthAuthorizeResponse {
   authorize_url: string;
 }

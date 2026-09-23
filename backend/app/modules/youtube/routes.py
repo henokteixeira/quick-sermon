@@ -28,7 +28,6 @@ from app.modules.youtube.repositories.youtube_upload_repository import (
 )
 from app.modules.youtube.schemas import (
     OAuthAuthorizeResponse,
-    QuotaResponse,
     UploadRequest,
     YouTubeConnectionResponse,
     YouTubeUploadResponse,
@@ -36,7 +35,6 @@ from app.modules.youtube.schemas import (
 from app.modules.youtube.services.disconnect_channel_service import DisconnectChannelService
 from app.modules.youtube.services.get_connection_service import GetConnectionService
 from app.modules.youtube.services.get_oauth_url_service import GetOAuthUrlService
-from app.modules.youtube.services.get_quota_service import GetQuotaService
 from app.modules.youtube.services.handle_oauth_callback_service import (
     HandleOAuthCallbackService,
 )
@@ -158,16 +156,3 @@ async def get_upload_by_clip(
         return None
     return YouTubeUploadResponse.model_validate(upload)
 
-
-# --- Quota ---
-
-
-@router.get("/quota", response_model=QuotaResponse)
-async def get_quota(
-    user: User = Depends(require_role(UserRole.ADMIN, UserRole.EDITOR)),
-    connection_repo: YouTubeConnectionRepository = Depends(
-        get_youtube_connection_repository
-    ),
-) -> QuotaResponse:
-    service = GetQuotaService(connection_repo)
-    return await service.execute()
