@@ -332,6 +332,14 @@ function FeaturedCard({
   const copyLink = () => {
     if (youtubeUrl) navigator.clipboard.writeText(youtubeUrl);
   };
+  const watchOnYoutube = () => {
+    if (youtubeUrl) window.open(youtubeUrl, "_blank", "noopener,noreferrer");
+  };
+  const watchOnYoutubeTitle = canCopyLink
+    ? undefined
+    : isPublished && isReviewLoading
+      ? "Carregando…"
+      : "Disponível após Publicar";
 
   return (
     <CardShell
@@ -380,12 +388,12 @@ function FeaturedCard({
               size="sm"
               variant="outline"
               icon={<Youtube className="h-3 w-3 text-[#ff0033]" />}
-              disabled
-              title={COMING_SOON}
+              onClick={watchOnYoutube}
+              disabled={!canCopyLink}
+              title={watchOnYoutubeTitle}
             >
               Ver no YouTube
             </Btn>
-            <ComingSoonNote />
             <Btn
               size="sm"
               variant="ghost"
