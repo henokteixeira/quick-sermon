@@ -93,6 +93,10 @@ _Avoid_: upload, postar, lançar
 Retirar do sistema e do YouTube um Clip ainda não publicado, mantendo o registro; ação exclusiva do Admin.
 _Avoid_: excluir, deletar, cancelar
 
+**Apagar**:
+Retirar do sistema um Clip que nunca chegou ao YouTube; ação exclusiva do Admin, como Descartar.
+_Avoid_: excluir, deletar, remover
+
 **Não Listado**:
 Visibilidade do YouTube em que o Clip é acessível por link mas não aparece em buscas; estado de todo Upload.
 _Avoid_: unlisted, privado
@@ -106,10 +110,6 @@ _Avoid_: public, publicado (para a visibilidade)
 **Canal Conectado**:
 O canal do YouTube da igreja autorizado via OAuth a receber Uploads, Publicações e Descartes.
 _Avoid_: conta, integração, conexão
-
-**Cota**:
-O limite diário de unidades da API do YouTube que Upload, Publicar e Descartar consomem.
-_Avoid_: quota, limite de API
 
 **Editor**:
 Usuário que submete Lives, cria Clips, dispara Uploads e faz Revisão.
