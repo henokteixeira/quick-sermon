@@ -81,7 +81,6 @@ class HandleOAuthCallbackService:
             token_expiry=token_expiry,
             channel_id=channel_id,
             channel_title=channel_title,
-            daily_quota_used=0,
             connected_by=user_id,
         )
         return await self.connection_repo.create(connection)

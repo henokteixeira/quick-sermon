@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from sqlalchemy import select
 
 from app.modules.clips.enums import ClipStatus
@@ -39,8 +37,6 @@ async def test_upload_de_clip_pronto_cria_o_registro_e_inicia_o_workflow(db_sess
             refresh_token="enc-refresh",
             channel_id="UC1",
             channel_title="Canal Teste",
-            daily_quota_used=9000,
-            quota_reset_date=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
             connected_by=editor.id,
         )
     )

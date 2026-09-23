@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -16,8 +16,6 @@ class YouTubeConnection(Base, UUIDMixin, TimestampMixin):
     token_expiry: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     channel_id: Mapped[str] = mapped_column(String(100), nullable=False)
     channel_title: Mapped[str] = mapped_column(String(255), nullable=False)
-    daily_quota_used: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    quota_reset_date: Mapped[str | None] = mapped_column(String(10))
     connected_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
     )

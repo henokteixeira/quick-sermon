@@ -43,7 +43,6 @@ def _make_connection() -> YouTubeConnection:
         refresh_token="enc-refresh",
         channel_id="UC1",
         channel_title="Canal Teste",
-        daily_quota_used=0,
         connected_by=uuid.uuid4(),
     )
 
