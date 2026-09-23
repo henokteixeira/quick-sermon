@@ -21,8 +21,8 @@ class _TemporalQueRegistraOsWorkflows:
     def __init__(self):
         self.iniciados = []
 
-    async def start_workflow(self, workflow, arg, *, id, task_queue):
-        self.iniciados.append(id)
+    async def start_workflow(self, workflow, *args, **kwargs):
+        self.iniciados.append(workflow)
 
 
 async def test_upload_de_clip_pronto_cria_o_registro_e_inicia_o_workflow(db_session):
